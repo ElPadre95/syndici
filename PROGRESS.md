@@ -1,0 +1,30 @@
+# PROGRESS — Suivi des incréments
+
+Méthode : un incrément à la fois. Après chacun → commit, capture d'écran, case cochée, **stop** et
+attente de validation. Reflète l'état réel à tout moment.
+
+**Serveur de dev** : http://localhost:3000/fr (laissé tournant toute la session, rechargement à chaud).
+**Base de dev** : PostgreSQL local sur `127.0.0.1:55432` (migré + seed : 1 résidence, 24 lots, 29 personnes).
+
+## Tranche A — écrans métier du syndic
+
+- [x] **A1** — Coquille de l'application connectée : navigation latérale, en-tête, page d'accueil.
+      Design provisoire mais réel : la navigation fonctionne, la session est lue, la langue se change.
+- [ ] **A2** — Créer une résidence (nom, adresse, ville, type, nb d'unités, charges, échéance).
+      Crée l'organisation + le mandat si absent. La résidence apparaît dans une liste.
+- [ ] **A3** — Créer les lots : un par un et en série depuis le nombre d'unités
+      (référence, type, étage, surface, quote-part, charges si ≠ défaut).
+- [ ] **A4** — Liste des lots (écran principal du syndic) : référence, occupant, statut, montant ;
+      recherche et filtres ; chaque ligne mène quelque part (pas de fausse ligne cliquable).
+- [ ] **A5** — Ajouter une personne à un lot (nom, e-mail, téléphone, pays, langue, rôle).
+      Passe par la couche person-access. Rattachement historisé + fin de rattachement (jamais de suppression).
+- [ ] **A6** — Émettre une invitation sur une personne rattachée (impossible sans rattachement actif).
+      Affiche le code + lien `wa.me` pré-rempli selon la langue préférée.
+- [ ] **A7** — Import Excel de lots + occupants : aperçu avant validation, rapport des lignes rejetées.
+
+## Règles permanentes
+
+Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·
+aucun Prisma hors `src/server/` · toute action métier passe par le point d'application des autorisations ·
+écrans réellement utilisables (formulaires validés, erreurs affichées, états vides traités) ·
+vérifier l'inversion RTL en arabe au moins une fois par tranche.

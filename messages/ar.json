@@ -540,5 +540,39 @@
     "switchLabel": "اللغة",
     "fr": "Français",
     "ar": "العربية"
+  },
+  "app": {
+    "nav": {
+      "dashboard": "لوحة القيادة",
+      "residences": "الإقامات",
+      "lots": "العقارات",
+      "residents": "المقيمون",
+      "payments": "المدفوعات",
+      "expenses": "المصاريف",
+      "documents": "الوثائق",
+      "settings": "الإعدادات"
+    },
+    "header": {
+      "account": "الحساب",
+      "signIn": "تسجيل الدخول",
+      "signOut": "تسجيل الخروج",
+      "guest": "غير مسجّل",
+      "residencesCount": "{count, plural, =0 {لا توجد إقامة} one {# إقامة} other {# إقامات}}"
+    },
+    "dashboard": {
+      "sectionLabel": "فضاء المتصرف",
+      "title": "لوحة القيادة",
+      "welcome": "مرحبًا، {name}",
+      "welcomeGuest": "مرحبًا بك في Syndici",
+      "subtitleGuest": "سجّل الدخول لإدارة إقاماتك.",
+      "getStartedTitle": "الخطوات الأولى",
+      "getStartedBody": "أنشئ أول إقامة، ثم أضف عقاراتها وشاغليها.",
+      "createResidence": "إنشاء إقامة",
+      "viewResidences": "عرض إقاماتي"
+    },
+    "comingSoon": {
+      "title": "قسم قادم",
+      "body": "سيتم إنشاء هذه الشاشة في خطوة لاحقة."
+    }
   }
 }

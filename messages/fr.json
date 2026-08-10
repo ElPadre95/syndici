@@ -543,5 +543,39 @@
     "switchLabel": "Langue",
     "fr": "Français",
     "ar": "العربية"
+  },
+  "app": {
+    "nav": {
+      "dashboard": "Tableau de bord",
+      "residences": "Résidences",
+      "lots": "Lots",
+      "residents": "Résidents",
+      "payments": "Paiements",
+      "expenses": "Dépenses",
+      "documents": "Documents",
+      "settings": "Réglages"
+    },
+    "header": {
+      "account": "Compte",
+      "signIn": "Se connecter",
+      "signOut": "Se déconnecter",
+      "guest": "Non connecté",
+      "residencesCount": "{count, plural, =0 {Aucune résidence} one {# résidence} other {# résidences}}"
+    },
+    "dashboard": {
+      "sectionLabel": "Espace syndic",
+      "title": "Tableau de bord",
+      "welcome": "Bonjour, {name}",
+      "welcomeGuest": "Bienvenue sur Syndici",
+      "subtitleGuest": "Connectez-vous pour gérer vos résidences.",
+      "getStartedTitle": "Premiers pas",
+      "getStartedBody": "Créez votre première résidence, puis ajoutez ses lots et ses occupants.",
+      "createResidence": "Créer une résidence",
+      "viewResidences": "Voir mes résidences"
+    },
+    "comingSoon": {
+      "title": "Section à venir",
+      "body": "Cet écran sera construit dans un prochain incrément."
+    }
   }
 }
