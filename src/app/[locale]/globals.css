@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Base layer. Logical properties only (no padding-left / margin-right / left /
+ * right / text-align:left). Enforced by stylelint (raw CSS) and the logical-css
+ * ESLint rule (Tailwind classes). Design is provisional — see DECISIONS.md.
+ */
+@layer base {
+  html {
+    /* autoprefixer adds the -webkit- prefix at build time */
+    text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg font-sans text-label antialiased;
+    min-height: 100vh;
+    text-align: start;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-serif;
+  }
+}

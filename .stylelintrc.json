@@ -1,0 +1,62 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "layer",
+          "config",
+          "screen",
+          "variants",
+          "responsive"
+        ]
+      }
+    ],
+    "property-disallowed-list": [
+      [
+        "padding-left",
+        "padding-right",
+        "margin-left",
+        "margin-right",
+        "left",
+        "right",
+        "border-left",
+        "border-right",
+        "border-left-width",
+        "border-right-width",
+        "border-left-color",
+        "border-right-color",
+        "border-left-style",
+        "border-right-style",
+        "border-top-left-radius",
+        "border-top-right-radius",
+        "border-bottom-left-radius",
+        "border-bottom-right-radius"
+      ],
+      {
+        "message": "Physical directional property forbidden (breaks RTL). Use the logical property (padding-inline-start, margin-inline-end, inset-inline-start, border-inline-*, border-start-start-radius, …)."
+      }
+    ],
+    "declaration-property-value-disallowed-list": [
+      {
+        "text-align": ["/^(left|right)$/"],
+        "float": ["/^(left|right)$/"],
+        "clear": ["/^(left|right)$/"]
+      },
+      {
+        "message": "Physical directional value forbidden (breaks RTL). Use start/end / inline-start / inline-end."
+      }
+    ],
+    "custom-property-empty-line-before": null,
+    "comment-empty-line-before": null,
+    "declaration-empty-line-before": null,
+    "no-descending-specificity": null,
+    "alpha-value-notation": null,
+    "color-function-notation": null,
+    "value-keyword-case": null
+  },
+  "ignoreFiles": ["node_modules/**", ".next/**", "reference/**", "coverage/**"]
+}

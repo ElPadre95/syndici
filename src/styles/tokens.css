@@ -1,0 +1,66 @@
+/*
+ * Design tokens — PROVISIONAL.
+ *
+ * Extracted verbatim from the audited prototype (reference/index-demo.html,
+ * :root block, lines 183-206). These are a temporary working base, NOT a design
+ * target: the visual design will be reworked at the end of the project.
+ * See DECISIONS.md.
+ *
+ * Note: the prototype defines 22 custom properties (not 23) plus 2 font families.
+ * They are reproduced here with their exact values and names (the prototype uses
+ * `--label` for what the brief calls `--label-1`).
+ *
+ * `--font-sans` / `--font-serif` compose the two families used by the prototype
+ * with the runtime font variables injected by next/font (`--font-sans-src`,
+ * `--font-serif-src`), so token names stay stable if the loader changes.
+ */
+:root {
+  /* Brand / accent */
+  --indigo: #4f6ef7;
+  --indigo-deep: #3a56d4;
+  --indigo-soft: #eef1fe;
+  --indigo-mid: #c7cffa;
+
+  /* Semantic status */
+  --red: #ff3b30;
+  --red-soft: #fff0ee;
+  --green: #34c759;
+  --green-soft: #edfbf1;
+  --orange: #ff9500;
+  --orange-soft: #fff5e6;
+
+  /* Surfaces & text */
+  --bg: #f2f2f7;
+  --label: #1c1c1e; /* label-1 in the brief */
+  --label-2: #3a3a3c;
+  --label-3: #636366;
+  --label-4: #aeaeb2;
+  --sep: rgba(60, 60, 67, 0.12);
+
+  /* Layout */
+  --sw: 72px; /* sidebar width */
+
+  /* Radii */
+  --r-lg: 20px;
+  --r-md: 14px;
+  --r-sm: 10px;
+
+  /* Shadows */
+  --sh-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sh-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+  /* Typography — the two families used by the prototype */
+  --font-sans: var(--font-sans-src), system-ui, sans-serif; /* Plus Jakarta Sans */
+  --font-serif: var(--font-serif-src), Georgia, serif; /* DM Serif Display */
+}
+
+/*
+ * Arabic locale: Plus Jakarta Sans / DM Serif Display carry no Arabic glyphs.
+ * Lead the stacks with Noto Sans Arabic (loaded via next/font), keeping the Latin
+ * families as fallback for any Latin runs (numbers, "MAD", proper nouns).
+ * The prototype already specified 'Noto Sans Arabic' in its language switch.
+ */
+:root[lang='ar'] {
+  --font-sans: var(--font-arabic-src), var(--font-sans-src), system-ui, sans-serif;
+  --font-serif: var(--font-arabic-src), var(--font-serif-src), Georgia, serif;
+}

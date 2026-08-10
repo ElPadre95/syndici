@@ -1,0 +1,7 @@
+node_modules
+.next
+coverage
+reference
+package-lock.json
+prisma/migrations
+prisma/schema.prisma

@@ -1,0 +1,929 @@
+// ============================================================================
+// Syndici — modèle de données
+// ----------------------------------------------------------------------------
+// Principes (voir DECISIONS.md D13-D22 et reference/SPEC.md) :
+//
+//  * LE LOT EST LE PIVOT (pas la personne). Un `Lot` est l'objet durable ;
+//    les personnes s'y rattachent dans le temps via `LotAttachment` (historisé :
+//    startDate / endDate nullable / role). On peut donc répondre à « qui possédait
+//    / occupait le lot B3 en mars 2025 ».
+//
+//  * PROPRIÉTAIRE ≠ LOCATAIRE : `AttachmentRole` { OWNER, TENANT }. Le propriétaire
+//    est redevable/votant ; le locataire occupe/signale. Le redevable des charges
+//    est porté par `LotAttachment.isChargePayer` (par défaut le propriétaire, mais
+//    délégable au locataire). Contraintes d'unicité « actif » ajoutées en SQL
+//    (migration) : un seul OWNER actif, un seul TENANT actif, un seul payeur actif
+//    par lot.
+//
+//  * SYNDIC ↔ RÉSIDENCE = MANDAT (`Mandate`), pas une colonne. Une `Organization`
+//    (cabinet ou gérant indépendant) gère plusieurs `Residence` via des mandats
+//    datés à statut. Une résidence a AU PLUS un mandat ACTIF (unique partiel SQL),
+//    avec historique. Les personnes appartiennent à l'organisation via `Membership`.
+//
+//  * MULTI-TENANT : la `Residence` est l'unité d'isolation. `residenceId` est
+//    DÉNORMALISÉ (non nul) sur TOUTES les entités scopées, afin que la barrière
+//    d'isolation serveur (src/server/db/tenant.ts) puisse exiger un scope sur
+//    chaque requête. Un lot sans résidence est interdit (FK non nullable).
+//
+//  * ARGENT : tous les montants en `Int` = centimes de MAD. Jamais de Float.
+//    Le statut d'un appel de charges est DÉRIVÉ (src/server/finance/status.ts),
+//    jamais stocké. Les paiements sont immuables (annulation = écriture inverse).
+//    Numérotation reçus/justificatifs = séquence en base continue par
+//    (résidence, exercice, série) via `NumberSequence`.
+//
+//  * FICHIERS : jamais de base64 en colonne. `FileAsset` = référence de stockage
+//    objet (clé + bucket), pointée par documents, justificatifs, photos.
+//
+//  * VOCABULAIRE immeuble/villa/mixte : vit dans les catalogues i18n (messages/*),
+//    PAS ici. Les CATÉGORIES de dépenses, elles, sont des DONNÉES (`ExpenseCategory`)
+//    modifiables par résidence.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────── Enums ────────────────────────────────────
+
+enum Locale {
+  fr
+  ar
+  en
+  nl
+  es
+  de
+}
+
+enum OrgKind {
+  COMPANY // cabinet de syndic
+  INDEPENDENT // gérant indépendant
+}
+
+enum OrgRole {
+  OWNER_ADMIN
+  MANAGER
+  STAFF
+}
+
+enum MembershipStatus {
+  ACTIVE
+  SUSPENDED
+  ENDED
+}
+
+enum MandateStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  ENDED
+}
+
+enum ResidenceType {
+  IMMEUBLE
+  VILLA
+  MIXTE
+}
+
+enum LotType {
+  APPARTEMENT
+  VILLA
+}
+
+enum AttachmentRole {
+  OWNER
+  TENANT
+}
+
+enum Plan {
+  STARTER
+  PRO
+  ENTREPRISE
+}
+
+enum PaymentMethod {
+  ESPECES
+  CARTE
+  VIREMENT
+}
+
+// Statut d'un appel de charges — NON stocké, DÉRIVÉ sur DEUX AXES INDÉPENDANTS
+// (decision D19, correction étape 4b / SPEC §7.7bis) :
+//   - règlement (settlement) : soldé / partiel / non réglé
+//   - temporalité              : à venir / dû / en retard
+// Un partiel échu est PARTIAL sur l'axe règlement ET OVERDUE sur l'axe temporalité.
+enum SettlementState {
+  SETTLED // soldé (allocations >= montant)
+  PARTIAL // partiel (0 < allocations < montant)
+  UNSETTLED // non réglé (allocations <= 0)
+}
+
+enum TemporalState {
+  UPCOMING // à venir (avant l'échéance)
+  DUE // dû (jour d'échéance)
+  OVERDUE // en retard (après l'échéance)
+}
+
+enum NumberSeries {
+  RECU // reçus de paiement (REC-<exercice>-<n>)
+  JUSTIFICATIF // justificatifs de dépense (DEP-<exercice>-<n>)
+}
+
+enum IncidentStatus {
+  NOUVEAU
+  EN_COURS
+  RESOLU
+}
+
+enum IncidentUrgency {
+  NORMALE
+  IMPORTANTE
+  URGENTE
+}
+
+enum IncidentUpdateKind {
+  COMMENT
+  STATUS_CHANGE
+  CONTACT
+}
+
+enum VoteStatus {
+  OUVERT
+  CLOS
+}
+
+enum DocumentScope {
+  PRIVE // résident seul
+  PARTAGE // résident ↔ syndic
+  INTERNE // syndic seul (invisible du résident)
+}
+
+enum DocumentOrigin {
+  GERANT
+  RESIDENT
+}
+
+enum AnnouncementType {
+  INFORMATION
+  TRAVAUX
+  URGENT
+  REUNION
+  TERMINE
+}
+
+enum AnnouncementAudience {
+  ALL
+  OWNERS
+  TENANTS
+}
+
+enum ContractFrequency {
+  MENSUEL
+  TRIMESTRIEL
+  SEMESTRIEL
+  ANNUEL
+}
+
+enum ReminderChannel {
+  WHATSAPP
+  EMAIL
+  SMS
+}
+
+enum SettlementProvider {
+  MANUAL // encaissement manuel (espèces/virement saisi)
+  BANK_TRANSFER
+  CMI
+  PAYZONE
+  STRIPE
+  OTHER
+}
+
+enum SettlementStatus {
+  PENDING
+  ACTIVE
+  DISABLED
+}
+
+enum InvitationStatus {
+  PENDING
+  USED
+  REVOKED
+  EXPIRED
+}
+
+enum MessageSide {
+  GERANT
+  RESIDENT
+}
+
+// ───────────────────────── Organisation & personnes ───────────────────────
+
+/// Cabinet de syndic ou gérant indépendant. Gère 0..N résidences via des mandats.
+model Organization {
+  id                 String              @id @default(uuid())
+  name               String
+  kind               OrgKind             @default(COMPANY)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  memberships        Membership[]
+  mandates           Mandate[]
+  settlementAccounts SettlementAccount[]
+}
+
+/// Une personne physique. Peut être : employé d'une organisation (Membership),
+/// et/ou propriétaire/locataire de lots (LotAttachment) — y compris dans
+/// PLUSIEURS résidences (cas du propriétaire MRE). N'est donc PAS scopée résidence.
+/// PII : l'accès à une Person passe OBLIGATOIREMENT par src/server/auth/person-access.ts
+/// (aucun autre module ne doit toucher le modèle Person — test méta). Le compte
+/// d'authentification est lié via `authUser`, UNE seule fois, via l'invitation (D28).
+model Person {
+  id               String           @id @default(uuid())
+  firstName        String
+  lastName         String
+  email            String?
+  phone            String?
+  nationality      String?
+  preferredLocale  Locale           @default(fr)
+  authUserId       String?          @unique
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  authUser         User?            @relation(fields: [authUserId], references: [id], onDelete: SetNull)
+  memberships      Membership[]
+  attachments      LotAttachment[]
+  invitations      InvitationCode[]
+  paymentsMade     Payment[]        @relation("PaymentPayer")
+  paymentsRecorded Payment[]        @relation("PaymentRecorder")
+  ballots          Ballot[]
+
+  @@index([email])
+}
+
+// ─────────────────────── Authentification (Auth.js v5) ────────────────────
+// Modèles requis par @auth/prisma-adapter, + `passwordHash` pour le provider
+// « mot de passe ». Le compte (`User`) est distinct de la `Person` métier : le
+// rattachement Person↔User se fait via l'invitation (D28), une seule fois.
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  passwordHash  String? // provider mot de passe (bcrypt) ; null si magic link / OTP seuls
+  createdAt     DateTime  @default(now())
+  accounts      Account[]
+  sessions      Session[]
+  person        Person?
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+/// Rattachement d'une personne à une organisation (employé du cabinet), avec rôle.
+model Membership {
+  id             String           @id @default(uuid())
+  organizationId String
+  personId       String
+  role           OrgRole          @default(STAFF)
+  status         MembershipStatus @default(ACTIVE)
+  createdAt      DateTime         @default(now())
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  person         Person           @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, personId])
+  @@index([personId])
+}
+
+// ────────────────────────────── Résidence ─────────────────────────────────
+
+/// Copropriété gérée. Unité d'isolation multi-tenant. Le lien vers le gérant
+/// passe par `Mandate` (jamais une colonne user_id). Réglages persistés ici
+/// (dont le solde reporté et les automatisations — anomalies m1/m6 corrigées).
+model Residence {
+  id                      String        @id @default(uuid())
+  name                    String
+  address                 String?
+  city                    String?
+  type                    ResidenceType @default(IMMEUBLE)
+  plan                    Plan          @default(STARTER)
+  // Réglages financiers (centimes)
+  reportedBalanceMinor    Int           @default(0) // trésorerie reportée (donnée, pas nombre magique)
+  defaultChargeApptMinor  Int           @default(0)
+  defaultChargeVillaMinor Int           @default(0)
+  dueDayOfMonth           Int           @default(1) // jour d'échéance mensuelle
+  // Automatisations (persistées)
+  autoReminder            Boolean       @default(true)
+  autoLateFee             Boolean       @default(false)
+  autoSmsReminder         Boolean       @default(false)
+  autoMonthlyReport       Boolean       @default(false)
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  mandates           Mandate[]
+  lots               Lot[]
+  expenseCategories  ExpenseCategory[]
+  expenses           Expense[]
+  contracts          SupplierContract[]
+  chargeCalls        ChargeCall[]
+  payments           Payment[]
+  allocations        PaymentAllocation[]
+  receipts           Receipt[]
+  numberSequences    NumberSequence[]
+  incidents          Incident[]
+  incidentUpdates    IncidentUpdate[]
+  announcements      Announcement[]
+  votes              Vote[]
+  voteOptions        VoteOption[]
+  ballots            Ballot[]
+  documents          Document[]
+  fileAssets         FileAsset[]
+  conversations      Conversation[]
+  messages           Message[]
+  reminderRules      ReminderRule[]
+  reminders          Reminder[]
+  invitations        InvitationCode[]
+  attachments        LotAttachment[]
+  settlementAccounts SettlementAccount[]
+  auditLogs          AuditLog[]
+}
+
+/// Mandat de gestion daté entre une organisation et une résidence.
+/// Une résidence a au plus un mandat ACTIF à la fois (unique partiel — migration SQL).
+model Mandate {
+  id             String        @id @default(uuid())
+  organizationId String
+  residenceId    String
+  status         MandateStatus @default(ACTIVE)
+  startDate      DateTime      @db.Date
+  endDate        DateTime?     @db.Date
+  createdAt      DateTime      @default(now())
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  residence      Residence     @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([residenceId])
+}
+
+// ──────────────────────────── Lot & rattachements ─────────────────────────
+
+/// Le LOT : objet durable. Rattachement à une résidence OBLIGATOIRE (non nul).
+model Lot {
+  id                 String           @id @default(uuid())
+  residenceId        String
+  reference          String // n° de lot, ex. "B3"
+  type               LotType          @default(APPARTEMENT)
+  floor              String?
+  quotePart          Int              @default(1) // tantièmes / pondération (v1 : non utilisé pour le tally)
+  monthlyChargeMinor Int              @default(0) // charge mensuelle courante (centimes)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  residence          Residence        @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  attachments        LotAttachment[]
+  chargeCalls        ChargeCall[]
+  payments           Payment[]
+  receipts           Receipt[]
+  incidents          Incident[]
+  documents          Document[]
+  ballots            Ballot[]
+  conversations      Conversation[]
+  reminders          Reminder[]
+  invitations        InvitationCode[]
+
+  @@unique([residenceId, reference])
+  @@index([residenceId])
+}
+
+/// Rattachement historisé d'une personne à un lot (propriétaire ou locataire).
+/// endDate nullable = rattachement actif. isChargePayer désigne le redevable
+/// (par défaut le propriétaire ; délégable au locataire).
+model LotAttachment {
+  id            String         @id @default(uuid())
+  residenceId   String // dénormalisé pour le scoping tenant
+  lotId         String
+  personId      String
+  role          AttachmentRole
+  isChargePayer Boolean        @default(false)
+  startDate     DateTime       @db.Date
+  endDate       DateTime?      @db.Date
+  createdAt     DateTime       @default(now())
+  residence     Residence      @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot           Lot            @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  person        Person         @relation(fields: [personId], references: [id], onDelete: Restrict)
+
+  @@index([residenceId])
+  @@index([lotId])
+  @@index([personId])
+}
+
+// ─────────────────────────────── Finance ──────────────────────────────────
+
+/// Appel de charges pour un lot sur une période. Le STATUT (paid/partial/late)
+/// n'est PAS stocké : il est dérivé de la somme des allocations de paiement et
+/// de l'échéance (src/server/finance/status.ts). Non supprimable physiquement
+/// (annulation via voidedAt).
+model ChargeCall {
+  id           String              @id @default(uuid())
+  residenceId  String
+  lotId        String
+  periodYear   Int
+  periodMonth  Int // 1..12
+  dueDate      DateTime            @db.Date
+  amountMinor  Int // centimes
+  externalRef  String? // référence externe (rapprochement)
+  voidedAt     DateTime?
+  voidedReason String?
+  createdAt    DateTime            @default(now())
+  residence    Residence           @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot          Lot                 @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  allocations  PaymentAllocation[]
+  reminders    Reminder[]
+
+  @@unique([lotId, periodYear, periodMonth])
+  @@index([residenceId])
+}
+
+/// Règlement reçu (espèces, carte, virement). IMMUABLE : jamais modifié.
+/// Une annulation se fait par un paiement inverse (`reversesPaymentId`, montant négatif).
+model Payment {
+  id                 String              @id @default(uuid())
+  residenceId        String
+  lotId              String?
+  payerPersonId      String?
+  recordedByPersonId String? // gérant ayant saisi (espèces)
+  method             PaymentMethod
+  amountMinor        Int // centimes (négatif = écriture inverse)
+  receivedAt         DateTime
+  reference          String? // identifiant de transaction externe (carte/virement)
+  note               String?
+  reversesPaymentId  String? // renseigné si ce paiement en annule un autre
+  createdAt          DateTime            @default(now())
+  residence          Residence           @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot                Lot?                @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  payer              Person?             @relation("PaymentPayer", fields: [payerPersonId], references: [id], onDelete: SetNull)
+  recordedBy         Person?             @relation("PaymentRecorder", fields: [recordedByPersonId], references: [id], onDelete: SetNull)
+  reverses           Payment?            @relation("PaymentReversal", fields: [reversesPaymentId], references: [id], onDelete: SetNull)
+  reversedBy         Payment[]           @relation("PaymentReversal")
+  allocations        PaymentAllocation[]
+  receipt            Receipt?
+
+  @@index([residenceId])
+  @@index([lotId])
+}
+
+/// RAPPROCHEMENT : rattache (une part d')un règlement à un appel de charges.
+/// Fonctionne indifféremment pour carte / virement / espèces. La somme des
+/// allocations d'un appel détermine son statut dérivé.
+model PaymentAllocation {
+  id           String     @id @default(uuid())
+  residenceId  String
+  paymentId    String
+  chargeCallId String
+  amountMinor  Int // centimes affectés à cet appel
+  createdAt    DateTime   @default(now())
+  residence    Residence  @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  payment      Payment    @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  chargeCall   ChargeCall @relation(fields: [chargeCallId], references: [id], onDelete: Cascade)
+
+  @@index([residenceId])
+  @@index([paymentId])
+  @@index([chargeCallId])
+}
+
+/// Compteur de séquence en base, par (résidence, exercice, série). Incrémenté
+/// transactionnellement (src/server/finance/numbering.ts) pour garantir une
+/// numérotation continue et sans trou (contrainte comptable).
+model NumberSequence {
+  residenceId String
+  exercice    Int // année d'exercice
+  series      NumberSeries
+  lastValue   Int          @default(0)
+  residence   Residence    @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+
+  @@id([residenceId, exercice, series])
+}
+
+/// Reçu de paiement. Numéro = REC-<exercice>-<sequence zero-paddé>. Séquence
+/// continue par (résidence, exercice). Non supprimable (voidedAt conserve le n°).
+model Receipt {
+  id          String    @id @default(uuid())
+  residenceId String
+  exercice    Int
+  sequence    Int // 1..N continu par (residenceId, exercice)
+  number      String // ex. "REC-2026-0001"
+  paymentId   String    @unique
+  lotId       String?
+  amountMinor Int
+  issuedAt    DateTime  @default(now())
+  voidedAt    DateTime?
+  residence   Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  payment     Payment   @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  lot         Lot?      @relation(fields: [lotId], references: [id], onDelete: SetNull)
+
+  @@unique([residenceId, exercice, sequence])
+  @@unique([residenceId, number])
+  @@index([residenceId])
+}
+
+/// Compte de règlement (prestataire d'encaissement). Rattaché à une organisation
+/// OU à une résidence (exactement un — check SQL). Accueille le paiement en ligne
+/// sans présumer du prestataire (non arbitré).
+model SettlementAccount {
+  id             String             @id @default(uuid())
+  organizationId String?
+  residenceId    String?
+  provider       SettlementProvider @default(MANUAL)
+  merchantId     String?
+  status         SettlementStatus   @default(PENDING)
+  createdAt      DateTime           @default(now())
+  organization   Organization?      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  residence      Residence?         @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([residenceId])
+}
+
+// ─────────────────────────────── Dépenses ─────────────────────────────────
+
+/// Catégorie de dépense — DONNÉE modifiable par résidence (pas un enum figé).
+/// Les deux jeux par défaut (immeuble / villa) sont créés au seed (SPEC §7.3).
+model ExpenseCategory {
+  id          String    @id @default(uuid())
+  residenceId String
+  label       String
+  sortOrder   Int       @default(0)
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  residence   Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  expenses    Expense[]
+
+  @@unique([residenceId, label])
+  @@index([residenceId])
+}
+
+/// Dépense de la résidence avec justificatif (référence de fichier, pas base64).
+/// Numéro de justificatif = DEP-<exercice>-<sequence> (série JUSTIFICATIF).
+model Expense {
+  id              String           @id @default(uuid())
+  residenceId     String
+  categoryId      String?
+  description     String
+  amountMinor     Int
+  spentOn         DateTime         @db.Date
+  supplierName    String?
+  exercice        Int?
+  voucherSequence Int?
+  voucherNumber   String? // ex. "DEP-2026-0001"
+  justificatifId  String? // FileAsset
+  voidedAt        DateTime?
+  createdAt       DateTime         @default(now())
+  residence       Residence        @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  category        ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  justificatif    FileAsset?       @relation(fields: [justificatifId], references: [id], onDelete: SetNull)
+
+  @@unique([residenceId, voucherNumber])
+  @@index([residenceId])
+  @@index([categoryId])
+}
+
+/// Contrat fournisseur avec échéance. Le compte à rebours et l'alerte sont
+/// DÉRIVÉS de `endDate` vs la date réelle (SPEC §7.2), jamais stockés.
+model SupplierContract {
+  id           String            @id @default(uuid())
+  residenceId  String
+  name         String
+  supplierName String?
+  amountMinor  Int?
+  startDate    DateTime?         @db.Date
+  endDate      DateTime          @db.Date // échéance
+  frequency    ContractFrequency @default(ANNUEL)
+  archivedAt   DateTime?
+  createdAt    DateTime          @default(now())
+  residence    Residence         @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+
+  @@index([residenceId])
+}
+
+// ───────────────────────── Incidents (signalements) ───────────────────────
+
+/// Signalement d'incident (posé par l'occupant / locataire, ou le propriétaire
+/// occupant). Photo = référence de fichier. Visible du gérant dès sa création.
+model Incident {
+  id                 String           @id @default(uuid())
+  residenceId        String
+  lotId              String?
+  reportedByPersonId String?
+  category           String
+  location           String
+  description        String
+  urgency            IncidentUrgency  @default(NORMALE)
+  status             IncidentStatus   @default(NOUVEAU)
+  photoId            String? // FileAsset
+  reportedAt         DateTime         @default(now())
+  resolvedAt         DateTime?
+  residence          Residence        @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot                Lot?             @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  photo              FileAsset?       @relation(fields: [photoId], references: [id], onDelete: SetNull)
+  updates            IncidentUpdate[]
+
+  @@index([residenceId])
+  @@index([lotId])
+}
+
+/// Fil de suivi d'un incident (commentaire, changement de statut, contact).
+model IncidentUpdate {
+  id             String             @id @default(uuid())
+  residenceId    String
+  incidentId     String
+  authorPersonId String?
+  kind           IncidentUpdateKind @default(COMMENT)
+  message        String?
+  oldStatus      IncidentStatus?
+  newStatus      IncidentStatus?
+  createdAt      DateTime           @default(now())
+  residence      Residence          @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  incident       Incident           @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  @@index([residenceId])
+  @@index([incidentId])
+}
+
+// ─────────────────────────────── Actualités ───────────────────────────────
+
+/// Actualité typée publiée par le gérant. `audience` prépare la diffusion
+/// différenciée propriétaires/locataires (SPEC §9). Peut porter un résultat de vote.
+model Announcement {
+  id                  String               @id @default(uuid())
+  residenceId         String
+  type                AnnouncementType     @default(INFORMATION)
+  audience            AnnouncementAudience @default(ALL)
+  title               String
+  body                String
+  publishedByPersonId String?
+  publishedAt         DateTime             @default(now())
+  voteId              String? // renseigné si actualité de résultat de vote
+  residence           Residence            @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  vote                Vote?                @relation(fields: [voteId], references: [id], onDelete: SetNull)
+
+  @@index([residenceId])
+}
+
+// ──────────────────────────────── Votes ───────────────────────────────────
+
+/// Scrutin. UN bulletin par LOT (pas par personne). Pondération par quote-part
+/// prévue (`Ballot.weight`) mais non utilisée pour le décompte en v1.
+model Vote {
+  id                String         @id @default(uuid())
+  residenceId       String
+  title             String
+  description       String
+  deadline          DateTime?      @db.Date
+  status            VoteStatus     @default(OUVERT)
+  createdByPersonId String?
+  createdAt         DateTime       @default(now())
+  closedAt          DateTime?
+  residence         Residence      @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  options           VoteOption[]
+  ballots           Ballot[]
+  announcements     Announcement[]
+
+  @@index([residenceId])
+}
+
+model VoteOption {
+  id          String    @id @default(uuid())
+  residenceId String
+  voteId      String
+  label       String // Pour / Contre / Abstention (par défaut)
+  sortOrder   Int       @default(0)
+  residence   Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  vote        Vote      @relation(fields: [voteId], references: [id], onDelete: Cascade)
+  ballots     Ballot[]
+
+  @@index([residenceId])
+  @@index([voteId])
+}
+
+/// Bulletin : un seul par lot et par scrutin (@@unique). `weight` = pondération
+/// (quote-part du lot) conservée pour un décompte pondéré futur.
+model Ballot {
+  id             String     @id @default(uuid())
+  residenceId    String
+  voteId         String
+  lotId          String
+  voteOptionId   String
+  castByPersonId String? // propriétaire ayant voté
+  weight         Int        @default(1)
+  castAt         DateTime   @default(now())
+  residence      Residence  @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  vote           Vote       @relation(fields: [voteId], references: [id], onDelete: Cascade)
+  lot            Lot        @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  option         VoteOption @relation(fields: [voteOptionId], references: [id], onDelete: Restrict)
+  castBy         Person?    @relation(fields: [castByPersonId], references: [id], onDelete: SetNull)
+
+  @@unique([voteId, lotId]) // un bulletin par lot
+  @@index([residenceId])
+  @@index([voteId])
+}
+
+// ─────────────────────────── Fichiers & documents ─────────────────────────
+
+/// Référence vers un objet en stockage (bucket + clé). AUCUN contenu binaire en base.
+model FileAsset {
+  id                 String     @id @default(uuid())
+  residenceId        String
+  bucket             String
+  storageKey         String // chemin de l'objet dans le bucket
+  mimeType           String?
+  sizeBytes          Int?
+  originalName       String?
+  uploadedByPersonId String?
+  createdAt          DateTime   @default(now())
+  residence          Residence  @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  documents          Document[]
+  expenses           Expense[]
+  incidents          Incident[]
+
+  @@index([residenceId])
+}
+
+/// Document avec portée de visibilité (SPEC §7.5) — appliquée côté serveur.
+///  PRIVE   : résident seul   | PARTAGE : résident ↔ syndic | INTERNE : syndic seul.
+model Document {
+  id          String         @id @default(uuid())
+  residenceId String
+  lotId       String? // dossier du lot / de la personne
+  personId    String? // résident concerné
+  fileAssetId String
+  name        String
+  scope       DocumentScope  @default(PARTAGE)
+  origin      DocumentOrigin @default(RESIDENT)
+  createdAt   DateTime       @default(now())
+  residence   Residence      @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot         Lot?           @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  fileAsset   FileAsset      @relation(fields: [fileAssetId], references: [id], onDelete: Restrict)
+
+  @@index([residenceId])
+  @@index([lotId])
+}
+
+// ──────────────────────────────── Messagerie ──────────────────────────────
+
+/// Conversation persistée entre le syndic et un résident (fil par lot/résident).
+model Conversation {
+  id          String    @id @default(uuid())
+  residenceId String
+  lotId       String?
+  createdAt   DateTime  @default(now())
+  residence   Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot         Lot?      @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  messages    Message[]
+
+  @@index([residenceId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  residenceId    String
+  conversationId String
+  senderPersonId String?
+  senderSide     MessageSide
+  body           String
+  sentAt         DateTime     @default(now())
+  readAt         DateTime?
+  residence      Residence    @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([residenceId])
+  @@index([conversationId])
+}
+
+// ─────────────────────────── Relances (règle + trace) ─────────────────────
+
+/// Règle de relance CONFIGURABLE et VERSIONNÉE par résidence (SPEC §7.1).
+/// Défauts = valeurs exactes du prototype : seuil 3 j, délai anti-harcèlement 4 j,
+/// statuts concernés late+partial, seuil de frais 10 j. Une version active par
+/// résidence (unique partiel — migration SQL).
+model ReminderRule {
+  id                        String            @id @default(uuid())
+  residenceId               String
+  version                   Int               @default(1)
+  overdueThresholdDays      Int               @default(3)
+  minDaysBetweenReminders   Int               @default(4)
+  // États de règlement relancés : partiels ET non réglés (comme le prototype, qui
+  // relançait « les partiels comme les retards »). La condition « en retard » vient
+  // du seuil `overdueThresholdDays` sur l'axe temporalité.
+  concernedSettlementStates SettlementState[] @default([PARTIAL, UNSETTLED])
+  lateFeeThresholdDays      Int               @default(10)
+  active                    Boolean           @default(true)
+  createdAt                 DateTime          @default(now())
+  residence                 Residence         @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  reminders                 Reminder[]
+
+  @@unique([residenceId, version])
+  @@index([residenceId])
+}
+
+/// Trace d'un déclenchement de relance : à qui, quand, par quelle règle, canal.
+model Reminder {
+  id                String          @id @default(uuid())
+  residenceId       String
+  lotId             String
+  recipientPersonId String? // destinataire (propriétaire / payeur)
+  reminderRuleId    String?
+  chargeCallId      String?
+  channel           ReminderChannel @default(WHATSAPP)
+  sentAt            DateTime        @default(now())
+  sentByPersonId    String?
+  residence         Residence       @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot               Lot             @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  rule              ReminderRule?   @relation(fields: [reminderRuleId], references: [id], onDelete: SetNull)
+  chargeCall        ChargeCall?     @relation(fields: [chargeCallId], references: [id], onDelete: SetNull)
+
+  @@index([residenceId])
+  @@index([lotId])
+}
+
+// ──────────────────────── Codes d'invitation résident ─────────────────────
+
+/// Code d'invitation à usage unique (SPEC §7.4, corrige C1/C4/C5).
+/// On stocke un HASH du code, jamais le code en clair. Deux invitations possibles
+/// par lot (une OWNER, une TENANT). Révocable, expirable, essais limités.
+model InvitationCode {
+  id                String           @id @default(uuid())
+  residenceId       String
+  lotId             String
+  personId          String
+  role              AttachmentRole
+  codeHash          String           @unique
+  status            InvitationStatus @default(PENDING)
+  attemptCount      Int              @default(0)
+  expiresAt         DateTime?
+  usedAt            DateTime?
+  createdByPersonId String?
+  createdAt         DateTime         @default(now())
+  residence         Residence        @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot               Lot              @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  person            Person           @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([residenceId])
+  @@index([lotId])
+}
+
+// ───────────────────────────── Journal d'audit ────────────────────────────
+
+/// Journal d'audit — toute écriture financière (et sensible) y passe :
+/// acteur, action, entité, avant/après (JSON), horodatage.
+model AuditLog {
+  id            String     @id @default(uuid())
+  residenceId   String?
+  actorPersonId String?
+  action        String // ex. "payment.record", "receipt.issue", "chargeCall.void"
+  entityType    String
+  entityId      String
+  before        Json?
+  after         Json?
+  at            DateTime   @default(now())
+  residence     Residence? @relation(fields: [residenceId], references: [id], onDelete: SetNull)
+
+  @@index([residenceId])
+  @@index([entityType, entityId])
+}

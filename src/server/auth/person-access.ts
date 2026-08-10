@@ -1,0 +1,172 @@
+/**
+ * COUCHE D'ACCÈS AUX PERSONNES — LE POINT CRITIQUE (§2).
+ *
+ * `Person` porte des données personnelles (nom, e-mail, téléphone, nationalité) et
+ * n'est PAS derrière la garde tenant (`forResidence`), parce qu'un propriétaire MRE
+ * existe dans plusieurs résidences à la fois : il n'a pas de `residenceId` propre.
+ *
+ * Conséquence : ce fichier est le SEUL de tout `src/` (hors tests) autorisé à lire
+ * ou écrire le modèle des personnes. Un test méta (person-access.meta.test.ts) le
+ * prouve : aucun autre module ne référence la table ni l'accesseur Prisma. Toute
+ * lecture passe par une fonction d'ici, qui n'accepte de renvoyer une personne que
+ * si elle est ATTEIGNABLE depuis le contexte actif par un chemin autorisé
+ * (rattachement de lot scopé, ou appartenance à l'organisation mandataire).
+ *
+ * Invariant de fuite : un LOCATAIRE (ou un PROPRIÉTAIRE) n'obtient AUCUNE donnée sur
+ * une autre personne que lui-même — donc rien sur le propriétaire de son propre lot.
+ */
+import type { SqlExecutor } from '@/server/db/sql';
+import type { ActiveContext } from './context';
+
+/** Vue publique d'une personne — jamais `authUserId`, jamais de secret. */
+export interface PersonView {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phone: string | null;
+  nationality: string | null;
+  preferredLocale: string;
+}
+
+const PERSON_COLUMNS = 'id, "firstName", "lastName", email, phone, nationality, "preferredLocale"';
+
+export class PersonAccessError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PersonAccessError';
+  }
+}
+
+/** Seuls SYNDIC/GESTIONNAIRE peuvent voir des personnes tierces (annuaire). */
+function isStaff(role: ActiveContext['role']): boolean {
+  return role === 'SYNDIC' || role === 'GESTIONNAIRE';
+}
+
+/**
+ * Une personne est-elle atteignable depuis un contexte staff ? Oui si, dans la
+ * résidence active, elle est rattachée à un lot, OU membre de l'organisation qui
+ * détient le mandat actif de cette résidence. Le staff ne « voit » donc jamais
+ * au-delà des résidences qu'il gère effectivement.
+ */
+async function reachableByStaff(
+  exec: SqlExecutor,
+  residenceId: string,
+  targetPersonId: string,
+): Promise<boolean> {
+  const rows = await exec.query<{ ok: number }>(
+    `SELECT 1 AS ok
+       FROM "LotAttachment"
+      WHERE "personId" = $1 AND "residenceId" = $2
+      UNION
+     SELECT 1 AS ok
+       FROM "Membership" mem
+       JOIN "Mandate" md ON md."organizationId" = mem."organizationId"
+      WHERE mem."personId" = $1
+        AND md."residenceId" = $2
+        AND md.status = 'ACTIVE'
+        AND (md."endDate" IS NULL OR md."endDate" >= CURRENT_DATE)
+      LIMIT 1`,
+    [targetPersonId, residenceId],
+  );
+  return rows.length > 0;
+}
+
+/**
+ * Lit une personne SI et SEULEMENT SI le contexte y donne droit :
+ *   - toujours soi-même ;
+ *   - sinon, staff uniquement, et seulement si la cible est atteignable.
+ * Renvoie `null` (pas d'erreur) quand l'accès est refusé : l'appelant ne peut pas
+ * distinguer « n'existe pas » de « pas le droit », donc aucune fuite d'existence.
+ */
+export async function getAccessiblePerson(
+  exec: SqlExecutor,
+  ctx: ActiveContext,
+  targetPersonId: string,
+): Promise<PersonView | null> {
+  if (targetPersonId !== ctx.personId) {
+    if (!isStaff(ctx.role)) return null;
+    if (!(await reachableByStaff(exec, ctx.residenceId, targetPersonId))) return null;
+  }
+  const rows = await exec.query<PersonView>(
+    `SELECT ${PERSON_COLUMNS} FROM "Person" WHERE id = $1 LIMIT 1`,
+    [targetPersonId],
+  );
+  return rows[0] ?? null;
+}
+
+/** Annuaire des personnes rattachées à la résidence active — staff uniquement. */
+export async function listResidents(exec: SqlExecutor, ctx: ActiveContext): Promise<PersonView[]> {
+  if (!isStaff(ctx.role)) throw new PersonAccessError('resident.list interdit pour ce rôle');
+  return exec.query<PersonView>(
+    `SELECT DISTINCT ${PERSON_COLUMNS.split(', ')
+      .map((c) => `p.${c}`)
+      .join(', ')}
+       FROM "Person" p
+       JOIN "LotAttachment" la ON la."personId" = p.id
+      WHERE la."residenceId" = $1`,
+    [ctx.residenceId],
+  );
+}
+
+/**
+ * Résout la Person métier liée à un compte d'authentification. Point d'entrée
+ * unique pour transformer une session (User.id) en identité métier (Person.id).
+ */
+export async function resolvePersonIdForUser(
+  exec: SqlExecutor,
+  authUserId: string,
+): Promise<string | null> {
+  const rows = await exec.query<{ id: string }>(
+    `SELECT id FROM "Person" WHERE "authUserId" = $1 LIMIT 1`,
+    [authUserId],
+  );
+  return rows[0]?.id ?? null;
+}
+
+/**
+ * Rattache un compte à une personne — UNE seule fois, IRRÉVERSIBLEMENT (pas de
+ * repli e-mail : c'est la faille de reprise de compte du prototype qui est fermée
+ * ici). L'UPDATE conditionnel `authUserId IS NULL` garantit qu'une personne déjà
+ * rattachée ne peut jamais être « re-rattachée » à un autre compte. Renvoie `false`
+ * si la personne est déjà liée. À appeler exclusivement depuis le parcours invitation.
+ */
+export async function linkAuthAccount(
+  exec: SqlExecutor,
+  personId: string,
+  authUserId: string,
+): Promise<boolean> {
+  const rows = await exec.query<{ id: string }>(
+    `UPDATE "Person" SET "authUserId" = $1, "updatedAt" = now()
+      WHERE id = $2 AND "authUserId" IS NULL
+      RETURNING id`,
+    [authUserId, personId],
+  );
+  return rows.length > 0;
+}
+
+/** E-mail masqué (`a***@domaine`) pour l'écran d'invitation — jamais l'e-mail en clair. */
+export function maskEmail(email: string | null): string | null {
+  if (!email) return null;
+  const at = email.indexOf('@');
+  if (at <= 0) return '***';
+  const first = email[0];
+  const domain = email.slice(at + 1);
+  return `${first}***@${domain}`;
+}
+
+/**
+ * Contact masqué d'une invitation — le SEUL renseignement toléré sur l'écran de
+ * vérification (§5 : pas de préremplissage, pas de PII exposée). On ne renvoie
+ * jamais l'e-mail complet ni le nom.
+ */
+export async function getMaskedInvitationContact(
+  exec: SqlExecutor,
+  personId: string,
+): Promise<{ maskedEmail: string | null }> {
+  const rows = await exec.query<{ email: string | null }>(
+    `SELECT email FROM "Person" WHERE id = $1 LIMIT 1`,
+    [personId],
+  );
+  return { maskedEmail: maskEmail(rows[0]?.email ?? null) };
+}
