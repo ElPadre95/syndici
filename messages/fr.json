@@ -717,6 +717,63 @@
         "no_active_residence": "Aucune résidence active.",
         "forbidden": "Vous n’avez pas le droit de gérer les lots."
       }
+    },
+    "board": {
+      "searchPlaceholder": "Rechercher un lot, un propriétaire, un locataire…",
+      "noResult": "Aucun résultat pour cette recherche.",
+      "kpiLots": "Lots",
+      "kpiSplit": "{appt} appts · {villa} villas",
+      "kpiAbroad": "Propriétaires à l’étranger",
+      "kpiSettled": "Soldés ce mois",
+      "kpiOverdue": "En retard"
+    },
+    "filters": {
+      "all": "Tous",
+      "overdue": "En retard",
+      "rented": "Loués",
+      "vacant": "Vacants",
+      "abroad": "Propriétaire à l’étranger"
+    },
+    "occupancy": {
+      "ownerOccupied": "Occupé par le propriétaire",
+      "vacant": "Vacant",
+      "roleOwner": "PROP",
+      "roleTenant": "LOC",
+      "delegated": "charges déléguées"
+    },
+    "state": {
+      "settlement": {
+        "SETTLED": "Soldé",
+        "PARTIAL": "Partiel",
+        "UNSETTLED": "Non réglé"
+      },
+      "temporal": {
+        "UPCOMING": "À venir",
+        "DUE": "Dû",
+        "OVERDUE": "En retard"
+      },
+      "overdueDays": "Retard {days} j"
+    },
+    "subnote": {
+      "paidOn": "Payé le {date}",
+      "received": "{amount} reçus",
+      "dueOn": "Échéance {date}",
+      "villa": "Villa"
+    },
+    "fiche": {
+      "occupants": "Occupants",
+      "owner": "Propriétaire",
+      "tenant": "Locataire",
+      "none": "Aucun occupant enregistré",
+      "edit": "Modifier",
+      "reference": "Référence",
+      "type": "Type",
+      "floor": "Étage",
+      "surface": "Surface",
+      "quotePart": "Quote-part",
+      "charge": "Charges mensuelles",
+      "delegated": "Charges déléguées au locataire",
+      "abroad": "Réside à l’étranger : {country}"
     }
   }
 }

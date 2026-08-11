@@ -6,6 +6,7 @@
 import { getBaseClient } from '@/server/db/client';
 import { forResidence } from '@/server/db/tenant';
 import { planGeneration, type GeneratedLot, type GroupSpec, type LotType } from './generation';
+import { distributeQuoteParts } from './quote-part';
 import type { LotDraft } from './validation';
 
 export interface LotRow {
@@ -88,11 +89,14 @@ export async function generateLots(
   }
   const apptCharge = await residenceDefaultCharge(residenceId, 'APPARTEMENT');
   const villaCharge = await residenceDefaultCharge(residenceId, 'VILLA');
-  const data = plan.toCreate.map((l: GeneratedLot) => ({
+  // Répartition des 1000 millièmes entre les lots créés (reste aux premiers).
+  const quotas = distributeQuoteParts(plan.toCreate.length);
+  const data = plan.toCreate.map((l: GeneratedLot, i: number) => ({
     residenceId,
     reference: l.reference,
     type: l.type,
     floor: l.floor,
+    quotePart: quotas[i] ?? 0,
     monthlyChargeMinor: l.type === 'VILLA' ? villaCharge : apptCharge,
   }));
   const res = await forResidence(residenceId).lot.createMany({ data, skipDuplicates: true });

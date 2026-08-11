@@ -714,6 +714,63 @@
         "no_active_residence": "لا توجد إقامة نشطة.",
         "forbidden": "لا تملك صلاحية إدارة العقارات."
       }
+    },
+    "board": {
+      "searchPlaceholder": "ابحث عن عقار أو مالك أو مكترٍ…",
+      "noResult": "لا نتيجة لهذا البحث.",
+      "kpiLots": "العقارات",
+      "kpiSplit": "{appt} شقق · {villa} فيلات",
+      "kpiAbroad": "ملاك في الخارج",
+      "kpiSettled": "مُسدَّدة هذا الشهر",
+      "kpiOverdue": "متأخرة"
+    },
+    "filters": {
+      "all": "الكل",
+      "overdue": "متأخرة",
+      "rented": "مُكتراة",
+      "vacant": "شاغرة",
+      "abroad": "مالك في الخارج"
+    },
+    "occupancy": {
+      "ownerOccupied": "يشغلها المالك",
+      "vacant": "شاغر",
+      "roleOwner": "مالك",
+      "roleTenant": "مكترٍ",
+      "delegated": "الواجبات مفوَّضة"
+    },
+    "state": {
+      "settlement": {
+        "SETTLED": "مُسدَّد",
+        "PARTIAL": "جزئي",
+        "UNSETTLED": "غير مُسدَّد"
+      },
+      "temporal": {
+        "UPCOMING": "قادم",
+        "DUE": "مستحق",
+        "OVERDUE": "متأخر"
+      },
+      "overdueDays": "تأخر {days} يوم"
+    },
+    "subnote": {
+      "paidOn": "دُفع في {date}",
+      "received": "{amount} مقبوضة",
+      "dueOn": "الاستحقاق {date}",
+      "villa": "فيلا"
+    },
+    "fiche": {
+      "occupants": "الشاغلون",
+      "owner": "المالك",
+      "tenant": "المكتري",
+      "none": "لا يوجد شاغل مسجَّل",
+      "edit": "تعديل",
+      "reference": "المرجع",
+      "type": "النوع",
+      "floor": "الطابق",
+      "surface": "المساحة",
+      "quotePart": "الحصة",
+      "charge": "الواجبات الشهرية",
+      "delegated": "الواجبات مفوَّضة للمكتري",
+      "abroad": "يقيم في الخارج: {country}"
     }
   }
 }

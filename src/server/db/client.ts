@@ -17,7 +17,10 @@ import { PrismaClient } from '@prisma/client';
 let _client: PrismaClient | null = null;
 
 export function getBaseClient(): PrismaClient {
-  return (_client ??= new PrismaClient());
+  // Journalisation des requêtes activable en dev (mesure des N+1) : PRISMA_QUERY_LOG=1.
+  return (_client ??= new PrismaClient(
+    process.env.PRISMA_QUERY_LOG === '1' ? { log: [{ emit: 'event', level: 'query' }] } : undefined,
+  ));
 }
 
 export async function disconnectBase(): Promise<void> {

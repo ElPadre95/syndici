@@ -5,6 +5,7 @@
  */
 import { toCentimes } from '@/lib/money';
 import type { GroupSpec, LotType, RefScheme } from './generation';
+import { QUOTE_PART_TARGET } from './quote-part';
 
 const TYPES: readonly LotType[] = ['APPARTEMENT', 'VILLA'];
 const SCHEMES: readonly RefScheme[] = ['continuous', 'floor'];
@@ -125,5 +126,4 @@ export function validateGenerationInput(rawGroups: readonly GroupRaw[]): Generat
   return { ok: true, groups };
 }
 
-/** Seuil d'avertissement quote-part (convention copropriété : total = 1000). */
-export const QUOTE_PART_TARGET = 1000;
+export { QUOTE_PART_TARGET };

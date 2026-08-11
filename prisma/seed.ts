@@ -12,6 +12,7 @@
  */
 import { PrismaClient } from '@prisma/client';
 import { createReceipt, createExpense } from '../src/server/finance/numbering';
+import { distributeQuoteParts } from '../src/server/lots/quote-part';
 import { disconnectBase } from '../src/server/db/client';
 
 const prisma = new PrismaClient();
@@ -225,18 +226,19 @@ async function main() {
 
   // Lots + rattachements historisés + charges + paiements + reçus
   const specs = buildLotSpecs();
+  const quotas = distributeQuoteParts(specs.length); // total = 1000 millièmes
   let paidCount = 0;
   let partialCount = 0;
   let lateCount = 0;
   let cashCount = 0;
 
-  for (const spec of specs) {
+  for (const [lotIndex, spec] of specs.entries()) {
     const lot = await prisma.lot.create({
       data: {
         residenceId: residence.id,
         reference: spec.reference,
         type: spec.villa ? 'VILLA' : 'APPARTEMENT',
-        quotePart: spec.villa ? 2 : 1,
+        quotePart: quotas[lotIndex] ?? 1,
         monthlyChargeMinor: spec.villa ? CHARGE_VILLA : CHARGE_APPT,
       },
     });

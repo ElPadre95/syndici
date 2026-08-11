@@ -2,22 +2,23 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { DoorOpen, Plus, Sparkles, AlertTriangle, Building2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
+import { BoardTable } from '@/components/lots/BoardTable';
 import { getSessionContext } from '@/server/session';
-import { listLots, quotePartTotal } from '@/server/lots/data';
+import { can } from '@/server/auth/permissions';
+import { listLotsForBoard } from '@/server/lots/board';
+import { quotePartTotal } from '@/server/lots/data';
 import { QUOTE_PART_TARGET } from '@/server/lots/validation';
-import { formatMoney } from '@/lib/money';
-import { cn } from '@/lib/cn';
 
 export default async function LotsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('lots.list');
-  const tType = await getTranslations('lots.type');
+  const tb = await getTranslations('lots.board');
 
   const ctx = await getSessionContext();
   const active = ctx?.residences.find((r) => r.id === ctx.activeId) ?? null;
 
-  if (!ctx?.activeId || !active) {
+  if (!ctx?.activeId || !ctx.role || !active) {
     return (
       <EmptyState
         icon={<Building2 className="size-6" aria-hidden />}
@@ -26,17 +27,30 @@ export default async function LotsPage({ params }: { params: Promise<{ locale: s
       />
     );
   }
+  if (!can(ctx.role, 'lot.view.all')) {
+    return (
+      <div className="mx-auto max-w-4xl">
+        <p className="rounded-md bg-orange-soft px-3 py-2 text-sm text-orange">
+          {t('noActiveBody')}
+        </p>
+      </div>
+    );
+  }
 
-  const lots = await listLots(ctx.activeId);
+  const { rows, kpis } = await listLotsForBoard({
+    personId: ctx.personId,
+    residenceId: ctx.activeId,
+    role: ctx.role,
+  });
   const total = await quotePartTotal(ctx.activeId);
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
+    <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-label">{t('title')}</h1>
           <p className="mt-1 text-sm text-label-3">
-            {t('subtitle', { residence: active.name, count: lots.length })}
+            {t('subtitle', { residence: active.name, count: rows.length })}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -55,7 +69,7 @@ export default async function LotsPage({ params }: { params: Promise<{ locale: s
         </div>
       </div>
 
-      {lots.length === 0 ? (
+      {rows.length === 0 ? (
         <EmptyState
           icon={<DoorOpen className="size-6" aria-hidden />}
           title={t('emptyTitle')}
@@ -68,6 +82,17 @@ export default async function LotsPage({ params }: { params: Promise<{ locale: s
         />
       ) : (
         <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Kpi
+              value={kpis.total}
+              label={tb('kpiLots')}
+              sub={tb('kpiSplit', { appt: kpis.apartments, villa: kpis.villas })}
+            />
+            <Kpi value={kpis.ownersAbroad} label={tb('kpiAbroad')} tone="indigo" />
+            <Kpi value={kpis.settledThisMonth} label={tb('kpiSettled')} tone="green" />
+            <Kpi value={kpis.overdue} label={tb('kpiOverdue')} tone="red" />
+          </div>
+
           {total !== QUOTE_PART_TARGET && (
             <p className="flex items-center gap-2 rounded-md bg-orange-soft px-3 py-2 text-sm text-orange">
               <AlertTriangle className="size-4 shrink-0" aria-hidden />
@@ -75,44 +100,37 @@ export default async function LotsPage({ params }: { params: Promise<{ locale: s
             </p>
           )}
 
-          <div className="overflow-x-auto rounded-lg border border-sep bg-white">
-            <div className="grid min-w-[640px] grid-cols-[70px_1fr_80px_90px_90px_120px] gap-3 border-b border-sep px-4 py-2 text-xs font-bold uppercase tracking-wide text-label-4">
-              <span>{t('colRef')}</span>
-              <span>{t('colType')}</span>
-              <span>{t('colFloor')}</span>
-              <span className="text-end">{t('colSurface')}</span>
-              <span className="text-end">{t('colQuote')}</span>
-              <span className="text-end">{t('colCharge')}</span>
-            </div>
-            {lots.map((lot) => (
-              <Link
-                key={lot.id}
-                href={`/lots/${lot.id}`}
-                className="grid min-w-[640px] grid-cols-[70px_1fr_80px_90px_90px_120px] items-center gap-3 border-b border-sep px-4 py-3 last:border-b-0 hover:bg-bg"
-              >
-                <span className="rounded-md bg-bg py-1 text-center text-sm font-extrabold tracking-wide">
-                  {lot.reference}
-                </span>
-                <span className="text-sm text-label">{tType(lot.type)}</span>
-                <span className="text-sm text-label-3">{lot.floor ?? '—'}</span>
-                <span className="text-end text-sm text-label-3">
-                  {lot.surfaceM2 !== null ? `${lot.surfaceM2} m²` : '—'}
-                </span>
-                <span className="text-end text-sm tabular-nums text-label-3">{lot.quotePart}</span>
-                <span className="text-end text-sm font-semibold tabular-nums text-label">
-                  {formatMoney(lot.monthlyChargeMinor, locale)}
-                </span>
-              </Link>
-            ))}
-          </div>
-
-          <p
-            className={cn('text-sm', total === QUOTE_PART_TARGET ? 'text-label-3' : 'text-orange')}
-          >
-            {t('quotePartTotal', { total })}
-          </p>
+          <BoardTable rows={rows} />
         </>
       )}
+    </div>
+  );
+}
+
+function Kpi({
+  value,
+  label,
+  sub,
+  tone,
+}: {
+  value: number;
+  label: string;
+  sub?: string;
+  tone?: 'indigo' | 'green' | 'red';
+}) {
+  const toneClass =
+    tone === 'indigo'
+      ? 'text-indigo'
+      : tone === 'green'
+        ? 'text-green'
+        : tone === 'red'
+          ? 'text-red'
+          : 'text-label';
+  return (
+    <div className="rounded-lg border border-sep bg-white px-4 py-3">
+      <div className={`text-2xl font-extrabold ${toneClass}`}>{value}</div>
+      <div className="mt-0.5 text-xs font-semibold text-label-3">{label}</div>
+      {sub && <div className="text-xs text-label-4">{sub}</div>}
     </div>
   );
 }

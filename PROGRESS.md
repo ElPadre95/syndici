@@ -22,8 +22,10 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       Génération avec schéma choisi (continu / par étage) + aperçu avant création, idempotente.
       Modification, archivage (jamais de suppression si historique), total des quotes-parts + alerte 1000.
       Tests d'isolation du cookie de résidence active (cookie = entrée non fiable).
-- [ ] **A4** — Liste des lots (écran principal du syndic) : référence, occupant, statut, montant ;
-      recherche et filtres ; chaque ligne mène quelque part (pas de fausse ligne cliquable).
+- [x] **A4** — Liste des lots (écran principal du syndic) : référence, occupant (propriétaire + pays si
+      à l'étranger, locataire + délégation, ou occupé/vacant), deux états dérivés (règlement × temporalité),
+      montant + sous-note ; indicateurs, recherche, filtres à compteurs justes ; lignes → fiche du lot.
+      Quote-part répartie à la génération (total 1000). Étanchéité propriétaire testée. Tableau en 6 requêtes.
 - [ ] **A5** — Ajouter une personne à un lot (nom, e-mail, téléphone, pays, langue, rôle).
       Passe par la couche person-access. Rattachement historisé + fin de rattachement (jamais de suppression).
 - [ ] **A6** — Émettre une invitation sur une personne rattachée (impossible sans rattachement actif).
