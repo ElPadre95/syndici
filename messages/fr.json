@@ -577,5 +577,58 @@
       "title": "Section à venir",
       "body": "Cet écran sera construit dans un prochain incrément."
     }
+  },
+  "residences": {
+    "list": {
+      "title": "Résidences",
+      "createCta": "Créer une résidence",
+      "emptyTitle": "Aucune résidence",
+      "emptyBody": "Créez votre première résidence pour commencer.",
+      "colName": "Nom",
+      "colCity": "Ville",
+      "colType": "Type",
+      "colLots": "Lots",
+      "colMandate": "Mandat",
+      "lotsCount": "{count, plural, =0 {0 lot} one {# lot} other {# lots}}"
+    },
+    "mandate": {
+      "ACTIVE": "Actif",
+      "ENDED": "Terminé",
+      "PENDING": "En attente",
+      "SUSPENDED": "Suspendu"
+    },
+    "form": {
+      "title": "Nouvelle résidence",
+      "name": "Nom de la résidence",
+      "address": "Adresse",
+      "addressOptional": "Adresse (facultatif)",
+      "city": "Ville",
+      "type": "Type de résidence",
+      "typeImmeuble": "Immeuble (appartements)",
+      "typeVilla": "Lotissement (villas)",
+      "typeMixte": "Mixte (appartements + villas)",
+      "unitsCount": "Nombre d'unités",
+      "unitsHint": "Sert de valeur par défaut pour la création des lots. Ne crée aucun lot.",
+      "chargeAppt": "Charges par appartement (MAD/mois)",
+      "chargeVilla": "Charges par villa (MAD/mois)",
+      "dueDay": "Jour d'échéance mensuelle",
+      "dueDayHint": "Entre 1 et 28.",
+      "submit": "Créer la résidence",
+      "cancel": "Annuler",
+      "errors": {
+        "required": "Ce champ est requis.",
+        "invalidType": "Choisissez un type.",
+        "min1": "Indiquez un nombre entier d’au moins 1.",
+        "amountInvalid": "Indiquez un montant valide.",
+        "dueDayRange": "Indiquez un jour entre 1 et 28.",
+        "unauthenticated": "Session expirée. Reconnectez-vous.",
+        "not_owner_admin": "Vous n'êtes pas administrateur d'une organisation.",
+        "server": "Une erreur est survenue. Réessayez."
+      }
+    },
+    "switcher": {
+      "label": "Résidence active",
+      "none": "Aucune résidence"
+    }
   }
 }

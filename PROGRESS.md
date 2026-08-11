@@ -5,13 +5,18 @@ attente de validation. Reflète l'état réel à tout moment.
 
 **Serveur de dev** : http://localhost:3000/fr (laissé tournant toute la session, rechargement à chaud).
 **Base de dev** : PostgreSQL local sur `127.0.0.1:55432` (migré + seed : 1 résidence, 24 lots, 29 personnes).
+**Compte de dev** (`npm run dev:account`) : `syndic@dev.local` / `dev-syndic-2026` — syndic (OWNER_ADMIN)
+de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais en production.
+**Routes protégées** : toute route de gestion exige une session (middleware) ; redirection vers
+`/<locale>/sign-in?callbackUrl=…` puis retour après connexion.
 
 ## Tranche A — écrans métier du syndic
 
 - [x] **A1** — Coquille de l'application connectée : navigation latérale, en-tête, page d'accueil.
       Design provisoire mais réel : la navigation fonctionne, la session est lue, la langue se change.
-- [ ] **A2** — Créer une résidence (nom, adresse, ville, type, nb d'unités, charges, échéance).
+- [x] **A2** — Créer une résidence (nom, adresse, ville, type, nb d'unités, charges, échéance).
       Crée l'organisation + le mandat si absent. La résidence apparaît dans une liste.
+      Sélecteur de résidence active dans l'en-tête (persisté en cookie). Routes gardées + compte de dev.
 - [ ] **A3** — Créer les lots : un par un et en série depuis le nombre d'unités
       (référence, type, étage, surface, quote-part, charges si ≠ défaut).
 - [ ] **A4** — Liste des lots (écran principal du syndic) : référence, occupant, statut, montant ;

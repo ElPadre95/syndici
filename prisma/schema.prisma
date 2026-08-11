@@ -350,6 +350,9 @@ model Residence {
   defaultChargeApptMinor  Int           @default(0)
   defaultChargeVillaMinor Int           @default(0)
   dueDayOfMonth           Int           @default(1) // jour d'échéance mensuelle
+  // Nombre d'unités saisi à la création (A2) : sert de valeur par défaut à la
+  // création des lots (A3). NE crée aucun lot par lui-même.
+  defaultUnitsCount       Int           @default(0)
   // Automatisations (persistées)
   autoReminder            Boolean       @default(true)
   autoLateFee             Boolean       @default(false)

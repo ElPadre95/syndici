@@ -6,34 +6,34 @@ import { LogOut, UserCircle2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
 import { LocaleSwitcher } from '@/components/LocaleSwitcher';
+import { ResidenceSwitcher, type SwitcherResidence } from '@/components/app/ResidenceSwitcher';
 
 interface AppHeaderProps {
   userLabel: string | null;
-  residencesCount: number;
+  residences: SwitcherResidence[];
+  activeId: string | null;
 }
 
 /**
- * En-tête de l'application connectée. Lit l'identité de session (transmise par le
- * layout serveur) : affiche l'utilisateur et le nombre de résidences accessibles,
- * ou un état « non connecté » avec accès à la connexion. Contient le sélecteur de
- * langue (bascule fr ⇄ ar sans quitter la page).
+ * En-tête de l'application connectée. Affiche l'utilisateur, le sélecteur de
+ * résidence active (§4), le sélecteur de langue, et la déconnexion. L'identité et
+ * la liste des résidences proviennent du contexte de session (layout serveur).
  */
-export function AppHeader({ userLabel, residencesCount }: AppHeaderProps) {
+export function AppHeader({ userLabel, residences, activeId }: AppHeaderProps) {
   const t = useTranslations('app.header');
 
   return (
     <header className="flex items-center justify-between gap-4 border-b border-sep bg-white px-6 py-3">
-      <div className="flex items-center gap-2 text-sm text-label-3">
-        <UserCircle2 className="size-5 text-label-4" aria-hidden />
-        {userLabel ? (
-          <span className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        {residences.length > 0 && <ResidenceSwitcher residences={residences} activeId={activeId} />}
+        <span className="flex items-center gap-2 text-sm text-label-3">
+          <UserCircle2 className="size-5 text-label-4" aria-hidden />
+          {userLabel ? (
             <span className="font-semibold text-label">{userLabel}</span>
-            <span className="text-label-4">·</span>
-            <span>{t('residencesCount', { count: residencesCount })}</span>
-          </span>
-        ) : (
-          <span>{t('guest')}</span>
-        )}
+          ) : (
+            <span>{t('guest')}</span>
+          )}
+        </span>
       </div>
 
       <div className="flex items-center gap-3">

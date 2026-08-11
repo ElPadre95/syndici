@@ -11,7 +11,7 @@ import { Link } from '@/i18n/navigation';
  * Volontairement sans travail de design. Aucun préremplissage, aucun message
  * distinctif qui permettrait d'énumérer les comptes.
  */
-export function SignInForm() {
+export function SignInForm({ callbackUrl = '/' }: { callbackUrl?: string }) {
   const t = useTranslations('auth.signIn');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +26,7 @@ export function SignInForm() {
     const res = await signIn('password', { email, password, redirect: false });
     setPending(false);
     if (res?.error) setError(t('invalid'));
-    else window.location.assign('/');
+    else window.location.assign(callbackUrl);
   }
 
   async function onMagic() {

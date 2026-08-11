@@ -12,6 +12,7 @@
  */
 import type { NextAuthConfig } from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
+import { authConfigBase } from '@/auth.config';
 import { getBaseClient } from '@/server/db/client';
 import { prismaExecutor } from '@/server/db/sql';
 import { authProviders } from './providers';
@@ -19,9 +20,8 @@ import { resolvePersonIdForUser } from './person-access';
 import { listAccessibleResidences } from './context';
 
 export const authConfig: NextAuthConfig = {
+  ...authConfigBase,
   adapter: PrismaAdapter(getBaseClient()),
-  session: { strategy: 'jwt' },
-  trustHost: true,
   providers: authProviders(),
   callbacks: {
     async jwt({ token, user, trigger, session }) {
