@@ -415,8 +415,12 @@ model Lot {
   reference          String // n° de lot, ex. "B3"
   type               LotType          @default(APPARTEMENT)
   floor              String?
+  surfaceM2          Int? // surface en m² (facultatif)
   quotePart          Int              @default(1) // tantièmes / pondération (v1 : non utilisé pour le tally)
   monthlyChargeMinor Int              @default(0) // charge mensuelle courante (centimes)
+  // Archivage (jamais de suppression physique dès qu'il existe un historique) :
+  // un lot rattaché ou porteur d'écritures financières est archivé, pas effacé.
+  archivedAt         DateTime?
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
   residence          Residence        @relation(fields: [residenceId], references: [id], onDelete: Cascade)

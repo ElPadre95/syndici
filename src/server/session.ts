@@ -2,21 +2,30 @@
  * Contexte de session côté serveur — le point d'entrée que TOUS les écrans
  * connectés utilisent (§4). Compose l'identité (`auth()` → personId), la liste
  * FRAÎCHE des résidences accessibles (jamais le JWT, qui peut être périmé après une
- * création), la résidence active (persistée en cookie, revalidée contre les
- * résidences accessibles) et le rôle effectif sur cette résidence.
+ * création), la résidence active et le rôle effectif sur cette résidence.
+ *
+ * SÉCURITÉ : le cookie de résidence active est traité comme une ENTRÉE NON FIABLE,
+ * au même titre qu'un paramètre d'URL forgé. La seule autorité sur « quelles
+ * résidences cette personne peut activer » est `listAccessibleResidences`
+ * (mandat ACTIF non expiré pour le staff, rattachement de lot courant pour un
+ * résident). Un cookie hors de cet ensemble est ignoré, sans erreur.
  */
 import { cookies } from 'next/headers';
 import { auth } from '@/auth';
 import { prismaExecutor } from '@/server/db/sql';
-import { getResidenceRole } from '@/server/auth/context';
+import { getResidenceRole, listAccessibleResidences } from '@/server/auth/context';
+import { resolveActiveResidenceId } from '@/server/auth/active-residence';
 import { listResidencesForPerson, type ResidenceListItem } from '@/server/residences/data';
 import type { AppRole } from '@/server/auth/permissions';
 
 export const ACTIVE_RESIDENCE_COOKIE = 'syndici.activeResidence';
 
+export { resolveActiveResidenceId };
+
 export interface SessionContext {
   personId: string;
   userLabel: string | null;
+  /** Résidences que la personne peut activer, nommées (pour le sélecteur d'en-tête). */
   residences: ResidenceListItem[];
   activeId: string | null;
   role: AppRole | null;
@@ -28,11 +37,18 @@ export async function getSessionContext(): Promise<SessionContext | null> {
   const personId = session?.user?.personId;
   if (!personId) return null;
 
-  const residences = await listResidencesForPerson(personId);
+  const exec = prismaExecutor();
+  const accessibleIds = await listAccessibleResidences(exec, personId);
+  // Liste d'affichage (staff) restreinte aux résidences réellement accessibles.
+  const managed = await listResidencesForPerson(personId);
+  const residences = managed.filter((r) => accessibleIds.includes(r.id));
+
   const store = await cookies();
-  const wanted = store.get(ACTIVE_RESIDENCE_COOKIE)?.value;
-  const activeId = residences.find((r) => r.id === wanted)?.id ?? residences[0]?.id ?? null;
-  const role = activeId ? await getResidenceRole(prismaExecutor(), personId, activeId) : null;
+  const activeId = resolveActiveResidenceId(
+    accessibleIds,
+    store.get(ACTIVE_RESIDENCE_COOKIE)?.value,
+  );
+  const role = activeId ? await getResidenceRole(exec, personId, activeId) : null;
   const userLabel = session.user?.name ?? session.user?.email ?? null;
 
   return { personId, userLabel, residences, activeId, role };

@@ -3,6 +3,7 @@ import { Building2, Plus } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
 import { getSessionContext } from '@/server/session';
+import { listResidencesForPerson } from '@/server/residences/data';
 import { focusResidenceAction } from '@/server/residences/actions';
 import { cn } from '@/lib/cn';
 
@@ -22,7 +23,9 @@ export default async function ResidencesPage({ params }: { params: Promise<{ loc
   const tMandate = await getTranslations('residences.mandate');
 
   const ctx = await getSessionContext();
-  const residences = ctx?.residences ?? [];
+  // Liste complète (historique inclus, mandats terminés) ; le sélecteur d'en-tête,
+  // lui, ne propose que les résidences activables.
+  const residences = ctx ? await listResidencesForPerson(ctx.personId) : [];
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">

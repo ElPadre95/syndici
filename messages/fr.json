@@ -630,5 +630,93 @@
       "label": "Résidence active",
       "none": "Aucune résidence"
     }
+  },
+  "lots": {
+    "type": {
+      "APPARTEMENT": "Appartement",
+      "VILLA": "Villa"
+    },
+    "list": {
+      "title": "Lots",
+      "subtitle": "{residence} · {count, plural, =0 {aucun lot} one {# lot} other {# lots}}",
+      "generateCta": "Générer les lots",
+      "addCta": "Ajouter un lot",
+      "colRef": "Réf.",
+      "colType": "Type",
+      "colFloor": "Étage",
+      "colSurface": "Surface",
+      "colQuote": "Quote-part",
+      "colCharge": "Charges",
+      "quotePartTotal": "Total des quotes-parts : {total} / 1000",
+      "quotePartWarning": "La somme des quotes-parts ({total}) n’est pas égale à 1000.",
+      "emptyTitle": "Aucun lot",
+      "emptyBody": "Générez les lots en série depuis le nombre d’unités, ou ajoutez-les un par un.",
+      "noActiveTitle": "Aucune résidence active",
+      "noActiveBody": "Sélectionnez ou créez une résidence pour gérer ses lots."
+    },
+    "generate": {
+      "title": "Générer les lots",
+      "intro": "Choisissez le schéma de référence. Un aperçu s’affiche avant toute création.",
+      "apartments": "Appartements",
+      "villas": "Villas",
+      "count": "Nombre",
+      "scheme": "Schéma de référence",
+      "schemeContinuous": "Numérotation continue (1, 2, 3…)",
+      "schemeFloor": "Par étage (A1, A2, B1…)",
+      "prefix": "Préfixe",
+      "prefixHint": "Optionnel, ex. « V » pour les villas.",
+      "floors": "Nombre d’étages / blocs",
+      "previewBtn": "Aperçu",
+      "previewTitle": "Aperçu",
+      "willCreate": "{count, plural, =0 {Aucune création} one {# lot sera créé} other {# lots seront créés}}",
+      "conflictsTitle": "Déjà existants (ignorés) :",
+      "duplicatesTitle": "Doublons dans la demande :",
+      "nothingToCreate": "Rien à créer : toutes les références existent déjà.",
+      "submit": "Créer ces lots",
+      "cancel": "Annuler",
+      "generatedOk": "{count, plural, =0 {Aucun lot créé} one {# lot créé} other {# lots créés}}",
+      "errors": {
+        "noGroups": "Indiquez au moins un lot à générer.",
+        "invalidCount": "Nombre invalide.",
+        "invalidFloors": "Indiquez un nombre d’étages valide.",
+        "invalidType": "Type invalide.",
+        "invalidScheme": "Schéma invalide.",
+        "no_active_residence": "Aucune résidence active.",
+        "forbidden": "Vous n’avez pas le droit de gérer les lots."
+      }
+    },
+    "form": {
+      "title": "Nouveau lot",
+      "editTitle": "Modifier le lot",
+      "reference": "Référence",
+      "type": "Type d’unité",
+      "floor": "Étage",
+      "floorOptional": "Étage (facultatif)",
+      "surface": "Surface (m²)",
+      "surfaceOptional": "Surface en m² (facultatif)",
+      "quotePart": "Quote-part (millièmes)",
+      "quotePartHint": "Convention : le total des lots vaut 1000.",
+      "charge": "Charges mensuelles (MAD)",
+      "chargeHint": "Laisser vide pour utiliser le défaut de la résidence.",
+      "submit": "Créer le lot",
+      "submitEdit": "Enregistrer",
+      "cancel": "Annuler",
+      "deleteVierge": "Supprimer",
+      "archive": "Archiver",
+      "dangerTitle": "Retirer ce lot",
+      "dangerHint": "Un lot avec historique est archivé (jamais supprimé). Un lot vierge est supprimé.",
+      "errors": {
+        "required": "Ce champ est requis.",
+        "invalidType": "Choisissez un type.",
+        "invalidSurface": "Surface invalide.",
+        "invalidQuote": "Quote-part invalide.",
+        "amountInvalid": "Montant invalide.",
+        "conflict": "Cette référence existe déjà dans la résidence.",
+        "server": "Une erreur est survenue. Réessayez.",
+        "not_found": "Lot introuvable.",
+        "no_active_residence": "Aucune résidence active.",
+        "forbidden": "Vous n’avez pas le droit de gérer les lots."
+      }
+    }
   }
 }

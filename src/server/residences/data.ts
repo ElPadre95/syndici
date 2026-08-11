@@ -62,6 +62,19 @@ export async function listResidencesForPerson(personId: string): Promise<Residen
   return items;
 }
 
+/** Métadonnées d'une résidence utiles à la génération de lots (A3). */
+export async function getResidenceBasics(
+  residenceId: string,
+): Promise<{ name: string; type: ResidenceType; defaultUnitsCount: number } | null> {
+  const r = await getBaseClient().residence.findUnique({
+    where: { id: residenceId },
+    select: { name: true, type: true, defaultUnitsCount: true },
+  });
+  return r
+    ? { name: r.name, type: r.type as ResidenceType, defaultUnitsCount: r.defaultUnitsCount }
+    : null;
+}
+
 /** Levée quand la personne n'a pas le droit de créer une résidence. */
 export class ResidenceAuthError extends Error {
   constructor() {

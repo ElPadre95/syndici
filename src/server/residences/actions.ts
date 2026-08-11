@@ -11,8 +11,10 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { auth } from '@/auth';
 import { routing } from '@/i18n/routing';
+import { prismaExecutor } from '@/server/db/sql';
+import { listAccessibleResidences } from '@/server/auth/context';
 import { validateResidenceInput, type CreateResidenceState } from './validation';
-import { createResidence, listResidencesForPerson, ResidenceAuthError } from './data';
+import { createResidence, ResidenceAuthError } from './data';
 import { ACTIVE_RESIDENCE_COOKIE } from '@/server/session';
 
 function resolveLocale(raw: FormDataEntryValue | null): string {
@@ -60,8 +62,9 @@ export async function setActiveResidenceAction(residenceId: string): Promise<voi
   const session = await auth();
   const personId = session?.user?.personId;
   if (!personId) return;
-  const residences = await listResidencesForPerson(personId);
-  if (!residences.some((r) => r.id === residenceId)) return;
+  // Autorité unique : le cookie ne peut viser qu'une résidence à mandat actif / lot courant.
+  const accessibleIds = await listAccessibleResidences(prismaExecutor(), personId);
+  if (!accessibleIds.includes(residenceId)) return;
   const store = await cookies();
   store.set(ACTIVE_RESIDENCE_COOKIE, residenceId, { httpOnly: true, sameSite: 'lax', path: '/' });
   revalidatePath('/', 'layout');

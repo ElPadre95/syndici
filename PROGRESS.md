@@ -17,8 +17,11 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
 - [x] **A2** — Créer une résidence (nom, adresse, ville, type, nb d'unités, charges, échéance).
       Crée l'organisation + le mandat si absent. La résidence apparaît dans une liste.
       Sélecteur de résidence active dans l'en-tête (persisté en cookie). Routes gardées + compte de dev.
-- [ ] **A3** — Créer les lots : un par un et en série depuis le nombre d'unités
+- [x] **A3** — Créer les lots : un par un et en série depuis le nombre d'unités
       (référence, type, étage, surface, quote-part, charges si ≠ défaut).
+      Génération avec schéma choisi (continu / par étage) + aperçu avant création, idempotente.
+      Modification, archivage (jamais de suppression si historique), total des quotes-parts + alerte 1000.
+      Tests d'isolation du cookie de résidence active (cookie = entrée non fiable).
 - [ ] **A4** — Liste des lots (écran principal du syndic) : référence, occupant, statut, montant ;
       recherche et filtres ; chaque ligne mène quelque part (pas de fausse ligne cliquable).
 - [ ] **A5** — Ajouter une personne à un lot (nom, e-mail, téléphone, pays, langue, rôle).

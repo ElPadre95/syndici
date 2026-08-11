@@ -31,6 +31,8 @@ export type Permission =
   // Lots & personnes
   | 'lot.view.all' // tous les lots de la résidence
   | 'lot.view.own' // ses propres lots
+  | 'lot.manage' // créer / générer / modifier / archiver des lots
+  | 'lot.delete' // supprimer physiquement un lot vierge (jamais s'il a un historique)
   | 'owner.identity.view' // voir l'identité d'un propriétaire (PII sensible)
   | 'resident.list' // lister les résidents (annuaire cabinet)
   | 'invitation.manage' // émettre / révoquer des codes d'invitation
@@ -73,6 +75,8 @@ const MATRIX: Record<AppRole, ReadonlySet<Permission>> = {
     'residence.delete',
     'member.manage',
     'lot.view.all',
+    'lot.manage',
+    'lot.delete',
     'owner.identity.view',
     'resident.list',
     'invitation.manage',
@@ -92,6 +96,7 @@ const MATRIX: Record<AppRole, ReadonlySet<Permission>> = {
   GESTIONNAIRE: new Set<Permission>([
     ...COMMON,
     'lot.view.all',
+    'lot.manage',
     'owner.identity.view',
     'resident.list',
     'invitation.manage',

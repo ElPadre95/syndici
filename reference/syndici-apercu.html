@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Syndici — aperçu tranche A</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --indigo:#4F6EF7; --indigo-soft:#EEF1FE;
+  --nuit:#0B1628;
+  --green:#1DB954; --green-soft:#E8F8ED;
+  --red:#E5484D;   --red-soft:#FDECEC;
+  --orange:#F5A524; --orange-soft:#FEF4E4;
+  --bg:#F5F5F7; --card:#FFFFFF;
+  --label-1:#0B1628; --label-2:#3A3A3C; --label-3:#8E8E93; --label-4:#C7C7CC;
+  --sep:#E5E5EA;
+  --r-s:8px; --r-m:12px; --r-l:16px;
+  --sh:0 1px 2px rgba(11,22,40,.06), 0 8px 24px rgba(11,22,40,.04);
+  --body:'Plus Jakarta Sans',system-ui,sans-serif;
+  --display:'DM Serif Display',Georgia,serif;
+}
+html[lang="ar"]{ --body:'Noto Sans Arabic','Plus Jakarta Sans',system-ui,sans-serif; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);background:var(--bg);color:var(--label-1);-webkit-font-smoothing:antialiased;font-size:14px}
+.app{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+
+/* ---------- notice ---------- */
+.notice{grid-column:1/-1;background:var(--nuit);color:#fff;padding:10px 22px;font-size:12.5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.notice b{font-weight:700}
+.notice span{color:#9AA6BC}
+
+/* ---------- sidebar ---------- */
+aside{background:var(--card);border-inline-end:1px solid var(--sep);padding:18px 12px;display:flex;flex-direction:column;gap:2px}
+.brand{font-family:var(--display);font-size:23px;padding:4px 10px 18px;letter-spacing:-.01em}
+.brand i{color:var(--indigo);font-style:normal}
+.navlabel{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--label-4);text-transform:uppercase;padding:16px 10px 6px}
+.nav{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-s);color:var(--label-2);font-weight:500;cursor:pointer;border:0;background:none;font-family:inherit;font-size:14px;width:100%;text-align:start}
+.nav:hover{background:var(--bg)}
+.nav[aria-current="true"]{background:var(--indigo-soft);color:var(--indigo);font-weight:600}
+.nav.soon{color:var(--label-4);cursor:default}
+.nav.soon:hover{background:none}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none;opacity:.55}
+.tag{margin-inline-start:auto;font-size:10px;font-weight:700;color:var(--label-4);border:1px solid var(--sep);border-radius:99px;padding:1px 6px}
+
+/* ---------- main ---------- */
+main{padding:26px 30px 60px;min-width:0}
+.head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-family:var(--display);font-size:31px;font-weight:400;letter-spacing:-.015em;line-height:1.15}
+.sub{color:var(--label-3);font-size:13px;margin-top:3px}
+.spacer{flex:1}
+.btn{border:0;font-family:inherit;font-size:13.5px;font-weight:600;padding:9px 15px;border-radius:var(--r-s);cursor:pointer;background:var(--indigo);color:#fff}
+.btn.ghost{background:var(--card);color:var(--label-1);border:1px solid var(--sep)}
+.btn.sm{padding:6px 11px;font-size:12.5px}
+
+.card{background:var(--card);border:1px solid var(--sep);border-radius:var(--r-l);box-shadow:var(--sh)}
+.pad{padding:20px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.kpi .n{font-size:29px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.kpi .l{color:var(--label-3);font-size:12.5px;margin-top:3px}
+.kpi .n.g{color:var(--green)} .kpi .n.r{color:var(--red)} .kpi .n.i{color:var(--indigo)}
+
+/* ---------- toolbar ---------- */
+.tools{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.search{flex:1;min-width:180px;border:1px solid var(--sep);background:var(--card);border-radius:var(--r-s);padding:9px 13px;font-family:inherit;font-size:13.5px}
+.chip{border:1px solid var(--sep);background:var(--card);border-radius:99px;padding:6px 13px;font-size:12.5px;font-weight:600;color:var(--label-2);cursor:pointer;font-family:inherit}
+.chip[aria-pressed="true"]{background:var(--nuit);color:#fff;border-color:var(--nuit)}
+
+/* ---------- lot rows ---------- */
+.rows{overflow:hidden}
+.row{display:grid;grid-template-columns:60px 1fr 210px 150px;gap:14px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--sep);cursor:pointer;background:none;border-inline:0;border-block-start:0;width:100%;text-align:start;font-family:inherit}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--indigo-soft)}
+.ref{font-weight:800;font-size:13px;background:var(--bg);border-radius:var(--r-s);padding:7px 0;text-align:center;letter-spacing:.02em}
+.who{min-width:0}
+.o,.t{display:flex;align-items:center;gap:7px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.o{font-weight:600}
+.t{color:var(--label-3);margin-top:2px}
+.role{font-size:9.5px;font-weight:800;letter-spacing:.06em;padding:2px 5px;border-radius:4px;flex:none}
+.role.own{background:var(--indigo-soft);color:var(--indigo)}
+.role.ten{background:var(--bg);color:var(--label-3)}
+.flag{font-size:11px;color:var(--label-4);font-weight:600;flex:none}
+.states{display:flex;gap:6px;flex-wrap:wrap}
+.st{font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;white-space:nowrap}
+.st.paid{background:var(--green-soft);color:#12813C}
+.st.part{background:var(--orange-soft);color:#96620A}
+.st.uns{background:var(--red-soft);color:#B4292D}
+.st.late{background:var(--nuit);color:#fff}
+.st.up{background:var(--bg);color:var(--label-3)}
+.amt{text-align:end;font-weight:700;font-variant-numeric:tabular-nums}
+.amt small{display:block;font-weight:500;color:var(--label-3);font-size:11.5px}
+.vac{color:var(--label-4);font-style:italic;font-size:12.5px}
+
+/* ---------- forms ---------- */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:15px;max-width:660px}
+.f{display:flex;flex-direction:column;gap:6px}
+.f.wide{grid-column:1/-1}
+label{font-size:12px;font-weight:700;color:var(--label-2);letter-spacing:.01em}
+input,select{border:1px solid var(--sep);border-radius:var(--r-s);padding:9px 12px;font-family:inherit;font-size:13.5px;background:var(--card);color:var(--label-1)}
+input:focus,select:focus,.search:focus{outline:2px solid var(--indigo);outline-offset:1px}
+.hint{font-size:11.5px;color:var(--label-3)}
+.seg{display:flex;gap:0;border:1px solid var(--sep);border-radius:var(--r-s);overflow:hidden}
+.seg button{flex:1;border:0;background:var(--card);padding:9px;font-family:inherit;font-size:13px;font-weight:600;color:var(--label-2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--indigo);color:#fff}
+.actions{grid-column:1/-1;display:flex;gap:9px;padding-top:6px}
+
+/* ---------- fiche ---------- */
+.two{display:grid;grid-template-columns:1.6fr 1fr;gap:18px;align-items:start}
+.sec-t{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--label-4);margin-bottom:12px}
+.tl{position:relative;padding-inline-start:18px}
+.tl::before{content:"";position:absolute;inset-block:5px;inset-inline-start:4px;width:2px;background:var(--sep)}
+.ev{position:relative;padding-block:9px}
+.ev::before{content:"";position:absolute;inset-inline-start:-18px;top:14px;width:10px;height:10px;border-radius:50%;background:var(--card);border:2px solid var(--indigo)}
+.ev.old::before{border-color:var(--label-4)}
+.ev b{font-size:13.5px}
+.ev p{font-size:12px;color:var(--label-3);margin-top:1px}
+.line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--sep);font-size:13px}
+.line:last-child{border:0}
+.line span{color:var(--label-3)}
+.line b{font-variant-numeric:tabular-nums}
+.tot{border-top:2px solid var(--nuit);margin-top:4px;padding-top:11px;font-weight:800}
+
+/* ---------- invite ---------- */
+.code{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:25px;font-weight:700;letter-spacing:.14em;background:var(--nuit);color:#fff;padding:16px 20px;border-radius:var(--r-m);text-align:center}
+.wa{display:flex;align-items:center;gap:10px;background:var(--green-soft);border:1px solid #BEEBCB;border-radius:var(--r-m);padding:13px 15px;margin-top:14px}
+.wa b{color:#12813C;font-size:13px}
+.wa p{font-size:12px;color:var(--label-2);margin-top:2px}
+.preview{background:var(--bg);border-radius:var(--r-m);padding:14px;font-size:13px;line-height:1.55;margin-top:14px;color:var(--label-2)}
+
+/* ---------- import ---------- */
+.drop{border:2px dashed var(--label-4);border-radius:var(--r-m);padding:34px;text-align:center;color:var(--label-3);font-size:13.5px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px}
+th{text-align:start;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--label-4);padding:8px 10px;border-bottom:1px solid var(--sep)}
+td{padding:9px 10px;border-bottom:1px solid var(--sep)}
+tr.bad td{background:var(--red-soft)}
+.why{font-size:11.5px;color:#B4292D;font-weight:600}
+
+.screen{display:none}
+.screen.on{display:block}
+.empty{text-align:center;padding:46px 20px;color:var(--label-3)}
+.empty b{display:block;font-size:15px;color:var(--label-1);margin-bottom:5px}
+
+.langbar{display:flex;gap:6px;margin-top:auto;padding-top:16px;border-top:1px solid var(--sep)}
+.langbar button{flex:1;border:1px solid var(--sep);background:var(--card);border-radius:var(--r-s);padding:7px;font-family:inherit;font-weight:700;font-size:12px;cursor:pointer;color:var(--label-2)}
+.langbar button[aria-pressed="true"]{background:var(--nuit);color:#fff;border-color:var(--nuit)}
+
+@media(max-width:860px){
+  .app{grid-template-columns:1fr}
+  aside{flex-direction:row;overflow-x:auto;align-items:center;border-inline-end:0;border-block-end:1px solid var(--sep)}
+  .brand,.navlabel,.tag,.langbar{display:none}
+  .nav{width:auto;white-space:nowrap}
+  .row{grid-template-columns:52px 1fr;row-gap:8px}
+  .states,.amt{grid-column:2}
+  .amt{text-align:start}
+  .two,.form{grid-template-columns:1fr}
+  main{padding:18px}
+}
+@media(prefers-reduced-motion:no-preference){
+  .screen.on{animation:in .22s ease}
+  @keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="notice">
+  <b>Maquette</b>
+  <span>Ceci n'est pas l'app actuelle — l'app réelle n'a que 2 écrans de connexion. C'est ce que la tranche A doit produire.</span>
+  <span style="margin-inline-start:auto">Bascule FR / العربية en bas à gauche pour voir l'inversion RTL.</span>
+</div>
+
+<aside>
+  <div class="brand">Syndici<i>.</i></div>
+
+  <div class="navlabel">Tranche A</div>
+  <button class="nav" aria-current="true" data-go="lots"><span class="dot"></span>Lots<span class="tag">A4</span></button>
+  <button class="nav" data-go="residence"><span class="dot"></span>Résidence<span class="tag">A2</span></button>
+  <button class="nav" data-go="fiche"><span class="dot"></span>Fiche lot<span class="tag">A5</span></button>
+  <button class="nav" data-go="invite"><span class="dot"></span>Inviter<span class="tag">A6</span></button>
+  <button class="nav" data-go="import"><span class="dot"></span>Import Excel<span class="tag">A7</span></button>
+
+  <div class="navlabel">Plus tard</div>
+  <button class="nav soon"><span class="dot"></span>Charges<span class="tag">B</span></button>
+  <button class="nav soon"><span class="dot"></span>Paiements<span class="tag">B</span></button>
+  <button class="nav soon"><span class="dot"></span>Dépenses<span class="tag">D</span></button>
+  <button class="nav soon"><span class="dot"></span>Tableau de bord<span class="tag">D</span></button>
+  <button class="nav soon"><span class="dot"></span>Relances<span class="tag">E</span></button>
+
+  <div class="langbar">
+    <button data-lang="fr" aria-pressed="true">FR</button>
+    <button data-lang="ar" aria-pressed="false">العربية</button>
+  </div>
+</aside>
+
+<main>
+
+<!-- ============ A4 : LOTS ============ -->
+<section class="screen on" id="lots">
+  <div class="head">
+    <div>
+      <h1>Lots</h1>
+      <div class="sub">Résidence Al Firdaous · Casablanca · mixte · 24 lots</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn ghost">Ajouter un lot</button>
+    <button class="btn">Ajouter une personne</button>
+  </div>
+
+  <div class="grid3">
+    <div class="card pad kpi"><div class="n">24</div><div class="l">Lots · 18 appts, 6 villas</div></div>
+    <div class="card pad kpi"><div class="n i">9</div><div class="l">Propriétaires à l'étranger</div></div>
+    <div class="card pad kpi"><div class="n g">17</div><div class="l">Soldés ce mois</div></div>
+    <div class="card pad kpi"><div class="n r">4</div><div class="l">En retard</div></div>
+  </div>
+
+  <div class="tools">
+    <input class="search" placeholder="Rechercher un lot, un propriétaire, un locataire…">
+    <button class="chip" aria-pressed="true">Tous</button>
+    <button class="chip" aria-pressed="false">En retard</button>
+    <button class="chip" aria-pressed="false">Loués</button>
+    <button class="chip" aria-pressed="false">Vacants</button>
+    <button class="chip" aria-pressed="false">Propriétaire à l'étranger</button>
+  </div>
+
+  <div class="card rows">
+    <button class="row" data-go="fiche">
+      <span class="ref">A1</span>
+      <span class="who">
+        <span class="o"><span class="role own">PROP</span>Karim Benali</span>
+        <span class="t">Occupé par le propriétaire</span>
+      </span>
+      <span class="states"><span class="st paid">Soldé</span></span>
+      <span class="amt">650,00 MAD<small>Payé le 8 juin</small></span>
+    </button>
+
+    <button class="row" data-go="fiche">
+      <span class="ref">B3</span>
+      <span class="who">
+        <span class="o"><span class="role own">PROP</span>Sara Tahiri<span class="flag">Lyon · FR</span></span>
+        <span class="t"><span class="role ten">LOC</span>Omar El Fassi · charges déléguées</span>
+      </span>
+      <span class="states"><span class="st part">Partiel</span><span class="st late">Retard 5 j</span></span>
+      <span class="amt">650,00 MAD<small>300,00 reçus</small></span>
+    </button>
+
+    <button class="row" data-go="fiche">
+      <span class="ref">V1</span>
+      <span class="who">
+        <span class="o"><span class="role own">PROP</span>Youssef Chraibi<span class="flag">Bruxelles · BE</span></span>
+        <span class="t vac">Vacant depuis le 1er mai</span>
+      </span>
+      <span class="states"><span class="st uns">Non réglé</span><span class="st late">Retard 8 j</span></span>
+      <span class="amt">1 200,00 MAD<small>Villa</small></span>
+    </button>
+
+    <button class="row" data-go="fiche">
+      <span class="ref">C3</span>
+      <span class="who">
+        <span class="o"><span class="role own">PROP</span>Fatima Amrani</span>
+        <span class="t"><span class="role ten">LOC</span>Leila Berrada</span>
+      </span>
+      <span class="states"><span class="st paid">Soldé</span></span>
+      <span class="amt">650,00 MAD<small>Payé le 7 juin</small></span>
+    </button>
+
+    <button class="row" data-go="fiche">
+      <span class="ref">E2</span>
+      <span class="who">
+        <span class="o"><span class="role own">PROP</span>Mohammed Ziani<span class="flag">Amsterdam · NL</span></span>
+        <span class="t">Occupé par le propriétaire</span>
+      </span>
+      <span class="states"><span class="st up">À venir</span></span>
+      <span class="amt">650,00 MAD<small>Échéance 1er juillet</small></span>
+    </button>
+
+    <button class="row" data-go="fiche">
+      <span class="ref">V4</span>
+      <span class="who">
+        <span class="o"><span class="role own">PROP</span>Amine Moussaoui<span class="flag">Paris · FR</span></span>
+        <span class="t"><span class="role ten">LOC</span>Hicham Ouazzani</span>
+      </span>
+      <span class="states"><span class="st uns">Non réglé</span><span class="st late">Retard 12 j</span></span>
+      <span class="amt">1 200,00 MAD<small>Villa</small></span>
+    </button>
+  </div>
+</section>
+
+<!-- ============ A2 : RÉSIDENCE ============ -->
+<section class="screen" id="residence">
+  <div class="head"><div>
+    <h1>Nouvelle résidence</h1>
+    <div class="sub">Remplace la création automatique du prototype, qui fabriquait une résidence vide.</div>
+  </div></div>
+  <div class="card pad">
+    <div class="form">
+      <div class="f wide"><label>Nom de la résidence</label><input value="Résidence Al Firdaous"></div>
+      <div class="f wide"><label>Adresse</label><input value="12, boulevard Zerktouni"></div>
+      <div class="f"><label>Ville</label><input value="Casablanca"></div>
+      <div class="f"><label>Nombre d'unités</label><input value="24" type="number"></div>
+      <div class="f wide">
+        <label>Type de résidence</label>
+        <div class="seg">
+          <button aria-pressed="false">Immeuble</button>
+          <button aria-pressed="false">Lotissement de villas</button>
+          <button aria-pressed="true">Mixte</button>
+        </div>
+        <span class="hint">Le type change le vocabulaire de l'interface et les catégories de dépenses proposées.</span>
+      </div>
+      <div class="f"><label>Charges mensuelles · appartement</label><input value="650,00 MAD"></div>
+      <div class="f"><label>Charges mensuelles · villa</label><input value="1 200,00 MAD"></div>
+      <div class="f wide"><label>Échéance</label><select><option>1er du mois</option><option>5 du mois</option><option>10 du mois</option></select></div>
+      <div class="actions">
+        <button class="btn">Créer la résidence</button>
+        <button class="btn ghost">Annuler</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ A5 : FICHE ============ -->
+<section class="screen" id="fiche">
+  <div class="head">
+    <div>
+      <h1>Lot B3</h1>
+      <div class="sub">Appartement · 2e étage · 78 m² · quote-part 42/1000</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn ghost">Terminer un rattachement</button>
+    <button class="btn">Enregistrer un paiement</button>
+  </div>
+
+  <div class="two">
+    <div class="card pad">
+      <div class="sec-t">Occupants — historisé, jamais supprimé</div>
+      <div class="tl">
+        <div class="ev">
+          <b>Sara Tahiri · propriétaire</b>
+          <p>Depuis le 3 mars 2019 · Lyon, France · préfère le français</p>
+        </div>
+        <div class="ev">
+          <b>Omar El Fassi · locataire</b>
+          <p>Depuis le 1er septembre 2024 · redevable des charges par délégation</p>
+        </div>
+        <div class="ev old">
+          <b>Nadia Alaoui · locataire</b>
+          <p>Du 1er juin 2021 au 31 août 2024 · rattachement terminé</p>
+        </div>
+      </div>
+      <div class="preview" style="margin-top:18px">
+        <b>Ce qu'Omar voit de son côté :</b> son lot, ses quittances, le signalement d'incident, les actualités.
+        Il ne voit ni les dépenses, ni les votes, ni le nom de Sara. Le mur est étanche et testé.
+      </div>
+    </div>
+
+    <div class="card pad">
+      <div class="sec-t">Compte du lot · juin 2026</div>
+      <div class="line"><span>Solde reporté</span><b>0,00</b></div>
+      <div class="line"><span>Appel de charges · juin</span><b>650,00</b></div>
+      <div class="line"><span>Espèces · reçu 2026-0034</span><b>−200,00</b></div>
+      <div class="line"><span>Espèces · reçu 2026-0041</span><b>−100,00</b></div>
+      <div class="line"><span>Frais de retard</span><b>0,00</b></div>
+      <div class="line tot"><span>Reste dû</span><b>350,00 MAD</b></div>
+      <div class="states" style="margin-top:14px">
+        <span class="st part">Partiel</span><span class="st late">Retard 5 j</span>
+      </div>
+      <div class="hint" style="margin-top:10px">Les deux états sont indépendants : un partiel échu est partiel <em>et</em> en retard.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ A6 : INVITER ============ -->
+<section class="screen" id="invite">
+  <div class="head"><div>
+    <h1>Inviter Sara Tahiri</h1>
+    <div class="sub">Propriétaire du lot B3 · rattachement actif vérifié</div>
+  </div></div>
+  <div class="two">
+    <div class="card pad">
+      <div class="sec-t">Code d'accès</div>
+      <div class="code">K7QM-R4XH-9TVB</div>
+      <div class="hint" style="margin-top:11px">12 caractères, sans 0/O ni 1/I/l. Usage unique. Expire dans 30 jours. Ne peut être émis que vers une personne déjà rattachée à un lot.</div>
+      <div class="wa">
+        <div>
+          <b>Envoyer par WhatsApp</b>
+          <p>Message pré-rempli en français — la langue préférée de Sara.</p>
+        </div>
+        <button class="btn sm" style="margin-inline-start:auto">Ouvrir</button>
+      </div>
+    </div>
+    <div class="card pad">
+      <div class="sec-t">Aperçu du message</div>
+      <div class="preview">
+        Bonjour Sara,<br><br>
+        Votre espace propriétaire pour le lot B3 de la Résidence Al Firdaous est prêt.<br><br>
+        Votre code : <b>K7QM-R4XH-9TVB</b><br>
+        Créez votre accès ici : syndici.ma/invite<br><br>
+        Vous y verrez vos charges, vos reçus et les dépenses de la résidence.
+      </div>
+      <div class="hint" style="margin-top:12px">Le code ne révèle aucune donnée personnelle avant activation — la faille du prototype, qui préremplissait l'e-mail.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ A7 : IMPORT ============ -->
+<section class="screen" id="import">
+  <div class="head"><div>
+    <h1>Import Excel</h1>
+    <div class="sub">Sans ça, aucun syndic ne saisira 60 lots à la main. C'est de l'acquisition, pas du confort.</div>
+  </div></div>
+  <div class="card pad">
+    <div class="drop">Déposez un fichier .xlsx ou .csv<br><span class="hint">Colonnes attendues : référence, type, étage, surface, quote-part, propriétaire, e-mail, téléphone, pays, locataire</span></div>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap">
+      <b style="font-size:13.5px">lots-al-firdaous.xlsx</b>
+      <span class="st paid">21 lignes prêtes</span>
+      <span class="st uns">3 rejetées</span>
+      <div class="spacer"></div>
+      <button class="btn">Importer les 21 lignes valides</button>
+    </div>
+    <table>
+      <thead><tr><th>Réf.</th><th>Type</th><th>Propriétaire</th><th>Locataire</th><th>Charges</th><th>État</th></tr></thead>
+      <tbody>
+        <tr><td><b>A1</b></td><td>Appartement</td><td>Karim Benali</td><td>—</td><td>650,00</td><td><span class="st paid">Prêt</span></td></tr>
+        <tr><td><b>B3</b></td><td>Appartement</td><td>Sara Tahiri</td><td>Omar El Fassi</td><td>650,00</td><td><span class="st paid">Prêt</span></td></tr>
+        <tr class="bad"><td><b>B3</b></td><td>Appartement</td><td>Hind Sekkat</td><td>—</td><td>650,00</td><td><span class="why">Référence B3 en doublon</span></td></tr>
+        <tr><td><b>V1</b></td><td>Villa</td><td>Youssef Chraibi</td><td>—</td><td>1 200,00</td><td><span class="st paid">Prêt</span></td></tr>
+        <tr class="bad"><td><b>V2</b></td><td>Villa</td><td>—</td><td>Rachid Idrissi</td><td>1 200,00</td><td><span class="why">Locataire sans propriétaire</span></td></tr>
+        <tr class="bad"><td><b>C7</b></td><td>Appartement</td><td>Nabil Fassi</td><td>—</td><td>six cents</td><td><span class="why">Montant illisible</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const nav = document.querySelectorAll('[data-go]');
+nav.forEach(b => b.addEventListener('click', () => {
+  const id = b.dataset.go;
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+  document.querySelectorAll('aside .nav').forEach(n => n.setAttribute('aria-current', n.dataset.go === id ? 'true' : 'false'));
+  window.scrollTo({top:0});
+}));
+
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('.chip').forEach(o => o.setAttribute('aria-pressed','false'));
+  c.setAttribute('aria-pressed','true');
+}));
+
+document.querySelectorAll('.seg button').forEach(s => s.addEventListener('click', () => {
+  s.parentElement.querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed','false'));
+  s.setAttribute('aria-pressed','true');
+}));
+
+document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => {
+  const l = b.dataset.lang;
+  document.documentElement.lang = l;
+  document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-lang]').forEach(o => o.setAttribute('aria-pressed', o === b ? 'true' : 'false'));
+}));
+</script>
+</body>
+</html>

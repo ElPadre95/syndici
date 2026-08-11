@@ -627,5 +627,93 @@
       "label": "الإقامة النشطة",
       "none": "لا توجد إقامة"
     }
+  },
+  "lots": {
+    "type": {
+      "APPARTEMENT": "شقة",
+      "VILLA": "فيلا"
+    },
+    "list": {
+      "title": "العقارات",
+      "subtitle": "{residence} · {count, plural, =0 {لا عقار} one {# عقار} other {# عقارات}}",
+      "generateCta": "توليد العقارات",
+      "addCta": "إضافة عقار",
+      "colRef": "المرجع",
+      "colType": "النوع",
+      "colFloor": "الطابق",
+      "colSurface": "المساحة",
+      "colQuote": "الحصة",
+      "colCharge": "الواجبات",
+      "quotePartTotal": "مجموع الحصص: {total} / 1000",
+      "quotePartWarning": "مجموع الحصص ({total}) لا يساوي 1000.",
+      "emptyTitle": "لا يوجد عقار",
+      "emptyBody": "ولّد العقارات دفعة واحدة انطلاقًا من عدد الوحدات، أو أضفها واحدًا تلو الآخر.",
+      "noActiveTitle": "لا توجد إقامة نشطة",
+      "noActiveBody": "اختر أو أنشئ إقامة لإدارة عقاراتها."
+    },
+    "generate": {
+      "title": "توليد العقارات",
+      "intro": "اختر نظام المراجع. تظهر معاينة قبل أي إنشاء.",
+      "apartments": "الشقق",
+      "villas": "الفيلات",
+      "count": "العدد",
+      "scheme": "نظام المرجع",
+      "schemeContinuous": "ترقيم متسلسل (1، 2، 3…)",
+      "schemeFloor": "حسب الطابق (A1، A2، B1…)",
+      "prefix": "بادئة",
+      "prefixHint": "اختياري، مثل «V» للفيلات.",
+      "floors": "عدد الطوابق / الكتل",
+      "previewBtn": "معاينة",
+      "previewTitle": "معاينة",
+      "willCreate": "{count, plural, =0 {لا إنشاء} one {سيُنشأ # عقار} other {ستُنشأ # عقارات}}",
+      "conflictsTitle": "موجودة سلفًا (متجاهَلة):",
+      "duplicatesTitle": "مكرّرة داخل الطلب:",
+      "nothingToCreate": "لا شيء لإنشائه: كل المراجع موجودة سلفًا.",
+      "submit": "إنشاء هذه العقارات",
+      "cancel": "إلغاء",
+      "generatedOk": "{count, plural, =0 {لم يُنشأ أي عقار} one {أُنشئ # عقار} other {أُنشئت # عقارات}}",
+      "errors": {
+        "noGroups": "حدّد عقارًا واحدًا على الأقل للتوليد.",
+        "invalidCount": "عدد غير صالح.",
+        "invalidFloors": "حدّد عدد طوابق صالحًا.",
+        "invalidType": "نوع غير صالح.",
+        "invalidScheme": "نظام غير صالح.",
+        "no_active_residence": "لا توجد إقامة نشطة.",
+        "forbidden": "لا تملك صلاحية إدارة العقارات."
+      }
+    },
+    "form": {
+      "title": "عقار جديد",
+      "editTitle": "تعديل العقار",
+      "reference": "المرجع",
+      "type": "نوع الوحدة",
+      "floor": "الطابق",
+      "floorOptional": "الطابق (اختياري)",
+      "surface": "المساحة (م²)",
+      "surfaceOptional": "المساحة بالمتر المربع (اختياري)",
+      "quotePart": "الحصة (بالألف)",
+      "quotePartHint": "العُرف: مجموع الحصص يساوي 1000.",
+      "charge": "الواجبات الشهرية (درهم)",
+      "chargeHint": "اتركه فارغًا لاستعمال القيمة الافتراضية للإقامة.",
+      "submit": "إنشاء العقار",
+      "submitEdit": "حفظ",
+      "cancel": "إلغاء",
+      "deleteVierge": "حذف",
+      "archive": "أرشفة",
+      "dangerTitle": "إزالة هذا العقار",
+      "dangerHint": "العقار ذو السجل يُؤرشَف (لا يُحذف). العقار الفارغ يُحذف.",
+      "errors": {
+        "required": "هذا الحقل مطلوب.",
+        "invalidType": "اختر نوعًا.",
+        "invalidSurface": "مساحة غير صالحة.",
+        "invalidQuote": "حصة غير صالحة.",
+        "amountInvalid": "مبلغ غير صالح.",
+        "conflict": "هذا المرجع موجود سلفًا في الإقامة.",
+        "server": "حدث خطأ. حاول مجددًا.",
+        "not_found": "العقار غير موجود.",
+        "no_active_residence": "لا توجد إقامة نشطة.",
+        "forbidden": "لا تملك صلاحية إدارة العقارات."
+      }
+    }
   }
 }
