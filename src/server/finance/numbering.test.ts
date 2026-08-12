@@ -6,11 +6,11 @@ import {
   type NumberSeries,
 } from './numbering';
 import { freshDb, insertResidence, insertPayment } from '@/test/pglite';
-import type { PGlite } from '@electric-sql/pglite';
+import type { TestExec } from '@/test/pglite';
 
 // Runs the exact allocation SQL used by the (private) allocator.
 async function alloc(
-  db: { query: PGlite['query'] },
+  db: TestExec,
   residenceId: string,
   exercice: number,
   series: NumberSeries,

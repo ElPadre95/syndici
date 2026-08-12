@@ -11,9 +11,9 @@ import {
   insertLot,
   insertLotAttachment,
 } from '@/test/pglite';
-import type { PGlite } from '@electric-sql/pglite';
+import type { TestExec } from '@/test/pglite';
 
-async function activeAttachments(db: PGlite, residenceId: string, lotId: string) {
+async function activeAttachments(db: TestExec, residenceId: string, lotId: string) {
   const res = await db.query<{ personId: string; role: string }>(
     'SELECT "personId", role FROM "LotAttachment" WHERE "residenceId"=$1 AND "lotId"=$2 AND "endDate" IS NULL',
     [residenceId, lotId],
@@ -118,7 +118,10 @@ describe('rattachements — unicité du rôle actif (chevauchement refusé, vent
     ).rejects.toThrow();
 
     // vente : on termine le premier, puis on rattache le nouveau (sans trou)
-    await db.query('UPDATE "LotAttachment" SET "endDate"=$2 WHERE id=$1', ['o1', '2026-01-31']);
+    await db.query('UPDATE "LotAttachment" SET "endDate"=$2::date WHERE id=$1', [
+      'o1',
+      '2026-01-31',
+    ]);
     await insertLotAttachment(db, {
       id: 'o2',
       residenceId: 'r1',

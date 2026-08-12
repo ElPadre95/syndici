@@ -17,6 +17,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:pg": "tsx scripts/test-pg.ts",
     "check": "npm run typecheck && npm run lint && npm run lint:css && npm run test",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",

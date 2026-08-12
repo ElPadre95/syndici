@@ -57,6 +57,31 @@ Règles non négociables du projet. Elles sont, autant que possible, **appliqué
   dans le rendu — correctif structurel identifié par l'audit du prototype.
 - (Le modèle de données Prisma fera l'objet d'une étape dédiée ; `src/server/` est déjà réservé.)
 
+## 5 bis. SQL brut : typer explicitement les paramètres
+
+Postgres n'applique **aucune conversion implicite** d'un paramètre `text` vers `timestamp`,
+`date`, un `enum`, etc. PGlite (utilisé par le gate) est plus tolérant : un SQL brut mal typé
+peut passer les tests et **casser en production**. C'est arrivé une fois :
+
+```ts
+// ❌ Cassé sur Postgres réel — PGlite l'acceptait
+`INSERT INTO "InvitationCode" (..., "expiresAt", ...) VALUES (..., $6, ...)`
+// → ERROR 42804: column "expiresAt" is of type timestamp but expression is of type text
+
+// ✅ Correct — cast explicite sur chaque paramètre non-textuel
+`INSERT INTO "InvitationCode" (..., "expiresAt", ...) VALUES (..., $6::timestamp, ...)`;
+```
+
+Règle : **dans tout SQL brut** (production _et_ fixtures de test), tout paramètre `$n` visant une
+colonne `timestamp` / `date` / un `enum` (ex. `$4::"AttachmentRole"`, `$3::"NumberSeries"`) doit
+porter un cast `::type` explicite. Les littéraux dans le texte SQL (`'PENDING'`, `now()`,
+`CURRENT_DATE`) n'en ont pas besoin ; les colonnes `text` non plus.
+
+Filet de sécurité : `npm run test:pg` rejoue **les mêmes tests d'invariants** contre un vrai
+Postgres (base jetable `<db>_test`, client Prisma dédié qui reproduit le binding de production)
+au lieu de PGlite. À lancer quand on touche à du SQL brut : c'est la seule façon de débusquer
+cette classe de divergence.
+
 ## 6. `reference/` n'est jamais importé
 
 - `reference/` (prototype audité + audit) est de la **documentation**, pas du code source.
@@ -82,6 +107,8 @@ reference/            LECTURE SEULE, hors build (prototype + audit)
 
 ## 8. Outillage
 
-- `npm run check` = `typecheck` + `lint` (ESLint) + `lint:css` (stylelint) + `test` (Vitest).
+- `npm run check` = `typecheck` + `lint` (ESLint) + `lint:css` (stylelint) + `test` (Vitest, PGlite).
+- `npm run test:pg` = rejoue les tests d'invariants DB contre un **Postgres réel** (voir §5 bis).
+  Pré-requis : un Postgres joignable via `DATABASE_URL` (le serveur de dev suffit) + droit `CREATEDB`.
 - TypeScript en mode **strict** (+ `noUncheckedIndexedAccess`).
 - Aucun emoji dans l'UI produite ; icônes via `lucide-react`. Composants maison (pas de librairie UI).

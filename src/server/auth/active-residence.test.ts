@@ -5,7 +5,7 @@
  * Ces tests échouent si quelqu'un contourne la revalidation plus tard.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
-import type { PGlite } from '@electric-sql/pglite';
+import type { TestDb } from '@/test/pglite';
 import {
   freshDb,
   pgliteExecutor,
@@ -57,7 +57,7 @@ describe('listAccessibleResidences — autorité de revalidation (vrai Postgres)
     resident: 'p-resident',
     lotR: 'lot-r',
   };
-  let db: PGlite;
+  let db: TestDb;
   let exec: SqlExecutor;
 
   beforeAll(async () => {

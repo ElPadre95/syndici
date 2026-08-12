@@ -11,9 +11,9 @@ import {
   insertPerson,
   insertLotAttachment,
 } from '@/test/pglite';
-import type { PGlite } from '@electric-sql/pglite';
+import type { TestExec } from '@/test/pglite';
 
-async function activeRole(db: PGlite, lotId: string, personId: string): Promise<string | null> {
+async function activeRole(db: TestExec, lotId: string, personId: string): Promise<string | null> {
   const res = await db.query<{ role: string }>(
     'SELECT role FROM "LotAttachment" WHERE "lotId"=$1 AND "personId"=$2 AND "endDate" IS NULL LIMIT 1',
     [lotId, personId],

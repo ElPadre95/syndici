@@ -16,7 +16,7 @@ const activeOwner = (
   chargePayer = false,
 ) =>
   db.query(
-    'INSERT INTO "LotAttachment"(id, "residenceId", "lotId", "personId", role, "isChargePayer", "startDate") VALUES ($1,$2,$3,$4,$5,$6,now())',
+    'INSERT INTO "LotAttachment"(id, "residenceId", "lotId", "personId", role, "isChargePayer", "startDate") VALUES ($1,$2,$3,$4,$5::"AttachmentRole",$6,now())',
     [id, 'r1', lotId, personId, role, chargePayer],
   );
 
@@ -58,7 +58,7 @@ describe('DB invariants (partial-unique indexes & checks, via PGlite)', () => {
     await insertOrganization(db, 'o2');
     const mandate = (id: string, orgId: string) =>
       db.query(
-        'INSERT INTO "Mandate"(id, "organizationId", "residenceId", status, "startDate") VALUES ($1,$2,$3,$4,now())',
+        'INSERT INTO "Mandate"(id, "organizationId", "residenceId", status, "startDate") VALUES ($1,$2,$3,$4::"MandateStatus",now())',
         [id, orgId, 'r1', 'ACTIVE'],
       );
     await mandate('m1', 'o1');
@@ -71,7 +71,7 @@ describe('DB invariants (partial-unique indexes & checks, via PGlite)', () => {
     await insertOrganization(db, 'o1');
     const acct = (id: string, orgId: string | null, resId: string | null) =>
       db.query(
-        'INSERT INTO "SettlementAccount"(id, "organizationId", "residenceId", provider, status) VALUES ($1,$2,$3,$4,$5)',
+        'INSERT INTO "SettlementAccount"(id, "organizationId", "residenceId", provider, status) VALUES ($1,$2,$3,$4::"SettlementProvider",$5::"SettlementStatus")',
         [id, orgId, resId, 'MANUAL', 'ACTIVE'],
       );
     await expect(acct('s1', 'o1', null)).resolves.toBeDefined(); // org only: ok
@@ -85,7 +85,7 @@ describe('DB invariants (partial-unique indexes & checks, via PGlite)', () => {
     await insertResidence(db, 'r1');
     await expect(
       db.query(
-        'INSERT INTO "Payment"(id, "residenceId", method, "amountMinor", "receivedAt") VALUES ($1,$2,$3,$4,now())',
+        'INSERT INTO "Payment"(id, "residenceId", method, "amountMinor", "receivedAt") VALUES ($1,$2,$3::"PaymentMethod",$4,now())',
         ['pz', 'r1', 'ESPECES', 0],
       ),
     ).rejects.toThrow();

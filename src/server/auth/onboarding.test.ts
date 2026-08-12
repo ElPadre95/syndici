@@ -2,7 +2,7 @@
  * Mot de passe + onboarding (§1/§5) — intégration PGlite.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { PGlite } from '@electric-sql/pglite';
+import type { TestDb } from '@/test/pglite';
 import {
   freshDb,
   pgliteExecutor,
@@ -22,7 +22,7 @@ import { createInvitation } from './invitation';
 import { onboardWithPassword } from './onboarding';
 import type { SqlExecutor, TxRunner } from '@/server/db/sql';
 
-let db: PGlite;
+let db: TestDb;
 let exec: SqlExecutor;
 let runner: TxRunner;
 
