@@ -14,6 +14,7 @@ import { PrismaClient } from '@prisma/client';
 import { createReceipt, createExpense } from '../src/server/finance/numbering';
 import { distributeQuoteParts } from '../src/server/lots/quote-part';
 import { disconnectBase } from '../src/server/db/client';
+import { hashPassword } from '../src/server/auth/password';
 
 const prisma = new PrismaClient();
 
@@ -612,6 +613,41 @@ async function main() {
       after: { name: residence.name },
     },
   });
+
+  // Compte de DÉMONSTRATION (déploiement) — créé UNIQUEMENT si un mot de passe est
+  // fourni par l'environnement. Le mot de passe (long, aléatoire) vient de Vercel :
+  // il n'est JAMAIS écrit dans le code ni journalisé. En local, cette variable est
+  // absente, donc aucun compte de démo n'est créé (le dev utilise `npm run dev:account`).
+  const demoPassword = process.env.DEMO_SYNDIC_PASSWORD;
+  if (demoPassword && demoPassword.length >= 12) {
+    const demoEmail = process.env.DEMO_SYNDIC_EMAIL ?? 'demo@syndici.ma';
+    const demoPerson = await prisma.person.create({
+      data: { firstName: 'Démo', lastName: 'Syndic', email: demoEmail, preferredLocale: 'fr' },
+    });
+    await prisma.membership.create({
+      data: {
+        organizationId: org.id,
+        personId: demoPerson.id,
+        role: 'OWNER_ADMIN',
+        status: 'ACTIVE',
+      },
+    });
+    // upsert : le seed ne purge pas la table User ; un réimport doit relier le compte
+    // existant à la nouvelle Person (et réinitialiser le mot de passe), sans violer
+    // l'unicité de l'e-mail.
+    const demoUser = await prisma.user.upsert({
+      where: { email: demoEmail },
+      update: { passwordHash: await hashPassword(demoPassword) },
+      create: { email: demoEmail, passwordHash: await hashPassword(demoPassword) },
+    });
+    await prisma.person.update({
+      where: { id: demoPerson.id },
+      data: { authUserId: demoUser.id },
+    });
+    console.log(
+      `✔ Compte de démonstration créé pour ${demoEmail} (mot de passe fourni par l'environnement).`,
+    );
+  }
 
   const counts = {
     residence: residence.name,
