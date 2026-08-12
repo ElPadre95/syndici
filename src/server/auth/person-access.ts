@@ -109,6 +109,68 @@ export async function listResidents(exec: SqlExecutor, ctx: ActiveContext): Prom
   );
 }
 
+/** Données d'une nouvelle personne (créée par le staff lors d'un rattachement). */
+export interface CreatePersonInput {
+  firstName: string;
+  lastName: string;
+  email?: string | null;
+  phone?: string | null;
+  nationality?: string | null;
+  preferredLocale: string; // 'fr' | 'ar'
+}
+
+/** Crée une personne — staff uniquement. Renvoie son id. */
+export async function createPerson(
+  exec: SqlExecutor,
+  ctx: ActiveContext,
+  input: CreatePersonInput,
+): Promise<string> {
+  if (!isStaff(ctx.role))
+    throw new PersonAccessError('création de personne interdite pour ce rôle');
+  const rows = await exec.query<{ id: string }>(
+    `INSERT INTO "Person"(id, "firstName", "lastName", email, phone, nationality, "preferredLocale", "updatedAt")
+     VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6::"Locale", now())
+     RETURNING id`,
+    [
+      input.firstName,
+      input.lastName,
+      input.email ?? null,
+      input.phone ?? null,
+      input.nationality ?? null,
+      input.preferredLocale,
+    ],
+  );
+  return rows[0]!.id;
+}
+
+/**
+ * Recherche de personnes DÉJÀ CONNUES du syndic, pour éviter les doublons (cas MRE :
+ * un propriétaire qui possède des lots dans plusieurs résidences gérées). Bornée aux
+ * résidences que le syndic gère (`residenceIds`) — jamais une fuite vers d'autres
+ * cabinets. Staff uniquement.
+ */
+export async function searchPersons(
+  exec: SqlExecutor,
+  ctx: ActiveContext,
+  query: string,
+  residenceIds: readonly string[],
+): Promise<PersonView[]> {
+  if (!isStaff(ctx.role)) throw new PersonAccessError('recherche de personnes interdite');
+  const q = query.trim().toLowerCase();
+  if (q === '' || residenceIds.length === 0) return [];
+  return exec.query<PersonView>(
+    `SELECT DISTINCT ${PERSON_COLUMNS.split(', ')
+      .map((c) => `p.${c}`)
+      .join(', ')}
+       FROM "Person" p
+       JOIN "LotAttachment" la ON la."personId" = p.id
+      WHERE la."residenceId" = ANY(string_to_array($2, ','))
+        AND (lower(p."firstName" || ' ' || p."lastName") LIKE $1 OR lower(coalesce(p.email, '')) LIKE $1)
+      LIMIT 10`,
+    [`%${q}%`, residenceIds.join(',')],
+  );
+}
+
 /**
  * Résout la Person métier liée à un compte d'authentification. Point d'entrée
  * unique pour transformer une session (User.id) en identité métier (Person.id).

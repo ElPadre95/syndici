@@ -26,8 +26,11 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       à l'étranger, locataire + délégation, ou occupé/vacant), deux états dérivés (règlement × temporalité),
       montant + sous-note ; indicateurs, recherche, filtres à compteurs justes ; lignes → fiche du lot.
       Quote-part répartie à la génération (total 1000). Étanchéité propriétaire testée. Tableau en 6 requêtes.
-- [ ] **A5** — Ajouter une personne à un lot (nom, e-mail, téléphone, pays, langue, rôle).
-      Passe par la couche person-access. Rattachement historisé + fin de rattachement (jamais de suppression).
+- [x] **A5** — Ajouter une personne à un lot (via person-access), dédoublonnage MRE (recherche +
+      rattachement d'une personne existante), délégation des charges au locataire, fin de rattachement
+      (date de fin, jamais de suppression), chronologie des occupants (actifs vs terminés). Mode
+      d'occupation explicite du lot (occupé/loué/vacant). Chevauchement refusé avec message clair.
+      Seed varié (4 états + lot vacant en dur).
 - [ ] **A6** — Émettre une invitation sur une personne rattachée (impossible sans rattachement actif).
       Affiche le code + lien `wa.me` pré-rempli selon la langue préférée.
 - [ ] **A7** — Import Excel de lots + occupants : aperçu avant validation, rapport des lignes rejetées.

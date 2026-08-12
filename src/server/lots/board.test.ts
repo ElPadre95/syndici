@@ -7,9 +7,30 @@ const due = new Date('2026-06-01'); // échu
 function baseInput(canSeeIdentities: boolean): AssembleInput {
   return {
     lots: [
-      { id: 'L1', reference: 'A1', type: 'APPARTEMENT', floor: 'A', monthlyChargeMinor: 65000 },
-      { id: 'L2', reference: 'V1', type: 'VILLA', floor: null, monthlyChargeMinor: 120000 },
-      { id: 'L3', reference: 'A2', type: 'APPARTEMENT', floor: 'A', monthlyChargeMinor: 65000 },
+      {
+        id: 'L1',
+        reference: 'A1',
+        type: 'APPARTEMENT',
+        floor: 'A',
+        monthlyChargeMinor: 65000,
+        occupancyMode: 'RENTED',
+      },
+      {
+        id: 'L2',
+        reference: 'V1',
+        type: 'VILLA',
+        floor: null,
+        monthlyChargeMinor: 120000,
+        occupancyMode: 'OWNER_OCCUPIED',
+      },
+      {
+        id: 'L3',
+        reference: 'A2',
+        type: 'APPARTEMENT',
+        floor: 'A',
+        monthlyChargeMinor: 65000,
+        occupancyMode: 'VACANT',
+      },
     ],
     attachments: [
       { lotId: 'L1', personId: 'pOwner', role: 'OWNER', isChargePayer: false },

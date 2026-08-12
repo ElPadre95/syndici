@@ -137,10 +137,8 @@ export function BoardTable({ rows }: { rows: BoardRow[] }) {
                         </span>
                       )}
                     </>
-                  ) : row.occupancy === 'vacant' ? (
-                    <span className="italic text-label-4">{t('occupancy.vacant')}</span>
                   ) : (
-                    <span className="text-label-3">{t('occupancy.ownerOccupied')}</span>
+                    <span className="italic text-label-4">{t('occupancy.vacant')}</span>
                   )}
                 </span>
                 {row.tenant ? (
@@ -154,6 +152,10 @@ export function BoardTable({ rows }: { rows: BoardRow[] }) {
                 ) : row.owner && row.occupancy === 'owner' ? (
                   <span className="mt-0.5 block text-xs text-label-4">
                     {t('occupancy.ownerOccupied')}
+                  </span>
+                ) : row.owner && row.occupancy === 'vacant' ? (
+                  <span className="mt-0.5 block text-xs italic text-label-4">
+                    {t('occupancy.vacant')}
                   </span>
                 ) : null}
               </span>

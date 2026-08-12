@@ -94,6 +94,15 @@ enum LotType {
   VILLA
 }
 
+/// Mode d'occupation d'un lot. Déduit quand c'est possible (un locataire actif
+/// implique RENTED) mais modifiable par le syndic pour distinguer un lot occupé
+/// par son propriétaire d'une résidence secondaire VIDE (cas MRE central).
+enum OccupancyMode {
+  OWNER_OCCUPIED
+  RENTED
+  VACANT
+}
+
 enum AttachmentRole {
   OWNER
   TENANT
@@ -414,6 +423,7 @@ model Lot {
   residenceId        String
   reference          String // n° de lot, ex. "B3"
   type               LotType          @default(APPARTEMENT)
+  occupancyMode      OccupancyMode    @default(VACANT) // occupé propriétaire / loué / vacant
   floor              String?
   surfaceM2          Int? // surface en m² (facultatif)
   quotePart          Int              @default(1) // tantièmes / pondération (v1 : non utilisé pour le tally)

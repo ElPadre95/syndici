@@ -27,7 +27,10 @@ function walk(dir: string): string[] {
 }
 
 const PERSON_TABLE = /"Person"/;
-const PERSON_ACCESSOR = /\.person\b/;
+// Accès au modèle Prisma des personnes : accesseur `.person.<op>` (méthode qui
+// suit). Volontairement précis pour ne PAS confondre avec un champ métier nommé
+// `person` (ex. `draft.person`), qui n'est pas un accès au modèle.
+const PERSON_ACCESSOR = /\.person\s*\./;
 
 describe('meta — Person is only reachable through person-access.ts', () => {
   it('no production module outside the access layer references Person', () => {

@@ -774,6 +774,61 @@
       "charge": "Charges mensuelles",
       "delegated": "Charges déléguées au locataire",
       "abroad": "Réside à l’étranger : {country}"
+    },
+    "attach": {
+      "title": "Ajouter une personne",
+      "search": {
+        "label": "Rechercher une personne déjà connue",
+        "placeholder": "Nom ou e-mail…",
+        "hint": "Sélectionnez une personne existante pour éviter un doublon (même propriétaire dans plusieurs résidences).",
+        "none": "Aucune personne connue ne correspond.",
+        "clear": "Saisir une nouvelle personne",
+        "selected": "Personne sélectionnée : {name}"
+      },
+      "newTitle": "Nouvelle personne",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "phoneHint": "Format international, ex. +212 6 12 34 56 78.",
+      "country": "Pays de résidence",
+      "locale": "Langue préférée",
+      "localeFr": "Français",
+      "localeAr": "Arabe",
+      "role": "Rôle",
+      "roleOwner": "Propriétaire",
+      "roleTenant": "Locataire",
+      "delegate": "Déléguer la redevabilité des charges au locataire",
+      "startDate": "Date de début du rattachement",
+      "submit": "Rattacher",
+      "cancel": "Annuler",
+      "errors": {
+        "required": "Ce champ est requis.",
+        "invalidRole": "Choisissez un rôle.",
+        "invalidEmail": "E-mail invalide.",
+        "invalidLocale": "Choisissez une langue.",
+        "overlap": "Un rattachement actif de ce rôle existe déjà pour ce lot. Terminez-le d’abord.",
+        "not_found": "Lot introuvable.",
+        "forbidden": "Vous n’avez pas le droit de gérer les rattachements.",
+        "no_active_residence": "Aucune résidence active.",
+        "server": "Une erreur est survenue. Réessayez."
+      }
+    },
+    "timeline": {
+      "title": "Occupants — historisé, jamais supprimé",
+      "add": "Ajouter une personne",
+      "active": "Actif",
+      "ended": "Terminé",
+      "since": "Depuis le {date}",
+      "period": "Du {start} au {end}",
+      "chargePayer": "Redevable des charges",
+      "roleOwner": "Propriétaire",
+      "roleTenant": "Locataire",
+      "end": "Terminer",
+      "endDate": "Date de fin",
+      "confirmEnd": "Terminer ce rattachement ?",
+      "none": "Aucun occupant enregistré.",
+      "replaceOwner": "Rattacher le nouveau propriétaire"
     }
   }
 }

@@ -26,12 +26,18 @@ const YEAR = now.getFullYear();
 // 1er du mois, décalé de `offset` mois par rapport au mois courant.
 const monthStart = (offset: number): Date => new Date(Date.UTC(YEAR, now.getMonth() + offset, 1));
 
-type Profile = 'PAID' | 'PARTIAL' | 'LATE' | 'UPCOMING';
+// Les 4 combinaisons d'états à démontrer (jeu de démonstration) :
+//   SETTLED            → soldé
+//   PARTIAL_OVERDUE    → partiel ET échu
+//   UNSETTLED_OVERDUE  → non réglé ET échu
+//   UNSETTLED_UPCOMING → non réglé AVANT échéance
+type Profile = 'SETTLED' | 'PARTIAL_OVERDUE' | 'UNSETTLED_OVERDUE' | 'UNSETTLED_UPCOMING';
+type OccupancyKind = 'OWNER_OCCUPIED' | 'RENTED' | 'VACANT';
 
 interface LotSpec {
   reference: string;
   villa: boolean;
-  owner: {
+  owner?: {
     first: string;
     last: string;
     nationality: string;
@@ -40,7 +46,8 @@ interface LotSpec {
   };
   tenant?: { first: string; last: string; nationality: string; locale: 'fr' | 'ar' };
   tenantPaysCharges?: boolean;
-  profile: Profile;
+  profile?: Profile; // absent = lot vacant en dur (aucun appel de charges)
+  occupancy: OccupancyKind;
 }
 
 // 18 appartements (A/B/C 1..6) + 6 villas (V1..V6). 9 propriétaires à l'étranger.
@@ -79,7 +86,12 @@ function buildLotSpecs(): LotSpec[] {
     for (let n = 1; n <= 6; n++) refs.push({ ref: `${block}${n}`, villa: false });
   for (let n = 1; n <= 6; n++) refs.push({ ref: `V${n}`, villa: true });
 
-  const profiles: Profile[] = ['PAID', 'PARTIAL', 'LATE', 'UPCOMING'];
+  const profiles: Profile[] = [
+    'SETTLED',
+    'PARTIAL_OVERDUE',
+    'UNSETTLED_OVERDUE',
+    'UNSETTLED_UPCOMING',
+  ];
   let localIdx = 0;
   refs.forEach((r, i) => {
     const isForeign = i < foreign.length;
@@ -96,6 +108,9 @@ function buildLotSpecs(): LotSpec[] {
         })();
     // Loue 1 lot étranger sur 2 (propriétaire absent -> locataire occupant).
     const rented = isForeign && i % 2 === 1;
+    // Occupation : loué s'il y a un locataire ; sinon un propriétaire à l'étranger
+    // laisse un bien VIDE (résidence secondaire MRE), un local l'occupe lui-même.
+    const occupancy: OccupancyKind = rented ? 'RENTED' : isForeign ? 'VACANT' : 'OWNER_OCCUPIED';
     specs.push({
       reference: r.ref,
       villa: r.villa,
@@ -110,8 +125,11 @@ function buildLotSpecs(): LotSpec[] {
         : undefined,
       tenantPaysCharges: rented && i === 3, // un lot délègue le paiement au locataire
       profile: profiles[i % profiles.length]!,
+      occupancy,
     });
   });
+  // Lot VACANT en dur (résidence secondaire vide, sans occupant ni appel de charges).
+  specs.push({ reference: 'A7', villa: false, occupancy: 'VACANT' });
   return specs;
 }
 
@@ -238,10 +256,14 @@ async function main() {
         residenceId: residence.id,
         reference: spec.reference,
         type: spec.villa ? 'VILLA' : 'APPARTEMENT',
+        occupancyMode: spec.occupancy,
         quotePart: quotas[lotIndex] ?? 1,
         monthlyChargeMinor: spec.villa ? CHARGE_VILLA : CHARGE_APPT,
       },
     });
+
+    // Lot vacant en dur : aucun occupant, aucun appel de charges.
+    if (!spec.owner) continue;
 
     const owner = await prisma.person.create({
       data: {
@@ -290,8 +312,10 @@ async function main() {
     }
 
     const amount = spec.villa ? CHARGE_VILLA : CHARGE_APPT;
-    // Appels de charges pour M-2, M-1, M.
-    for (const offset of [-2, -1, 0]) {
+    // Appels de charges : passés (M-2..M) sauf le profil « avant échéance » qui n'a
+    // qu'un appel FUTUR (M+1).
+    const offsets = spec.profile === 'UNSETTLED_UPCOMING' ? [1] : [-2, -1, 0];
+    for (const offset of offsets) {
       const due = monthStart(offset);
       const call = await prisma.chargeCall.create({
         data: {
@@ -304,17 +328,20 @@ async function main() {
         },
       });
 
-      // Couverture selon le profil du lot.
-      const coverFull =
-        spec.profile === 'PAID' ||
-        (spec.profile === 'LATE' && offset < -1) || // en retard : les vieux appels restent parfois payés
-        (spec.profile === 'UPCOMING' && offset < 0);
-      const coverPartial = spec.profile === 'PARTIAL' && offset === -1;
+      // Montant réglé selon le profil.
+      let payAmount = 0;
+      if (spec.profile === 'SETTLED') payAmount = amount;
+      else if (spec.profile === 'PARTIAL_OVERDUE') {
+        if (offset === -2)
+          payAmount = amount; // ancien appel soldé (avec reçu)
+        else if (offset === -1) payAmount = Math.round(amount / 2); // partiel
+      }
+      // UNSETTLED_OVERDUE / UNSETTLED_UPCOMING → aucun paiement.
 
-      if (coverFull || coverPartial) {
-        const method = offset === -2 ? 'ESPECES' : coverPartial ? 'ESPECES' : 'CARTE';
+      if (payAmount > 0) {
+        const full = payAmount === amount;
+        const method = full && offset === -2 ? 'ESPECES' : full ? 'CARTE' : 'ESPECES';
         if (method === 'ESPECES') cashCount++;
-        const payAmount = coverPartial ? Math.round(amount / 2) : amount;
         const payment = await prisma.payment.create({
           data: {
             residenceId: residence.id,
@@ -336,7 +363,7 @@ async function main() {
           },
         });
         // Reçu (numéro séquentiel, transaction) uniquement pour un paiement complet.
-        if (coverFull) {
+        if (full) {
           await createReceipt({
             residenceId: residence.id,
             exercice: YEAR,
@@ -347,9 +374,10 @@ async function main() {
         }
       }
     }
-    if (spec.profile === 'PAID') paidCount++;
-    else if (spec.profile === 'PARTIAL') partialCount++;
-    else if (spec.profile === 'LATE') lateCount++;
+    if (spec.profile === 'SETTLED') paidCount++;
+    else if (spec.profile === 'PARTIAL_OVERDUE') partialCount++;
+    else if (spec.profile === 'UNSETTLED_OVERDUE' || spec.profile === 'UNSETTLED_UPCOMING')
+      lateCount++;
   }
 
   // Dépenses avec justificatif (référence de fichier)
@@ -588,11 +616,12 @@ async function main() {
   const counts = {
     residence: residence.name,
     lots: specs.length,
-    foreignOwners: specs.filter((s) => s.owner.abroad).length,
+    foreignOwners: specs.filter((s) => s.owner?.abroad).length,
     rentedLots: specs.filter((s) => s.tenant).length,
-    profilePaid: paidCount,
-    profilePartial: partialCount,
-    profileLate: lateCount,
+    vacantLots: specs.filter((s) => s.occupancy === 'VACANT').length,
+    profileSettled: paidCount,
+    profilePartialOverdue: partialCount,
+    profileUnsettled: lateCount,
     cashPayments: cashCount,
     receipts: await prisma.receipt.count(),
     expenses: await prisma.expense.count(),

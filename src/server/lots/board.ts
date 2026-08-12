@@ -73,12 +73,15 @@ export interface Board {
 
 // ── Entrées de l'assembleur (types plats, testables) ────────────────────────
 
+export type OccupancyMode = 'OWNER_OCCUPIED' | 'RENTED' | 'VACANT';
+
 export interface RawLot {
   id: string;
   reference: string;
   type: LotType;
   floor: string | null;
   monthlyChargeMinor: number;
+  occupancyMode: OccupancyMode;
 }
 export interface RawAttachment {
   lotId: string;
@@ -169,9 +172,15 @@ export function assembleBoard(input: AssembleInput): Board {
   const rows: BoardRow[] = lots.map((lot) => {
     const owner = occupantOf(ownerAtt.get(lot.id), persons, canSeeIdentities);
     const tenant = occupantOf(tenantAtt.get(lot.id), persons, canSeeIdentities);
-    const hasOwner = ownerAtt.has(lot.id);
     const hasTenant = tenantAtt.has(lot.id);
-    const occupancy: Occupancy = hasTenant ? 'tenant' : hasOwner ? 'owner' : 'vacant';
+    // Un locataire actif implique « loué » ; sinon on suit le mode explicite du lot
+    // (occupé par le propriétaire vs résidence secondaire VIDE). Un mode RENTED
+    // périmé (sans locataire actif) retombe sur « vacant ».
+    const occupancy: Occupancy = hasTenant
+      ? 'tenant'
+      : lot.occupancyMode === 'OWNER_OCCUPIED'
+        ? 'owner'
+        : 'vacant';
 
     const ownerAtt2 = ownerAtt.get(lot.id);
     const ownerAbroad =
@@ -261,7 +270,14 @@ export async function listLotsForBoard(ctx: ActiveContext, now: Date = new Date(
     scoped.lot.findMany({
       where: { archivedAt: null },
       orderBy: { reference: 'asc' },
-      select: { id: true, reference: true, type: true, floor: true, monthlyChargeMinor: true },
+      select: {
+        id: true,
+        reference: true,
+        type: true,
+        floor: true,
+        monthlyChargeMinor: true,
+        occupancyMode: true,
+      },
     }),
     scoped.lotAttachment.findMany({
       where: { endDate: null },
@@ -287,7 +303,11 @@ export async function listLotsForBoard(ctx: ActiveContext, now: Date = new Date(
   }
 
   return assembleBoard({
-    lots: lots.map((l) => ({ ...l, type: l.type as LotType })),
+    lots: lots.map((l) => ({
+      ...l,
+      type: l.type as LotType,
+      occupancyMode: l.occupancyMode as OccupancyMode,
+    })),
     attachments: attachments.map((a) => ({ ...a, role: a.role as 'OWNER' | 'TENANT' })),
     persons,
     calls,
