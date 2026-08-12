@@ -13,7 +13,7 @@ import { getSessionContext } from '@/server/session';
 import { prismaExecutor } from '@/server/db/sql';
 import { can } from '@/server/auth/permissions';
 import { listAccessibleResidences } from '@/server/auth/context';
-import { createPerson, searchPersons } from '@/server/auth/person-access';
+import { searchPersons } from '@/server/auth/person-access';
 import type { ActiveContext } from '@/server/auth/context';
 import { attachPerson, endAttachment } from './attachments';
 import { validateAttachInput, type AttachFormState } from './attach-validation';
@@ -80,16 +80,13 @@ export async function addPersonAction(
   if (!parsed.ok) return { errors: parsed.errors };
   const draft = parsed.value;
 
-  let personId = draft.existingPersonId;
-  if (!personId && draft.person) {
-    personId = await createPerson(prismaExecutor(), ctx, draft.person);
-  }
-  if (!personId) return { formError: 'not_found' };
-
   const isChargePayer = draft.role === 'OWNER' ? true : draft.delegate;
+  // Création (si nouvelle personne) + rattachement dans une seule transaction :
+  // un chevauchement ne laisse aucune personne orpheline.
   const result = await attachPerson(ctx, {
     lotId,
-    personId,
+    personId: draft.existingPersonId ?? undefined,
+    newPerson: draft.person ?? undefined,
     role: draft.role,
     isChargePayer,
     startDate: draft.startDate,

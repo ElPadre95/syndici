@@ -23,12 +23,23 @@ export function AddPersonForm({ lotId, lotReference }: { lotId: string; lotRefer
     {},
   );
 
+  const today = new Date().toISOString().slice(0, 10);
+  // Champs CONTRÔLÉS : les valeurs saisies survivent à un ré-affichage d'erreur
+  // (React 19 réinitialise les champs non contrôlés après une action de formulaire).
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [nationality, setNationality] = useState('');
+  const [preferredLocale, setPreferredLocale] = useState('fr');
   const [role, setRole] = useState<'OWNER' | 'TENANT'>('OWNER');
+  const [delegate, setDelegate] = useState(false);
+  const [startDate, setStartDate] = useState(today);
+
   const [query, setQuery] = useState('');
   const [candidates, setCandidates] = useState<PersonCandidate[] | null>(null);
   const [selected, setSelected] = useState<PersonCandidate | null>(null);
   const [searching, startSearch] = useTransition();
-  const today = new Date().toISOString().slice(0, 10);
 
   const err = (f: string) =>
     state.errors?.[f] ? (
@@ -114,31 +125,68 @@ export function AddPersonForm({ lotId, lotReference }: { lotId: string; lotRefer
           <p className="text-sm font-bold text-label sm:col-span-2">{t('newTitle')}</p>
           <label className={LABEL}>
             {t('firstName')}
-            <input name="firstName" type="text" className={FIELD} />
+            <input
+              name="firstName"
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className={FIELD}
+            />
             {err('firstName')}
           </label>
           <label className={LABEL}>
             {t('lastName')}
-            <input name="lastName" type="text" className={FIELD} />
+            <input
+              name="lastName"
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className={FIELD}
+            />
             {err('lastName')}
           </label>
           <label className={LABEL}>
             {t('email')}
-            <input name="email" type="email" autoComplete="off" className={FIELD} />
+            <input
+              name="email"
+              type="email"
+              autoComplete="off"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={FIELD}
+            />
             {err('email')}
           </label>
           <label className={LABEL}>
             {t('phone')}
-            <input name="phone" type="tel" placeholder="+212 6 12 34 56 78" className={FIELD} />
+            <input
+              name="phone"
+              type="tel"
+              placeholder="+212 6 12 34 56 78"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className={FIELD}
+            />
             <span className="text-xs font-normal text-label-4">{t('phoneHint')}</span>
           </label>
           <label className={LABEL}>
             {t('country')}
-            <input name="nationality" type="text" className={FIELD} />
+            <input
+              name="nationality"
+              type="text"
+              value={nationality}
+              onChange={(e) => setNationality(e.target.value)}
+              className={FIELD}
+            />
           </label>
           <label className={LABEL}>
             {t('locale')}
-            <select name="preferredLocale" defaultValue="fr" className={FIELD}>
+            <select
+              name="preferredLocale"
+              value={preferredLocale}
+              onChange={(e) => setPreferredLocale(e.target.value)}
+              className={FIELD}
+            >
               <option value="fr">{t('localeFr')}</option>
               <option value="ar">{t('localeAr')}</option>
             </select>
@@ -164,12 +212,25 @@ export function AddPersonForm({ lotId, lotReference }: { lotId: string; lotRefer
         </label>
         <label className={LABEL}>
           {t('startDate')}
-          <input name="startDate" type="date" required defaultValue={today} className={FIELD} />
+          <input
+            name="startDate"
+            type="date"
+            required
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className={FIELD}
+          />
           {err('startDate')}
         </label>
         {role === 'TENANT' && (
           <label className="flex items-center gap-2 text-sm font-semibold text-label sm:col-span-2">
-            <input name="delegate" type="checkbox" className="size-4" />
+            <input
+              name="delegate"
+              type="checkbox"
+              checked={delegate}
+              onChange={(e) => setDelegate(e.target.checked)}
+              className="size-4"
+            />
             {t('delegate')}
           </label>
         )}

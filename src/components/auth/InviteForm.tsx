@@ -18,7 +18,6 @@ export function InviteForm() {
   const [code, setCode] = useState('');
   const [step, setStep] = useState<'code' | 'account' | 'done'>('code');
   const [role, setRole] = useState<'OWNER' | 'TENANT' | null>(null);
-  const [maskedEmail, setMaskedEmail] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +36,6 @@ export function InviteForm() {
     setPending(false);
     if (res.status === 'valid') {
       setRole(res.role);
-      setMaskedEmail(res.maskedEmail);
       setStep('account');
     } else {
       setError(errText(res.reason));
@@ -98,9 +96,6 @@ export function InviteForm() {
           <p className="text-sm text-label-3">
             {t('verifiedNote', { role: role === 'OWNER' ? t('roleOwner') : t('roleTenant') })}
           </p>
-          {maskedEmail && (
-            <p className="text-sm text-label-4">{t('maskedEmailNote', { email: maskedEmail })}</p>
-          )}
           <p className="text-sm font-semibold text-label">{t('createTitle')}</p>
           <label className="flex flex-col gap-1 text-sm font-semibold text-label">
             {t('emailLabel')}

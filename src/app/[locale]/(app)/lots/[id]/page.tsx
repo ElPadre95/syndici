@@ -3,10 +3,13 @@ import { Pencil, Plane, UserPlus } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
 import { EndAttachmentButton } from '@/components/lots/EndAttachmentButton';
+import { InviteButton } from '@/components/invitations/InviteButton';
+import { InvitationList } from '@/components/invitations/InvitationList';
 import { getSessionContext } from '@/server/session';
 import { can } from '@/server/auth/permissions';
 import { getLot } from '@/server/lots/data';
 import { listLotAttachments } from '@/server/lots/attachments';
+import { listInvitations } from '@/server/invitations/data';
 import { formatMoney } from '@/lib/money';
 import { cn } from '@/lib/cn';
 
@@ -22,6 +25,7 @@ export default async function LotFichePage({
   const tl = await getTranslations('lots.timeline');
   const tType = await getTranslations('lots.type');
   const tList = await getTranslations('lots.list');
+  const tInv = await getTranslations('invitations.list');
 
   const ctx = await getSessionContext();
   if (!ctx?.activeId || !ctx.role || !can(ctx.role, 'lot.view.all')) {
@@ -47,6 +51,11 @@ export default async function LotFichePage({
     id,
   );
   const canManage = can(ctx.role, 'lot.manage');
+  const canInvite = can(ctx.role, 'invitation.manage');
+  const invitations = await listInvitations(
+    { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role },
+    id,
+  );
   const fmtDate = new Intl.DateTimeFormat(activeLocale, {
     day: 'numeric',
     month: 'long',
@@ -146,14 +155,24 @@ export default async function LotFichePage({
                       )}
                     </p>
                   </div>
-                  {active && canManage && (
-                    <EndAttachmentButton attachmentId={a.id} lotId={lot.id} />
-                  )}
+                  <div className="flex flex-col items-end gap-2">
+                    {canInvite && (
+                      <InviteButton lotId={lot.id} personId={a.personId} active={active} />
+                    )}
+                    {active && canManage && (
+                      <EndAttachmentButton attachmentId={a.id} lotId={lot.id} />
+                    )}
+                  </div>
                 </li>
               );
             })}
           </ul>
         )}
+      </div>
+
+      <div className="rounded-lg border border-sep bg-white p-4">
+        <h2 className="mb-4 text-sm font-bold text-label">{tInv('title')}</h2>
+        <InvitationList invitations={invitations} back={`/lots/${lot.id}`} />
       </div>
     </div>
   );

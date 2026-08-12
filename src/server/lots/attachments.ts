@@ -6,8 +6,12 @@
  */
 import { getBaseClient } from '@/server/db/client';
 import { forResidence } from '@/server/db/tenant';
-import { prismaExecutor } from '@/server/db/sql';
-import { getAccessiblePerson } from '@/server/auth/person-access';
+import { prismaExecutor, type SqlExecutor } from '@/server/db/sql';
+import {
+  createPerson,
+  getAccessiblePerson,
+  type CreatePersonInput,
+} from '@/server/auth/person-access';
 import type { ActiveContext } from '@/server/auth/context';
 
 export type AttachRole = 'OWNER' | 'TENANT';
@@ -15,6 +19,7 @@ export type AttachRole = 'OWNER' | 'TENANT';
 export interface AttachmentRow {
   id: string;
   role: AttachRole;
+  personId: string;
   /** Identité seulement si le contexte y donne droit (staff) ; sinon null (étanchéité). */
   personName: string | null;
   personCountry: string | null;
@@ -58,6 +63,7 @@ export async function listLotAttachments(
     rows.push({
       id: a.id,
       role: a.role as AttachRole,
+      personId: a.personId,
       personName: person ? `${person.firstName} ${person.lastName}`.trim() : null,
       personCountry: person?.nationality ?? null,
       personAbroad: isAbroad(person?.nationality ?? null),
@@ -74,19 +80,25 @@ export type AttachResult =
 
 export interface AttachInput {
   lotId: string;
-  personId: string;
+  /** Rattachement d'une personne existante (dédoublonnage MRE)… */
+  personId?: string;
+  /** …ou création d'une nouvelle personne, DANS LA MÊME transaction (aucun orphelin). */
+  newPerson?: CreatePersonInput;
   role: AttachRole;
   isChargePayer: boolean;
   startDate: Date;
 }
 
 /**
- * Rattache une personne à un lot. Si le locataire devient redevable (délégation),
- * on libère d'abord le redevable actif (le propriétaire) dans la MÊME transaction,
- * pour respecter l'unicité « un seul redevable actif par lot ». Un rôle déjà occupé
+ * Rattache une personne à un lot. Création de la personne (si nouvelle) ET
+ * rattachement dans UNE SEULE transaction : un chevauchement fait tout échouer, sans
+ * laisser de personne orpheline en base. Si le locataire devient redevable
+ * (délégation), on libère d'abord le redevable actif (le propriétaire), pour
+ * respecter l'unicité « un seul redevable actif par lot ». Un rôle déjà occupé
  * activement → `overlap`.
  */
 export async function attachPerson(ctx: ActiveContext, input: AttachInput): Promise<AttachResult> {
+  if (!input.personId && !input.newPerson) return { ok: false, reason: 'not_found' };
   const lot = await forResidence(ctx.residenceId).lot.findUnique({
     where: { id: input.lotId },
     select: { id: true },
@@ -95,6 +107,13 @@ export async function attachPerson(ctx: ActiveContext, input: AttachInput): Prom
 
   try {
     const id = await getBaseClient().$transaction(async (tx) => {
+      // Exécuteur SQL transactionnel : la création de la personne (via person-access)
+      // partage la transaction, donc un échec ultérieur l'annule aussi.
+      const txExec: SqlExecutor = {
+        query: <T>(sql: string, params: unknown[] = []) => tx.$queryRawUnsafe<T[]>(sql, ...params),
+      };
+      const personId = input.personId ?? (await createPerson(txExec, ctx, input.newPerson!));
+
       if (input.isChargePayer) {
         await tx.lotAttachment.updateMany({
           where: { lotId: input.lotId, endDate: null, isChargePayer: true },
@@ -105,7 +124,7 @@ export async function attachPerson(ctx: ActiveContext, input: AttachInput): Prom
         data: {
           residenceId: ctx.residenceId,
           lotId: input.lotId,
-          personId: input.personId,
+          personId,
           role: input.role,
           isChargePayer: input.isChargePayer,
           startDate: input.startDate,

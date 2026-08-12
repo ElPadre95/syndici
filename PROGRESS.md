@@ -31,8 +31,17 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       (date de fin, jamais de suppression), chronologie des occupants (actifs vs terminés). Mode
       d'occupation explicite du lot (occupé/loué/vacant). Chevauchement refusé avec message clair.
       Seed varié (4 états + lot vacant en dur).
-- [ ] **A6** — Émettre une invitation sur une personne rattachée (impossible sans rattachement actif).
-      Affiche le code + lien `wa.me` pré-rempli selon la langue préférée.
+- [x] **A6** — Émettre une invitation sur une personne rattachée (impossible sans rattachement actif :
+      bouton désactivé + explication, jamais d'échec après clic). Affiche le code UNE fois (lisible,
+      groupé, avec échéance, copiable) + lien `wa.me` pré-rempli dans la langue préférée de la personne
+      (nom, lot, résidence, code, adresse d'activation). Suivi sur la fiche du lot ET vue d'ensemble
+      `/invitations` (qui, quand, état : en attente / activée / révoquée / expirée) ; révocation d'une
+      invitation en attente puis réémission. La vérification du code n'expose AUCUNE donnée personnelle
+      avant activation. Correctifs préalables : création personne + rattachement dans UNE transaction
+      (plus d'orphelin), champs du formulaire préservés à l'erreur. Bout-en-bout vérifié : émission →
+      activation en session non authentifiée → création du compte → lien compte↔personne (usage unique,
+      irréversible). Le périmètre du résident est borné par la matrice `can` (un locataire n'atteint ni
+      dépenses ni identité du propriétaire) ; l'espace résident dédié reste hors tranche A.
 - [ ] **A7** — Import Excel de lots + occupants : aperçu avant validation, rapport des lignes rejetées.
 
 ## Règles permanentes

@@ -64,7 +64,7 @@ describe('code generation', () => {
 });
 
 describe('verify — no PII leak', () => {
-  it('valid code returns only role + masked e-mail (never the full address or name)', async () => {
+  it('valid code returns ONLY the role — no PII at all (no e-mail, even masked)', async () => {
     const { code } = await createInvitation(exec, {
       residenceId: RES,
       lotId: LOT,
@@ -72,12 +72,9 @@ describe('verify — no PII leak', () => {
       role: 'OWNER',
     });
     const res = await verifyInvitation(exec, code);
-    expect(res.valid).toBe(true);
-    if (res.valid) {
-      expect(res.role).toBe('OWNER');
-      expect(res.maskedEmail).toBe('a***@example.ma');
-      expect(res.maskedEmail).not.toContain('aicha');
-    }
+    expect(res).toEqual({ valid: true, role: 'OWNER' });
+    // aucune clé « email »/« name »/« masked » ne doit exister dans la réponse
+    expect(Object.keys(res)).toEqual(['valid', 'role']);
   });
 
   it('unknown code is simply invalid', async () => {
@@ -173,6 +170,30 @@ describe('redeem — single use, irreversible link, no e-mail fallback', () => {
       ok: false,
       reason: 'expired',
     });
+  });
+
+  it('a revoked code no longer works (verify and redeem)', async () => {
+    await insertUser(db, 'user-1');
+    const { code } = await createInvitation(exec, {
+      residenceId: RES,
+      lotId: LOT,
+      personId: PERSON,
+      role: 'OWNER',
+    });
+    await db.query(`UPDATE "InvitationCode" SET status = 'REVOKED' WHERE "codeHash" = $1`, [
+      hashCode(code),
+    ]);
+    expect(await verifyInvitation(exec, code)).toEqual({ valid: false, reason: 'revoked' });
+    expect(await redeemInvitation(runner, { code, authUserId: 'user-1' })).toEqual({
+      ok: false,
+      reason: 'revoked',
+    });
+    // le compte n'a été lié à personne
+    const p = await exec.query<{ authUserId: string | null }>(
+      'SELECT "authUserId" FROM "Person" WHERE id = $1',
+      [PERSON],
+    );
+    expect(p[0]?.authUserId).toBeNull();
   });
 
   it('caps attempts', async () => {

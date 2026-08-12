@@ -206,29 +206,3 @@ export async function linkAuthAccount(
   );
   return rows.length > 0;
 }
-
-/** E-mail masqué (`a***@domaine`) pour l'écran d'invitation — jamais l'e-mail en clair. */
-export function maskEmail(email: string | null): string | null {
-  if (!email) return null;
-  const at = email.indexOf('@');
-  if (at <= 0) return '***';
-  const first = email[0];
-  const domain = email.slice(at + 1);
-  return `${first}***@${domain}`;
-}
-
-/**
- * Contact masqué d'une invitation — le SEUL renseignement toléré sur l'écran de
- * vérification (§5 : pas de préremplissage, pas de PII exposée). On ne renvoie
- * jamais l'e-mail complet ni le nom.
- */
-export async function getMaskedInvitationContact(
-  exec: SqlExecutor,
-  personId: string,
-): Promise<{ maskedEmail: string | null }> {
-  const rows = await exec.query<{ email: string | null }>(
-    `SELECT email FROM "Person" WHERE id = $1 LIMIT 1`,
-    [personId],
-  );
-  return { maskedEmail: maskEmail(rows[0]?.email ?? null) };
-}

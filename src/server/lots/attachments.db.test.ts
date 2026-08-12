@@ -130,4 +130,39 @@ describe('rattachements — unicité du rôle actif (chevauchement refusé, vent
     const active = await activeAttachments(db, 'r1', 'lot1');
     expect(active.map((a) => a.personId)).toEqual(['owner2']);
   });
+
+  it('un chevauchement avec une NOUVELLE personne ne laisse aucun orphelin (transaction)', async () => {
+    const db = await freshDb();
+    await insertResidence(db, 'r1');
+    await insertLot(db, 'lot1', 'r1', 'F1');
+    await insertPerson(db, 'owner1');
+    await insertLotAttachment(db, {
+      id: 'a1',
+      residenceId: 'r1',
+      lotId: 'lot1',
+      personId: 'owner1',
+      role: 'OWNER',
+    });
+    const before = (await db.query<{ n: number }>('SELECT count(*)::int AS n FROM "Person"'))
+      .rows[0]!.n;
+
+    // Même séquence que attachPerson : créer la personne PUIS rattacher (chevauchement)
+    // dans une seule transaction → l'index rejette → tout est annulé.
+    await expect(
+      db.transaction(async (tx) => {
+        const p = await tx.query<{ id: string }>(
+          'INSERT INTO "Person"(id,"firstName","lastName","updatedAt") VALUES (gen_random_uuid(),$1,$2,now()) RETURNING id',
+          ['Nouveau', 'Doublon'],
+        );
+        await tx.query(
+          'INSERT INTO "LotAttachment"(id,"residenceId","lotId","personId",role,"startDate") VALUES (gen_random_uuid(),$1,$2,$3,$4::"AttachmentRole",now())',
+          ['r1', 'lot1', p.rows[0]!.id, 'OWNER'],
+        );
+      }),
+    ).rejects.toThrow();
+
+    const after = (await db.query<{ n: number }>('SELECT count(*)::int AS n FROM "Person"'))
+      .rows[0]!.n;
+    expect(after).toBe(before); // la personne « Nouveau Doublon » n'a pas été écrite
+  });
 });

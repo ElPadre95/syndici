@@ -9,14 +9,14 @@
  *   - Le rattachement compte↔personne se fait UNE seule fois, IRRÉVERSIBLEMENT,
  *     via `linkAuthAccount` (UPDATE conditionnel). AUCUN repli e-mail — c'était la
  *     faille de reprise de compte du prototype.
- *   - La vérification n'expose aucune PII (au plus un e-mail masqué).
+ *   - La vérification n'expose AUCUNE donnée personnelle avant activation.
  *
  * Ce module ne touche jamais directement le modèle des personnes : l'écriture
- * (`linkAuthAccount`) et la lecture masquée passent par `person-access.ts`.
+ * (`linkAuthAccount`) passe par `person-access.ts`.
  */
 import { createHash, randomInt } from 'node:crypto';
 import type { SqlExecutor, TxRunner } from '@/server/db/sql';
-import { getMaskedInvitationContact, linkAuthAccount } from './person-access';
+import { linkAuthAccount } from './person-access';
 
 /** Alphabet sans ambiguïté : ni 0/O, ni 1/I/L. 31 symboles. */
 export const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -72,7 +72,7 @@ export async function createInvitation(
   const rows = await exec.query<{ id: string }>(
     `INSERT INTO "InvitationCode"
        ("id","residenceId","lotId","personId",role,"codeHash",status,"attemptCount","expiresAt","createdByPersonId","createdAt")
-     VALUES (gen_random_uuid(),$1,$2,$3,$4::"AttachmentRole",$5,'PENDING',0,$6,$7,$8)
+     VALUES (gen_random_uuid(),$1,$2,$3,$4::"AttachmentRole",$5,'PENDING',0,$6::timestamp,$7,$8::timestamp)
      RETURNING id`,
     [
       input.residenceId,
@@ -98,18 +98,15 @@ export type InvitationFailure =
   | 'person_already_linked';
 
 /**
- * Vérifie un code SANS le consommer, pour l'écran de saisie. Ne renvoie que la
- * validité et, au plus, un e-mail masqué — jamais le nom, jamais l'e-mail complet,
- * jamais de préremplissage.
+ * Vérifie un code SANS le consommer, pour l'écran de saisie. Ne renvoie QUE la
+ * validité et le rôle — AUCUNE donnée personnelle avant activation (ni nom, ni
+ * e-mail, même masqué : c'était le préremplissage-faille du prototype).
  */
 export async function verifyInvitation(
   exec: SqlExecutor,
   code: string,
   now: Date = new Date(),
-): Promise<
-  | { valid: true; role: InvitationRole; maskedEmail: string | null }
-  | { valid: false; reason: InvitationFailure }
-> {
+): Promise<{ valid: true; role: InvitationRole } | { valid: false; reason: InvitationFailure }> {
   const rows = await exec.query<{
     personId: string;
     role: InvitationRole;
@@ -128,8 +125,7 @@ export async function verifyInvitation(
   if (inv.attemptCount >= MAX_ATTEMPTS) return { valid: false, reason: 'too_many_attempts' };
   if (inv.status === 'EXPIRED' || (inv.expiresAt && new Date(inv.expiresAt) < now))
     return { valid: false, reason: 'expired' };
-  const { maskedEmail } = await getMaskedInvitationContact(exec, inv.personId);
-  return { valid: true, role: inv.role, maskedEmail };
+  return { valid: true, role: inv.role };
 }
 
 export interface RedeemResult {
@@ -188,10 +184,10 @@ export async function redeemInvitation(
       return { ok: false as const, reason: 'person_already_linked' as const };
     }
 
-    await tx.query(`UPDATE "InvitationCode" SET status = 'USED', "usedAt" = $2 WHERE id = $1`, [
-      inv.id,
-      now.toISOString(),
-    ]);
+    await tx.query(
+      `UPDATE "InvitationCode" SET status = 'USED', "usedAt" = $2::timestamp WHERE id = $1`,
+      [inv.id, now.toISOString()],
+    );
     return {
       ok: true as const,
       result: {

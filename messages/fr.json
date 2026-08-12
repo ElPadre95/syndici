@@ -553,7 +553,8 @@
       "payments": "Paiements",
       "expenses": "Dépenses",
       "documents": "Documents",
-      "settings": "Réglages"
+      "settings": "Réglages",
+      "invitations": "Invitations"
     },
     "header": {
       "account": "Compte",
@@ -829,6 +830,50 @@
       "confirmEnd": "Terminer ce rattachement ?",
       "none": "Aucun occupant enregistré.",
       "replaceOwner": "Rattacher le nouveau propriétaire"
+    }
+  },
+  "invitations": {
+    "wa": {
+      "message": "Bonjour {name}, votre espace en ligne pour le lot {lotRef} de la résidence {residence} est prêt. Votre code d’accès : {code}. Créez votre accès ici : {url}. Ce code expire le {expires}."
+    },
+    "status": {
+      "PENDING": "En attente",
+      "USED": "Activée",
+      "REVOKED": "Révoquée",
+      "EXPIRED": "Expirée"
+    },
+    "invite": {
+      "button": "Inviter",
+      "disabledHint": "Un rattachement actif est requis pour inviter.",
+      "title": "Code d’accès",
+      "role": "Invitation {role}",
+      "expiresOn": "Expire le {date}",
+      "copy": "Copier le code",
+      "copied": "Copié",
+      "waOpen": "Ouvrir WhatsApp",
+      "waHint": "Message pré-rempli dans la langue préférée de la personne.",
+      "preview": "Aperçu du message",
+      "noPii": "Le code ne révèle aucune donnée personnelle avant activation.",
+      "close": "Fermer",
+      "errors": {
+        "forbidden": "Vous n’avez pas le droit d’émettre des invitations.",
+        "no_active_attachment": "Cette personne n’a pas de rattachement actif sur ce lot.",
+        "not_found": "Introuvable.",
+        "no_active_residence": "Aucune résidence active."
+      }
+    },
+    "list": {
+      "title": "Invitations",
+      "subtitle": "Qui a été invité, quand, et l’état de chaque invitation.",
+      "none": "Aucune invitation émise.",
+      "colPerson": "Personne",
+      "colLot": "Lot",
+      "colStatus": "État",
+      "colCreated": "Émise",
+      "colExpires": "Expiration",
+      "revoke": "Révoquer",
+      "roleOwner": "Propriétaire",
+      "roleTenant": "Locataire"
     }
   }
 }

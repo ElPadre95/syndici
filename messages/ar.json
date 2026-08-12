@@ -550,7 +550,8 @@
       "payments": "المدفوعات",
       "expenses": "المصاريف",
       "documents": "الوثائق",
-      "settings": "الإعدادات"
+      "settings": "الإعدادات",
+      "invitations": "الدعوات"
     },
     "header": {
       "account": "الحساب",
@@ -826,6 +827,50 @@
       "confirmEnd": "إنهاء هذا الارتباط؟",
       "none": "لا يوجد شاغل مسجَّل.",
       "replaceOwner": "ربط المالك الجديد"
+    }
+  },
+  "invitations": {
+    "wa": {
+      "message": "مرحبًا {name}، فضاؤك الإلكتروني للعقار {lotRef} بإقامة {residence} جاهز. رمز الدخول الخاص بك: {code}. أنشئ حسابك هنا: {url}. تنتهي صلاحية هذا الرمز في {expires}."
+    },
+    "status": {
+      "PENDING": "قيد الانتظار",
+      "USED": "مُفعَّلة",
+      "REVOKED": "مُلغاة",
+      "EXPIRED": "منتهية"
+    },
+    "invite": {
+      "button": "دعوة",
+      "disabledHint": "يلزم ارتباط نشط لإرسال دعوة.",
+      "title": "رمز الدخول",
+      "role": "دعوة {role}",
+      "expiresOn": "تنتهي في {date}",
+      "copy": "نسخ الرمز",
+      "copied": "تم النسخ",
+      "waOpen": "فتح واتساب",
+      "waHint": "رسالة معدّة مسبقًا بلغة الشخص المفضّلة.",
+      "preview": "معاينة الرسالة",
+      "noPii": "لا يكشف الرمز أي بيانات شخصية قبل التفعيل.",
+      "close": "إغلاق",
+      "errors": {
+        "forbidden": "لا تملك صلاحية إرسال الدعوات.",
+        "no_active_attachment": "لا يملك هذا الشخص ارتباطًا نشطًا بهذا العقار.",
+        "not_found": "غير موجود.",
+        "no_active_residence": "لا توجد إقامة نشطة."
+      }
+    },
+    "list": {
+      "title": "الدعوات",
+      "subtitle": "من دُعي، ومتى، وحالة كل دعوة.",
+      "none": "لم تُرسَل أي دعوة.",
+      "colPerson": "الشخص",
+      "colLot": "العقار",
+      "colStatus": "الحالة",
+      "colCreated": "الإرسال",
+      "colExpires": "الانتهاء",
+      "revoke": "إلغاء",
+      "roleOwner": "مالك",
+      "roleTenant": "مكترٍ"
     }
   }
 }

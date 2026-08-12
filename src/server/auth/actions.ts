@@ -3,20 +3,19 @@
 /**
  * Actions serveur pour les écrans d'authentification. Fines enveloppes autour des
  * fonctions déjà testées (verifyInvitation / onboardWithPassword), adossées aux
- * exécuteurs de production. Elles ne renvoient JAMAIS de PII (au plus un e-mail
- * masqué) et ne divulguent pas l'existence des comptes.
+ * exécuteurs de production. Elles ne renvoient JAMAIS de PII avant activation et ne
+ * divulguent pas l'existence des comptes.
  */
 import { prismaExecutor, prismaTxRunner } from '@/server/db/sql';
 import { verifyInvitation, type InvitationRole } from './invitation';
 import { onboardWithPassword, type OnboardFailure } from './onboarding';
 
 export type VerifyState =
-  | { status: 'valid'; role: InvitationRole; maskedEmail: string | null }
-  | { status: 'invalid'; reason: string };
+  { status: 'valid'; role: InvitationRole } | { status: 'invalid'; reason: string };
 
 export async function verifyInviteAction(code: string): Promise<VerifyState> {
   const res = await verifyInvitation(prismaExecutor(), code);
-  if (res.valid) return { status: 'valid', role: res.role, maskedEmail: res.maskedEmail };
+  if (res.valid) return { status: 'valid', role: res.role };
   return { status: 'invalid', reason: res.reason };
 }
 
