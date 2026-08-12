@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { DoorOpen, Plus, Sparkles, AlertTriangle, Building2 } from 'lucide-react';
+import { DoorOpen, Plus, Sparkles, Upload, AlertTriangle, Building2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
 import { BoardTable } from '@/components/lots/BoardTable';
@@ -14,6 +14,7 @@ export default async function LotsPage({ params }: { params: Promise<{ locale: s
   setRequestLocale(locale);
   const t = await getTranslations('lots.list');
   const tb = await getTranslations('lots.board');
+  const tImport = await getTranslations('lots.import');
 
   const ctx = await getSessionContext();
   const active = ctx?.residences.find((r) => r.id === ctx.activeId) ?? null;
@@ -54,6 +55,12 @@ export default async function LotsPage({ params }: { params: Promise<{ locale: s
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link href="/lots/import">
+            <Button variant="secondary">
+              <Upload className="size-4" aria-hidden />
+              {tImport('cta')}
+            </Button>
+          </Link>
           <Link href="/lots/generer">
             <Button variant="secondary">
               <Sparkles className="size-4" aria-hidden />

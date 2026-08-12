@@ -144,6 +144,29 @@ export async function createPerson(
 }
 
 /**
+ * Dédoublonnage d'import (A7) : id d'une personne DÉJÀ rattachée à la résidence
+ * active, retrouvée par e-mail exact. Reste dans la couche d'accès aux personnes
+ * (seule autorisée à lire le modèle Person). Staff uniquement, bornée à la résidence
+ * du contexte — aucune fuite hors périmètre.
+ */
+export async function findAttachedPersonIdByEmail(
+  exec: SqlExecutor,
+  ctx: ActiveContext,
+  email: string,
+): Promise<string | null> {
+  if (!isStaff(ctx.role)) throw new PersonAccessError('recherche de personne interdite');
+  const rows = await exec.query<{ id: string }>(
+    `SELECT p.id
+       FROM "Person" p
+       JOIN "LotAttachment" la ON la."personId" = p.id
+      WHERE la."residenceId" = $1 AND lower(p.email) = lower($2)
+      LIMIT 1`,
+    [ctx.residenceId, email],
+  );
+  return rows[0]?.id ?? null;
+}
+
+/**
  * Recherche de personnes DÉJÀ CONNUES du syndic, pour éviter les doublons (cas MRE :
  * un propriétaire qui possède des lots dans plusieurs résidences gérées). Bornée aux
  * résidences que le syndic gère (`residenceIds`) — jamais une fuite vers d'autres

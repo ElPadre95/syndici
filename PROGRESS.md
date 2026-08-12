@@ -42,7 +42,21 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       activation en session non authentifiée → création du compte → lien compte↔personne (usage unique,
       irréversible). Le périmètre du résident est borné par la matrice `can` (un locataire n'atteint ni
       dépenses ni identité du propriétaire) ; l'espace résident dédié reste hors tranche A.
-- [ ] **A7** — Import Excel de lots + occupants : aperçu avant validation, rapport des lignes rejetées.
+- [x] **A7** — Import Excel/CSV de lots + occupants. Modèle téléchargeable (fr/ar) avec en-têtes +
+      ligne d'exemple. Lecture tolérante : .xlsx et .csv, ordre des colonnes libre, en-têtes insensibles
+      à la casse/accents/langue, montants « 650 » / « 650,00 » / « 1 200,00 », cellules et ligne vides
+      ignorées. Seule la référence est obligatoire. **Aperçu avant validation** (rien n'est écrit avant
+      confirmation) : ligne par ligne, à créer / déjà présent / rejeté AVEC motif clair (doublon,
+      référence existante, locataire sans propriétaire, montant illisible, quote-part invalide, e-mail
+      mal formé, type inconnu). **Écriture en UNE transaction** (tout ou rien) : lots + personnes +
+      rattachements ensemble ; dédoublonnage MRE (A5) ; idempotence (réimport = 0 doublon) ; quote-part
+      répartie sur 1000 si la colonne est absente (A3). Rapport final (lots créés, personnes créées,
+      rattachements, lignes ignorées). Réservé au staff (`can(role, 'lot.manage')`).
+      **Limite : 500 lignes / 2 Mo** (transaction unique confortable ; au-delà, découper le fichier —
+      l'optimisation du verrouillage de masse est repoussée à une tranche ultérieure).
+      Vérifié au navigateur avec un vrai fichier réaliste (`fixtures/import-lots-test.xlsx`, 60 lignes,
+      accents + arabe + téléphones hétérogènes + 7 lignes défectueuses) importé sur une résidence vide ;
+      capture arabe (RTL) incluse.
 
 ## Règles permanentes
 
