@@ -13,7 +13,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-screen bg-bg">
-      <AppSidebar />
+      <AppSidebar staff={ctx?.isStaff ?? false} />
       <div className="flex min-h-screen flex-1 flex-col">
         <AppHeader
           userLabel={ctx?.userLabel ?? null}

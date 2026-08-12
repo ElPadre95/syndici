@@ -571,6 +571,16 @@
       "createResidence": "إنشاء إقامة",
       "viewResidences": "عرض إقاماتي"
     },
+    "residentHome": {
+      "sectionLabel": "مساحتي",
+      "welcome": "مرحبًا، {name}",
+      "welcomeGeneric": "مرحبًا",
+      "attachmentsTitle": "ارتباطاتك",
+      "lot": "العقار {lot}",
+      "roleOwner": "مالك",
+      "roleTenant": "مستأجر",
+      "spaceComing": "مساحتك كمقيم ستتوفّر قريبًا."
+    },
     "comingSoon": {
       "title": "قسم قادم",
       "body": "سيتم إنشاء هذه الشاشة في خطوة لاحقة."

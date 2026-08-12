@@ -29,6 +29,8 @@ export interface SessionContext {
   residences: ResidenceListItem[];
   activeId: string | null;
   role: AppRole | null;
+  /** A-t-elle un accès STAFF (syndic/gestionnaire) à au moins une résidence ? Sinon : résident. */
+  isStaff: boolean;
 }
 
 /** Renvoie le contexte, ou `null` si non authentifié (le middleware garde déjà les routes). */
@@ -50,6 +52,9 @@ export async function getSessionContext(): Promise<SessionContext | null> {
   );
   const role = activeId ? await getResidenceRole(exec, personId, activeId) : null;
   const userLabel = session.user?.name ?? session.user?.email ?? null;
+  // Staff = au moins une résidence gérée (mandat actif). Sinon, la personne est un
+  // résident : l'accueil et la navigation lui présentent une vue réduite (A7 §1).
+  const isStaff = residences.length > 0;
 
-  return { personId, userLabel, residences, activeId, role };
+  return { personId, userLabel, residences, activeId, role, isStaff };
 }

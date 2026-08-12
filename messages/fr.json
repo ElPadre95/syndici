@@ -574,6 +574,16 @@
       "createResidence": "Créer une résidence",
       "viewResidences": "Voir mes résidences"
     },
+    "residentHome": {
+      "sectionLabel": "Mon espace",
+      "welcome": "Bonjour, {name}",
+      "welcomeGeneric": "Bonjour",
+      "attachmentsTitle": "Vos rattachements",
+      "lot": "Lot {lot}",
+      "roleOwner": "Propriétaire",
+      "roleTenant": "Locataire",
+      "spaceComing": "Votre espace résident arrive prochainement."
+    },
     "comingSoon": {
       "title": "Section à venir",
       "body": "Cet écran sera construit dans un prochain incrément."

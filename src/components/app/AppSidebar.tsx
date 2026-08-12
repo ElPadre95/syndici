@@ -23,8 +23,9 @@ interface NavItem {
 }
 
 // Chaque entrée mène à un écran RÉEL (jamais de lien mort — cf. A4).
-const NAV: readonly NavItem[] = [
-  { href: '/', key: 'dashboard', Icon: LayoutDashboard },
+// Les entrées SYNDIC ne sont montrées qu'au staff : un résident ne doit voir
+// aucune fonction de gestion (A7 §1).
+const STAFF_NAV: readonly NavItem[] = [
   { href: '/residences', key: 'residences', Icon: Building2 },
   { href: '/lots', key: 'lots', Icon: DoorOpen },
   { href: '/residents', key: 'residents', Icon: Users },
@@ -34,6 +35,8 @@ const NAV: readonly NavItem[] = [
   { href: '/documents', key: 'documents', Icon: FileText },
   { href: '/reglages', key: 'settings', Icon: Settings },
 ];
+// L'accueil est neutre (pas une fonction de gestion) : commun à tous les rôles.
+const HOME_NAV: NavItem = { href: '/', key: 'dashboard', Icon: LayoutDashboard };
 
 /** Détermine l'entrée active : correspondance exacte pour l'accueil, préfixe sinon. */
 function isActive(pathname: string, href: string): boolean {
@@ -41,10 +44,11 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppSidebar() {
+export function AppSidebar({ staff }: { staff: boolean }) {
   const t = useTranslations('app.nav');
   const tCommon = useTranslations('common');
   const pathname = usePathname();
+  const items = staff ? [HOME_NAV, ...STAFF_NAV] : [HOME_NAV];
 
   return (
     <aside className="flex w-64 shrink-0 flex-col gap-1 border-e border-sep bg-white pb-6 pe-3 ps-4 pt-6">
@@ -52,7 +56,7 @@ export function AppSidebar() {
         <span className="font-serif text-2xl text-label">{tCommon('appName')}</span>
       </div>
       <nav className="flex flex-col gap-1">
-        {NAV.map(({ href, key, Icon }) => {
+        {items.map(({ href, key, Icon }) => {
           const active = isActive(pathname, href);
           return (
             <Link

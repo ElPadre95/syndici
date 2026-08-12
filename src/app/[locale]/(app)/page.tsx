@@ -1,21 +1,33 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Building2, ArrowRight } from 'lucide-react';
-import { auth } from '@/auth';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Link } from '@/i18n/navigation';
+import { getSessionContext } from '@/server/session';
+import { listResidentAttachments } from '@/server/residents/home';
+import { ResidentHome } from '@/components/app/ResidentHome';
 
 /**
- * Page d'accueil de l'espace syndic (A1). Salue l'utilisateur connecté (ou
- * l'invite à se connecter) et propose le premier pas : créer une résidence.
+ * Page d'accueil. Selon le profil :
+ *   - staff (syndic/gestionnaire) → premier pas « créer une résidence » (A1) ;
+ *   - résident rattaché → accueil sobre, informatif (A7 §1), jamais l'invite syndic ;
+ *   - compte nouveau sans rattachement → l'onboarding syndic (créer une résidence).
  */
 export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const t = await getTranslations('app.dashboard');
-  const session = await auth();
-  const name = session?.user?.name ?? session?.user?.email ?? null;
+  const ctx = await getSessionContext();
+  const name = ctx?.userLabel ?? null;
+
+  // Résident (ni syndic ni gestionnaire) rattaché à au moins un lot : vue réduite.
+  if (ctx && !ctx.isStaff) {
+    const attachments = await listResidentAttachments(ctx.personId);
+    if (attachments.length > 0) {
+      return <ResidentHome name={name} attachments={attachments} />;
+    }
+  }
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
