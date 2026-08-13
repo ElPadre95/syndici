@@ -46,6 +46,8 @@ export type Permission =
   | 'receipt.issue'
   | 'expense.view' // dépenses & justificatifs de la copropriété
   | 'expense.manage'
+  | 'contract.view' // contrats fournisseurs & échéances
+  | 'contract.manage'
   | 'reminder.manage' // relances impayés
   // Vie de la copropriété
   | 'incident.report'
@@ -89,6 +91,8 @@ const MATRIX: Record<AppRole, ReadonlySet<Permission>> = {
     'receipt.issue',
     'expense.view',
     'expense.manage',
+    'contract.view',
+    'contract.manage',
     'reminder.manage',
     'incident.manage',
     'vote.view',
@@ -111,6 +115,8 @@ const MATRIX: Record<AppRole, ReadonlySet<Permission>> = {
     'receipt.issue',
     'expense.view',
     'expense.manage',
+    'contract.view',
+    'contract.manage',
     'reminder.manage',
     'incident.manage',
     'vote.view',

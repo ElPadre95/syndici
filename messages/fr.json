@@ -440,13 +440,45 @@
     "moisJun": "Juin"
   },
   "contracts": {
-    "ctrTitre": "Contrats & échéances",
-    "ctrAjouter": "Contrat",
-    "ctrExpire": "Expiré",
-    "ctrJours": "jours",
-    "ctrChamps": "Nom et date obligatoires",
-    "ctrAjoute": "Contrat ajouté",
-    "ctrSupprime": "Contrat supprimé"
+    "noActiveTitle": "Aucune résidence active",
+    "noActiveBody": "Sélectionnez une résidence pour voir ses contrats.",
+    "forbidden": "Accès réservé au syndic.",
+    "title": "Contrats fournisseurs",
+    "subtitle": "Échéances triées par urgence. Alerte sous 30 jours, rouge si dépassée.",
+    "newCta": "Nouveau contrat",
+    "emptyTitle": "Aucun contrat",
+    "emptyBody": "Enregistrez un contrat pour suivre son échéance.",
+    "archive": "Archiver",
+    "due": "Échéance {date}",
+    "countdown": {
+      "expired": "Expiré",
+      "today": "Aujourd'hui",
+      "days": "{days} jours"
+    },
+    "frequency": {
+      "MENSUEL": "Mensuel",
+      "TRIMESTRIEL": "Trimestriel",
+      "SEMESTRIEL": "Semestriel",
+      "ANNUEL": "Annuel"
+    },
+    "form": {
+      "name": "Nom du contrat",
+      "supplier": "Fournisseur",
+      "amount": "Montant (MAD)",
+      "frequency": "Fréquence",
+      "startDate": "Début",
+      "endDate": "Échéance",
+      "save": "Enregistrer",
+      "cancel": "Annuler"
+    },
+    "error": {
+      "forbidden": "Accès refusé.",
+      "no_active_residence": "Aucune résidence active.",
+      "name_required": "Le nom du contrat est obligatoire.",
+      "invalid_amount": "Montant invalide.",
+      "invalid_date": "Date d'échéance invalide.",
+      "not_found": "Contrat introuvable."
+    }
   },
   "report": {
     "bilanBtn": "Générer le bilan annuel (AG)",
@@ -727,7 +759,8 @@
       "expenses": "Dépenses",
       "documents": "Documents",
       "settings": "Réglages",
-      "invitations": "Invitations"
+      "invitations": "Invitations",
+      "contracts": "Contrats"
     },
     "header": {
       "account": "Compte",

@@ -10,6 +10,7 @@ import {
   CreditCard,
   Receipt,
   FileText,
+  FileSignature,
   Settings,
   type LucideIcon,
 } from 'lucide-react';
@@ -34,6 +35,7 @@ const STAFF_NAV: readonly NavItem[] = [
   { href: '/charges', key: 'charges', Icon: CalendarClock },
   { href: '/paiements', key: 'payments', Icon: CreditCard },
   { href: '/depenses', key: 'expenses', Icon: Receipt },
+  { href: '/contrats', key: 'contracts', Icon: FileSignature },
   { href: '/documents', key: 'documents', Icon: FileText },
   { href: '/reglages', key: 'settings', Icon: Settings },
 ];

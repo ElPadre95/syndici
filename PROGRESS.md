@@ -140,7 +140,15 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       (recalculée selon la période) ET **sur le tableau de bord** (tout l'historique), à côté du taux de
       collecte. Vérifié au navigateur (trésorerie dashboard + période, filtre fournisseur/période, négatif
       en orange, répartition, capture arabe RTL).
-- [ ] **C3** — Contrats fournisseurs (échéance, compte à rebours, alerte visuelle ; seuils §7.2).
+- [x] **C3** — Contrats fournisseurs. Nom, fournisseur, montant (centimes), échéance, fréquence
+      (mensuel→annuel). Le **compte à rebours** et l'**alerte visuelle** sont DÉRIVÉS de l'échéance vs la
+      date RÉELLE du serveur (SPEC §7.2 ; le M1 « date figée » du prototype est corrigé) — jamais stockés.
+      Paliers : **< 0 « Expiré » (rouge)**, **≤ 30 j (orange)**, **sinon (vert)** ; liste triée par échéance
+      la plus proche/dépassée d'abord. Saisie et archivage (soft delete) réservés au staff, tracés à
+      l'audit (`contract.record` / `contract.archive`) ; nouveau droit `contract.view`/`contract.manage`
+      (matrice + test). Cœur pur `contractCountdown` testé (bornes 0 et 30), écritures testées PGlite ET
+      Postgres réel. Écran `/contrats` (nav). Vérifié au navigateur (4 contrats seed : un expiré rouge,
+      deux orange, un vert ; tri par urgence ; capture arabe RTL incluse).
 
 ## Règles permanentes
 

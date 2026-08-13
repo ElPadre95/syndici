@@ -440,13 +440,45 @@
     "moisJun": "يونيو"
   },
   "contracts": {
-    "ctrTitre": "العقود والمواعيد",
-    "ctrAjouter": "عقد",
-    "ctrExpire": "منتهٍ",
-    "ctrJours": "يوم",
-    "ctrChamps": "الاسم والتاريخ مطلوبان",
-    "ctrAjoute": "تمت إضافة العقد",
-    "ctrSupprime": "تم حذف العقد"
+    "noActiveTitle": "لا توجد إقامة نشطة",
+    "noActiveBody": "اختر إقامة لعرض عقودها.",
+    "forbidden": "الوصول محصور على المتصرّف.",
+    "title": "عقود المورّدين",
+    "subtitle": "الاستحقاقات مرتّبة حسب الأولوية. تنبيه دون 30 يوماً، أحمر إذا انقضت.",
+    "newCta": "عقد جديد",
+    "emptyTitle": "لا توجد عقود",
+    "emptyBody": "سجّل عقداً لتتبّع استحقاقه.",
+    "archive": "أرشفة",
+    "due": "الاستحقاق {date}",
+    "countdown": {
+      "expired": "منتهٍ",
+      "today": "اليوم",
+      "days": "{days} يوماً"
+    },
+    "frequency": {
+      "MENSUEL": "شهري",
+      "TRIMESTRIEL": "فصلي",
+      "SEMESTRIEL": "نصف سنوي",
+      "ANNUEL": "سنوي"
+    },
+    "form": {
+      "name": "اسم العقد",
+      "supplier": "المورّد",
+      "amount": "المبلغ (د.م.)",
+      "frequency": "الوتيرة",
+      "startDate": "البداية",
+      "endDate": "الاستحقاق",
+      "save": "حفظ",
+      "cancel": "إلغاء"
+    },
+    "error": {
+      "forbidden": "تم رفض الوصول.",
+      "no_active_residence": "لا توجد إقامة نشطة.",
+      "name_required": "اسم العقد إلزامي.",
+      "invalid_amount": "مبلغ غير صالح.",
+      "invalid_date": "تاريخ استحقاق غير صالح.",
+      "not_found": "العقد غير موجود."
+    }
   },
   "report": {
     "bilanBtn": "إنشاء التقرير السنوي",
@@ -724,7 +756,8 @@
       "expenses": "المصاريف",
       "documents": "الوثائق",
       "settings": "الإعدادات",
-      "invitations": "الدعوات"
+      "invitations": "الدعوات",
+      "contracts": "العقود"
     },
     "header": {
       "account": "الحساب",
