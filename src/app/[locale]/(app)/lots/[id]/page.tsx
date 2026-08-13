@@ -1,5 +1,5 @@
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
-import { Pencil, Plane, UserPlus } from 'lucide-react';
+import { Pencil, Plane, UserPlus, FileText } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
 import { EndAttachmentButton } from '@/components/lots/EndAttachmentButton';
@@ -90,6 +90,12 @@ export default async function LotFichePage({
               </Button>
             </Link>
           )}
+          <Link href={`/lots/${lot.id}/compte`}>
+            <Button variant="secondary">
+              <FileText className="size-4" aria-hidden />
+              {t('account')}
+            </Button>
+          </Link>
           <Link href={`/lots/${lot.id}/modifier`}>
             <Button variant="secondary">
               <Pencil className="size-4" aria-hidden />

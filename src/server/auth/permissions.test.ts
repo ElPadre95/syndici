@@ -31,6 +31,11 @@ describe('permissions matrix (§3) — single source of truth', () => {
     expect(roles.filter((r) => can(r, 'charge.manage'))).toEqual(['SYNDIC', 'GESTIONNAIRE']);
   });
 
+  it('payment.view.all (vue globale des paiements) est réservé au staff', () => {
+    const roles: AppRole[] = ['SYNDIC', 'GESTIONNAIRE', 'PROPRIETAIRE', 'LOCATAIRE'];
+    expect(roles.filter((r) => can(r, 'payment.view.all'))).toEqual(['SYNDIC', 'GESTIONNAIRE']);
+  });
+
   it('PROPRIETAIRE: own lots/charges, visible expenses, votes — not global nor member mgmt', () => {
     expect(can('PROPRIETAIRE', 'lot.view.own')).toBe(true);
     expect(can('PROPRIETAIRE', 'charge.view.own')).toBe(true);

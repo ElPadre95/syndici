@@ -96,7 +96,16 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       cliquable dans l'historique des paiements du lot. Réservé au staff (`receipt.issue`). Émission
       et void testés PGlite ET Postgres réel. Vérifié au navigateur (reçu valide, reçu annulé,
       capture arabe RTL incluse).
-- [ ] **B4** — Compte du lot et historique + vue globale des paiements.
+- [x] **B4** — Compte du lot & vue globale des paiements. **Relevé de compte** du lot : grand livre
+      chronologique DÉBIT (appels) / CRÉDIT (règlements) / re-débit (annulations) avec solde courant ;
+      solde de clôture = total appelé − net réglé = reste dû. Rien n'est stocké — tout est DÉRIVÉ des
+      appels et paiements immuables (cœur pur `buildLedger`, testé). Le numéro de reçu figure sur chaque
+      règlement (barré si annulé). Imprimable fr/ar (en-tête cabinet + résidence, propriétaire), accessible
+      depuis la fiche du lot ; réservé au staff (`lot.view.all`). **Vue globale des paiements** (`/paiements`,
+      remplace le stub) : tous les règlements de la résidence, le plus récent d'abord, avec lot (cliquable),
+      payeur, mode, reçu et montant ; les annulations en négatif ; total encaissé net en tête. Réservé au
+      staff via un nouveau droit `payment.view.all` (matrice + test). Vérifié au navigateur (relevé fr, vue
+      globale fr, capture arabe RTL du relevé incluse).
 
 ## Règles permanentes
 

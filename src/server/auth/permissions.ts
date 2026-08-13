@@ -41,6 +41,7 @@ export type Permission =
   | 'charge.view.own'
   | 'charge.manage' // générer des campagnes d'appels de charges
   | 'payment.record' // enregistrer un paiement (immuable)
+  | 'payment.view.all' // vue globale des paiements de la résidence (staff)
   | 'payment.view.own'
   | 'receipt.issue'
   | 'expense.view' // dépenses & justificatifs de la copropriété
@@ -84,6 +85,7 @@ const MATRIX: Record<AppRole, ReadonlySet<Permission>> = {
     'charge.view.all',
     'charge.manage',
     'payment.record',
+    'payment.view.all',
     'receipt.issue',
     'expense.view',
     'expense.manage',
@@ -105,6 +107,7 @@ const MATRIX: Record<AppRole, ReadonlySet<Permission>> = {
     'charge.view.all',
     'charge.manage',
     'payment.record',
+    'payment.view.all',
     'receipt.issue',
     'expense.view',
     'expense.manage',

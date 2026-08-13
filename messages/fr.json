@@ -523,17 +523,32 @@
     "appActualitesPubliees": "Actualités publiées"
   },
   "account": {
-    "appResidence": "Résidence",
-    "appMonCompte": "Mon compte",
-    "appAutomatisations": "Automatisations",
-    "appDeconnecter": "Se déconnecter",
-    "appMonProfil": "Mon profil",
-    "appInfos": "Informations",
-    "appStats": "Statistiques",
-    "appResidenceLbl": "Résidence",
-    "appMonCompteLbl": "Mon compte",
-    "appMonProfilLbl": "Mon profil",
-    "appInformations": "Informations"
+    "forbidden": "Accès réservé au syndic.",
+    "notFound": "Compte introuvable.",
+    "back": "Retour",
+    "print": "Imprimer",
+    "title": "Relevé de compte",
+    "lotLine": "Lot {lot}",
+    "empty": "Aucune écriture.",
+    "closingBalance": "Solde de clôture",
+    "col": {
+      "date": "Date",
+      "label": "Libellé",
+      "debit": "Débit",
+      "credit": "Crédit",
+      "balance": "Solde"
+    },
+    "label": {
+      "charge": "Appel de charges — {period}",
+      "payment": "Règlement — {method}",
+      "reversal": "Annulation de règlement — {method}"
+    },
+    "method": {
+      "ESPECES": "Espèces",
+      "CHEQUE": "Chèque",
+      "VIREMENT": "Virement",
+      "CARTE": "Carte"
+    }
   },
   "residentHome": {
     "appBonjour": "Bonjour, Sara",
@@ -1019,7 +1034,8 @@
       "quotePart": "Quote-part",
       "charge": "Charges mensuelles",
       "delegated": "Charges déléguées au locataire",
-      "abroad": "Réside à l’étranger : {country}"
+      "abroad": "Réside à l’étranger : {country}",
+      "account": "Relevé"
     },
     "attach": {
       "title": "Ajouter une personne",
@@ -1119,6 +1135,31 @@
       "revoke": "Révoquer",
       "roleOwner": "Propriétaire",
       "roleTenant": "Locataire"
+    }
+  },
+  "paiements": {
+    "noActiveTitle": "Aucune résidence active",
+    "noActiveBody": "Sélectionnez une résidence pour voir ses paiements.",
+    "forbidden": "Accès réservé au syndic.",
+    "title": "Paiements",
+    "subtitle": "{residence} · {count} paiement(s)",
+    "netCollected": "Encaissé net",
+    "emptyTitle": "Aucun paiement",
+    "emptyBody": "Les encaissements enregistrés apparaîtront ici.",
+    "reversal": "Annulation",
+    "col": {
+      "date": "Date",
+      "lot": "Lot",
+      "payer": "Payeur",
+      "method": "Mode",
+      "receipt": "Reçu",
+      "amount": "Montant"
+    },
+    "method": {
+      "ESPECES": "Espèces",
+      "CHEQUE": "Chèque",
+      "VIREMENT": "Virement",
+      "CARTE": "Carte"
     }
   }
 }

@@ -537,17 +537,32 @@
     "appActualitesPubliees": "الأخبار المنشورة"
   },
   "account": {
-    "appResidence": "المبنى",
-    "appMonCompte": "حسابي",
-    "appAutomatisations": "الأتمتة",
-    "appDeconnecter": "تسجيل الخروج",
-    "appMonProfil": "ملفي الشخصي",
-    "appInfos": "المعلومات",
-    "appStats": "الإحصائيات",
-    "appResidenceLbl": "المبنى",
-    "appMonCompteLbl": "حسابي",
-    "appMonProfilLbl": "ملفي الشخصي",
-    "appInformations": "المعلومات"
+    "forbidden": "الوصول محصور على المتصرّف.",
+    "notFound": "الحساب غير موجود.",
+    "back": "رجوع",
+    "print": "طباعة",
+    "title": "كشف الحساب",
+    "lotLine": "الوحدة {lot}",
+    "empty": "لا توجد حركات.",
+    "closingBalance": "الرصيد الختامي",
+    "col": {
+      "date": "التاريخ",
+      "label": "البيان",
+      "debit": "مدين",
+      "credit": "دائن",
+      "balance": "الرصيد"
+    },
+    "label": {
+      "charge": "مطالبة رسوم — {period}",
+      "payment": "دفعة — {method}",
+      "reversal": "إلغاء دفعة — {method}"
+    },
+    "method": {
+      "ESPECES": "نقداً",
+      "CHEQUE": "شيك",
+      "VIREMENT": "تحويل",
+      "CARTE": "بطاقة"
+    }
   },
   "residentHome": {
     "appBonjour": "مرحباً، سارة",
@@ -1016,7 +1031,8 @@
       "quotePart": "الحصة",
       "charge": "الواجبات الشهرية",
       "delegated": "الواجبات مفوَّضة للمكتري",
-      "abroad": "يقيم في الخارج: {country}"
+      "abroad": "يقيم في الخارج: {country}",
+      "account": "كشف الحساب"
     },
     "attach": {
       "title": "إضافة شخص",
@@ -1116,6 +1132,31 @@
       "revoke": "إلغاء",
       "roleOwner": "مالك",
       "roleTenant": "مكترٍ"
+    }
+  },
+  "paiements": {
+    "noActiveTitle": "لا توجد إقامة نشطة",
+    "noActiveBody": "اختر إقامة لعرض مدفوعاتها.",
+    "forbidden": "الوصول محصور على المتصرّف.",
+    "title": "المدفوعات",
+    "subtitle": "{residence} · {count} دفعة",
+    "netCollected": "صافي التحصيل",
+    "emptyTitle": "لا توجد مدفوعات",
+    "emptyBody": "ستظهر هنا المدفوعات المسجّلة.",
+    "reversal": "إلغاء",
+    "col": {
+      "date": "التاريخ",
+      "lot": "الوحدة",
+      "payer": "الدافع",
+      "method": "الطريقة",
+      "receipt": "الإيصال",
+      "amount": "المبلغ"
+    },
+    "method": {
+      "ESPECES": "نقداً",
+      "CHEQUE": "شيك",
+      "VIREMENT": "تحويل",
+      "CARTE": "بطاقة"
     }
   }
 }

@@ -349,3 +349,92 @@ export async function getLotFinance(
     }),
   };
 }
+
+// ── Vue globale des paiements de la résidence (B4) ───────────────────────────
+
+export interface ResidencePaymentRow {
+  id: string;
+  receivedAt: string;
+  lotId: string | null;
+  lotReference: string | null;
+  payerName: string | null;
+  method: string;
+  amountMinor: number;
+  isReversal: boolean;
+  reversed: boolean;
+  receiptId: string | null;
+  receiptNumber: string | null;
+  receiptVoided: boolean;
+}
+
+export interface ResidencePayments {
+  rows: ResidencePaymentRow[];
+  totalNetMinor: number; // somme signée (annulations comprises) = encaissé net
+  count: number; // paiements réels (hors annulations)
+}
+
+/** Tous les paiements de la résidence active (staff), le plus récent d'abord. */
+export async function listResidencePayments(ctx: ActiveContext): Promise<ResidencePayments> {
+  const scoped = forResidence(ctx.residenceId);
+  const payments = await scoped.payment.findMany({
+    orderBy: { receivedAt: 'desc' },
+    select: {
+      id: true,
+      lotId: true,
+      method: true,
+      amountMinor: true,
+      receivedAt: true,
+      payerPersonId: true,
+      reversesPaymentId: true,
+    },
+  });
+
+  const lotIds = [...new Set(payments.map((p) => p.lotId).filter((v): v is string => v != null))];
+  const lots = lotIds.length
+    ? await scoped.lot.findMany({
+        where: { id: { in: lotIds } },
+        select: { id: true, reference: true },
+      })
+    : [];
+  const lotRefById = new Map(lots.map((l) => [l.id, l.reference]));
+
+  const receipts = payments.length
+    ? await scoped.receipt.findMany({
+        where: { paymentId: { in: payments.map((p) => p.id) } },
+        select: { id: true, number: true, paymentId: true, voidedAt: true },
+      })
+    : [];
+  const receiptByPayment = new Map(receipts.map((r) => [r.paymentId, r]));
+
+  const nameById = new Map<string, string>();
+  for (const p of await listResidents(prismaExecutor(), ctx)) {
+    nameById.set(p.id, `${p.firstName} ${p.lastName}`.trim());
+  }
+  const reversedSet = new Set(
+    payments.filter((p) => p.reversesPaymentId).map((p) => p.reversesPaymentId as string),
+  );
+
+  const rows: ResidencePaymentRow[] = payments.map((p) => {
+    const receipt = receiptByPayment.get(p.id);
+    return {
+      id: p.id,
+      receivedAt: p.receivedAt.toISOString(),
+      lotId: p.lotId,
+      lotReference: p.lotId ? (lotRefById.get(p.lotId) ?? null) : null,
+      payerName: p.payerPersonId ? (nameById.get(p.payerPersonId) ?? null) : null,
+      method: p.method,
+      amountMinor: p.amountMinor,
+      isReversal: p.reversesPaymentId != null,
+      reversed: reversedSet.has(p.id),
+      receiptId: receipt?.id ?? null,
+      receiptNumber: receipt?.number ?? null,
+      receiptVoided: receipt?.voidedAt != null,
+    };
+  });
+
+  return {
+    rows,
+    totalNetMinor: rows.reduce((s, r) => s + r.amountMinor, 0),
+    count: rows.filter((r) => !r.isReversal).length,
+  };
+}
