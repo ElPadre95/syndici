@@ -6,6 +6,7 @@
  */
 import { forResidence } from '@/server/db/tenant';
 import { listCampaigns } from './campaigns';
+import { getTreasury, type Treasury } from './treasury';
 import type { ActiveContext } from '@/server/auth/context';
 
 export interface StaffDashboard {
@@ -20,6 +21,7 @@ export interface StaffDashboard {
   } | null;
   totalRemainingMinor: number; // impayés cumulés (toutes campagnes)
   collectedThisMonthMinor: number; // net encaissé ce mois calendaire (annulations comprises)
+  treasury: Treasury; // trésorerie réelle : encaissé − dépensé (tout l'historique)
 }
 
 export async function getStaffDashboard(
@@ -36,12 +38,13 @@ export async function getStaffDashboard(
 
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const [lots, agg] = await Promise.all([
+  const [lots, agg, treasury] = await Promise.all([
     scoped.lot.count({ where: { archivedAt: null } }),
     scoped.payment.aggregate({
       _sum: { amountMinor: true },
       where: { receivedAt: { gte: monthStart, lt: nextMonth } },
     }),
+    getTreasury(ctx), // tout l'historique : encaissé − dépensé
   ]);
 
   return {
@@ -57,5 +60,6 @@ export async function getStaffDashboard(
       : null,
     totalRemainingMinor: campaigns.reduce((s, c) => s + c.remainingMinor, 0),
     collectedThisMonthMinor: agg._sum.amountMinor ?? 0,
+    treasury,
   };
 }

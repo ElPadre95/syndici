@@ -271,6 +271,29 @@
       "file_unsupported_type": "نوع ملف غير مقبول (صور أو PDF).",
       "file_too_large": "الملف كبير جداً (بحد أقصى 10 ميغا).",
       "file_empty": "ملف فارغ."
+    },
+    "subtitleResidence": "{residence}",
+    "uncategorized": "بدون فئة",
+    "noMatch": "لا نتائج",
+    "noMatchBody": "لا مصروف يطابق هذه المرشّحات.",
+    "treasury": {
+      "title": "خزينة الفترة",
+      "collected": "المحصّل",
+      "spent": "المصروف"
+    },
+    "filters": {
+      "category": "الفئة",
+      "allCategories": "الكل",
+      "from": "من",
+      "to": "إلى",
+      "supplier": "المورّد",
+      "supplierHint": "بحث…",
+      "search": "بحث",
+      "reset": "إعادة ضبط"
+    },
+    "breakdown": {
+      "title": "التوزيع حسب الفئة",
+      "empty": "لا مصاريف في الفترة."
     }
   },
   "votes": {
@@ -728,7 +751,10 @@
         "viewCharges": "عرض المطالبات",
         "remaining": "المتبقّي (الإجمالي)",
         "collectedMonth": "المحصَّل هذا الشهر",
-        "noCampaign": "لا حملة"
+        "noCampaign": "لا حملة",
+        "treasury": "الخزينة الفعلية",
+        "treasuryCollected": "المحصّل",
+        "treasurySpent": "المصروف"
       }
     },
     "residentHome": {

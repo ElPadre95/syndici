@@ -1,7 +1,8 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import { DoorOpen, TrendingUp, AlertTriangle, Wallet, ArrowRight } from 'lucide-react';
+import { DoorOpen, TrendingUp, AlertTriangle, Wallet, ArrowRight, Landmark } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { formatMoney } from '@/lib/money';
+import { cn } from '@/lib/cn';
 import type { StaffDashboard as Data } from '@/server/finance/dashboard';
 
 /**
@@ -73,6 +74,49 @@ export async function StaffDashboard({
           {name ? t('welcome', { name }) : t('welcomeGuest')}
         </h1>
       </header>
+
+      {/* Trésorerie réelle : encaissé − dépensé (tout l'historique). */}
+      <Link
+        href="/depenses"
+        className="group flex flex-wrap items-center justify-between gap-4 rounded-lg border border-sep bg-white p-5 transition-colors hover:border-indigo"
+      >
+        <div className="flex items-center gap-4">
+          <span className="flex size-11 items-center justify-center rounded-md bg-indigo-soft text-indigo">
+            <Landmark className="size-5" aria-hidden />
+          </span>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wide text-label-4">
+              {t('staff.treasury')}
+            </p>
+            <p
+              className={cn(
+                'text-3xl font-extrabold tabular-nums',
+                data.treasury.netMinor >= 0 ? 'text-green' : 'text-orange',
+              )}
+            >
+              {formatMoney(data.treasury.netMinor, locale)}
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-6 text-sm">
+          <div className="text-end">
+            <p className="text-xs font-semibold uppercase tracking-wide text-label-4">
+              {t('staff.treasuryCollected')}
+            </p>
+            <p className="font-bold tabular-nums text-green">
+              {formatMoney(data.treasury.collectedMinor, locale)}
+            </p>
+          </div>
+          <div className="text-end">
+            <p className="text-xs font-semibold uppercase tracking-wide text-label-4">
+              {t('staff.treasurySpent')}
+            </p>
+            <p className="font-bold tabular-nums text-label">
+              −{formatMoney(data.treasury.spentMinor, locale)}
+            </p>
+          </div>
+        </div>
+      </Link>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map(({ key, Icon, value, label, href, cta }) => (

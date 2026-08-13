@@ -131,7 +131,15 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       Liste staff avec justificatif consultable en un clic (URL signée), badge INTERNE, annulation. Cœur
       executor-based testé PGlite ET Postgres réel ; défauts §7.3 testés. Vérifié au navigateur (saisie,
       justificatif PDF servi en 200 via la route signée / 403 si altéré, annulation, capture arabe RTL).
-- [ ] **C2** — Liste & transparence (filtres, recherche fournisseur, répartition par catégorie, trésorerie réelle).
+- [x] **C2** — Liste & transparence. La liste des dépenses gagne des **filtres** (catégorie + période) et
+      une **recherche fournisseur**, portés par l'URL (partageable, rechargeable). Une **répartition par
+      catégorie** (la lecture « budget » du prototype) : chaque poste avec son montant NET et sa part du
+      total, triée décroissante, barres de proportion (cœur pur `aggregateByCategory`, testé). Et surtout
+      la **trésorerie réelle de la période — encaissé − dépensé** (sommes nettes, annulations comprises ;
+      les dépenses INTERNE comptent, la trésorerie est un fait comptable) : affichée en tête de `/depenses`
+      (recalculée selon la période) ET **sur le tableau de bord** (tout l'historique), à côté du taux de
+      collecte. Vérifié au navigateur (trésorerie dashboard + période, filtre fournisseur/période, négatif
+      en orange, répartition, capture arabe RTL).
 - [ ] **C3** — Contrats fournisseurs (échéance, compte à rebours, alerte visuelle ; seuils §7.2).
 
 ## Règles permanentes

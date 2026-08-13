@@ -188,6 +188,7 @@ export async function getExpenseCategories(ctx: ActiveContext): Promise<ExpenseC
 export interface ExpenseRow {
   id: string;
   spentOn: string;
+  categoryId: string | null;
   categoryLabel: string | null;
   supplierName: string | null;
   description: string;
@@ -204,21 +205,36 @@ export interface ExpenseList {
   totalNetMinor: number; // somme signée (annulations comprises)
 }
 
+export interface ListExpensesOptions {
+  includeInternal: boolean;
+  from?: Date; // borne basse sur `spentOn` (incluse)
+  to?: Date; // borne haute sur `spentOn` (incluse)
+}
+
 /**
- * Dépenses de la résidence, la plus récente d'abord. `includeInternal=false` masque les
- * dépenses INTERNE (vue copropriétaire) ; le staff voit tout.
+ * Dépenses de la résidence sur une période, la plus récente d'abord. `includeInternal=false`
+ * masque les dépenses INTERNE (vue copropriétaire) ; le staff voit tout. Les filtres fins
+ * (catégorie, fournisseur) s'appliquent ensuite en mémoire côté page (jeu de données réduit).
  */
 export async function listExpenses(
   ctx: ActiveContext,
-  opts: { includeInternal: boolean } = { includeInternal: true },
+  opts: ListExpensesOptions = { includeInternal: true },
 ): Promise<ExpenseList> {
   const scoped = forResidence(ctx.residenceId);
+  const spentOn =
+    opts.from || opts.to
+      ? { ...(opts.from ? { gte: opts.from } : {}), ...(opts.to ? { lte: opts.to } : {}) }
+      : undefined;
   const expenses = await scoped.expense.findMany({
-    where: opts.includeInternal ? {} : { visibility: 'PARTAGE' },
+    where: {
+      ...(opts.includeInternal ? {} : { visibility: 'PARTAGE' }),
+      ...(spentOn ? { spentOn } : {}),
+    },
     orderBy: [{ spentOn: 'desc' }, { createdAt: 'desc' }],
     select: {
       id: true,
       spentOn: true,
+      categoryId: true,
       supplierName: true,
       description: true,
       amountMinor: true,
@@ -236,6 +252,7 @@ export async function listExpenses(
   const rows: ExpenseRow[] = expenses.map((e) => ({
     id: e.id,
     spentOn: e.spentOn.toISOString(),
+    categoryId: e.categoryId,
     categoryLabel: e.category?.label ?? null,
     supplierName: e.supplierName,
     description: e.description,
@@ -248,4 +265,48 @@ export async function listExpenses(
   }));
 
   return { rows, totalNetMinor: rows.reduce((s, r) => s + r.amountMinor, 0) };
+}
+
+// ── Répartition par catégorie (transparence, C2) — cœur PUR testable ──────────
+
+export interface CategoryBreakdownRow {
+  categoryId: string | null;
+  label: string;
+  totalMinor: number;
+}
+export interface CategoryBreakdown {
+  rows: CategoryBreakdownRow[]; // triées par montant décroissant
+  totalMinor: number;
+}
+
+/**
+ * Regroupe des dépenses par catégorie et somme les montants (nets : une annulation, de
+ * même catégorie et négative, réduit son poste). Les catégories à solde nul sont omises,
+ * le reste est trié par montant décroissant. Fonction PURE.
+ */
+export function aggregateByCategory(
+  items: readonly {
+    categoryId: string | null;
+    categoryLabel: string | null;
+    amountMinor: number;
+  }[],
+  uncategorizedLabel: string,
+): CategoryBreakdown {
+  const NONE = ' none';
+  const map = new Map<string, { label: string; total: number }>();
+  for (const it of items) {
+    const key = it.categoryId ?? NONE;
+    const prev = map.get(key);
+    if (prev) prev.total += it.amountMinor;
+    else map.set(key, { label: it.categoryLabel ?? uncategorizedLabel, total: it.amountMinor });
+  }
+  const rows = [...map.entries()]
+    .map(([key, v]) => ({
+      categoryId: key === NONE ? null : key,
+      label: v.label,
+      totalMinor: v.total,
+    }))
+    .filter((r) => r.totalMinor !== 0)
+    .sort((a, b) => b.totalMinor - a.totalMinor);
+  return { rows, totalMinor: rows.reduce((s, r) => s + r.totalMinor, 0) };
 }
