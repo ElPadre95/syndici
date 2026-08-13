@@ -44,8 +44,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // Runtime de l'application : chaîne POOLÉE (PgBouncer). En local : Postgres direct.
+  url       = env("DATABASE_URL")
+  // Migrations / introspection : chaîne DIRECTE (le pooler transactionnel casse
+  // `prisma migrate`). Sur Neon : l'URL sans `-pooler`. En local : identique à DATABASE_URL.
+  directUrl = env("DIRECT_URL")
 }
 
 // ─────────────────────────────── Enums ────────────────────────────────────

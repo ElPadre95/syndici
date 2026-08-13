@@ -31,8 +31,13 @@ Repère : 🧑 = à faire par toi · 🤖 = déjà fait / vérifiable par l'assi
 ### 1. 🧑 Créer la base Postgres de production
 
 1. Crée un projet Postgres chez Neon (ou Vercel Postgres).
-2. Copie la **chaîne de connexion** (format `postgresql://…?sslmode=require`).
-   Garde-la de côté pour les étapes 3 et 4 — **ne la colle nulle part dans le dépôt**.
+2. Neon fournit **deux** chaînes de connexion — copie les deux (SSL, `?sslmode=require`) :
+   - **poolée** (l'hôte contient `-pooler`) → pour l'application → variable `DATABASE_URL` ;
+   - **directe** (l'hôte SANS `-pooler`) → pour les migrations → variable `DIRECT_URL`.
+
+   Pourquoi : le pooler transactionnel (PgBouncer) casse `prisma migrate` ; l'app, elle,
+   tourne mieux sur la poolée. Le schéma Prisma gère ce cas (`url` + `directUrl`).
+   Garde ces valeurs de côté — **ne les colle nulle part dans le dépôt**.
 
 ### 2. 🧑 Générer les secrets
 
@@ -48,18 +53,17 @@ développement (`dev-syndic-2026`).
 
 ### 3. 🧑 Appliquer les migrations + charger la démo (depuis ta machine)
 
-Depuis le dossier du projet, en pointant `DATABASE_URL` sur la **base de prod**
-(remplace `<PROD_URL>` par la chaîne de l'étape 1, `<DEMO_PWD>` par le mot de passe
-de l'étape 2). Ces variables ne sont passées qu'en ligne de commande, jamais écrites
-dans un fichier versionné :
+Depuis le dossier du projet. Remplace `<POOLED>` par la chaîne poolée, `<DIRECT>` par
+la directe (étape 1), `<DEMO_PWD>` par le mot de passe de l'étape 2. Ces valeurs ne sont
+passées qu'en ligne de commande, jamais écrites dans un fichier versionné :
 
 ```bash
-# 3a. Créer le schéma (tables, index, contraintes) sur la base de prod
-DATABASE_URL="<PROD_URL>" npx prisma migrate deploy
+# 3a. Créer le schéma (tables, index, contraintes) — via la connexion DIRECTE
+DIRECT_URL="<DIRECT>" DATABASE_URL="<POOLED>" npx prisma migrate deploy
 
 # 3b. Charger la démo (Al Firdaous + lots + propriétaires MRE + locataires +
 #     impayés variés + paiements) ET créer le compte de démonstration
-DATABASE_URL="<PROD_URL>" \
+DATABASE_URL="<POOLED>" DIRECT_URL="<DIRECT>" \
   DEMO_SYNDIC_EMAIL="demo@syndici.ma" \
   DEMO_SYNDIC_PASSWORD="<DEMO_PWD>" \
   npm run db:seed
@@ -70,7 +74,7 @@ DATABASE_URL="<PROD_URL>" \
 > développement local), aucun compte de démo n'est créé.
 >
 > ⚠️ Le seed **réinitialise** les données de la base ciblée (démo repartant propre).
-> Vérifie deux fois que `<PROD_URL>` est bien la base de démo, pas une autre.
+> Vérifie deux fois que les chaînes pointent bien sur la base de démo, pas une autre.
 
 ### 4. 🧑 Configurer les variables d'environnement Vercel
 
@@ -79,7 +83,8 @@ Dans Vercel → ton projet → **Settings → Environment Variables**, ajoute (s
 
 | Nom            | Valeur                                        |
 | -------------- | --------------------------------------------- |
-| `DATABASE_URL` | la chaîne Postgres de prod (étape 1)          |
+| `DATABASE_URL` | la chaîne **poolée** (étape 1)                |
+| `DIRECT_URL`   | la chaîne **directe** (étape 1)               |
 | `AUTH_SECRET`  | la valeur `openssl rand -base64 32` (étape 2) |
 
 `DEMO_SYNDIC_*` n'a **pas** besoin d'être dans Vercel (le compte est déjà créé à
@@ -88,8 +93,9 @@ l'étape 3). Ne mets jamais ces valeurs dans le dépôt.
 ### 5. 🧑 Déployer
 
 1. Dans Vercel, importe le dépôt (Framework: **Next.js**, détecté automatiquement).
-2. Lance le déploiement. Le build exécute `prisma generate` (via `postinstall`) puis
-   `next build`. Aucune migration n'est jouée au build : elles l'ont été à l'étape 3.
+2. Lance le déploiement. Le script `build` = `prisma generate && next build` (le client
+   Prisma est donc régénéré à CHAQUE build, même si Vercel met `node_modules` en cache).
+   Aucune migration n'est jouée au build : elles l'ont été à l'étape 3.
 3. Récupère l'URL de production (`https://<projet>.vercel.app`).
 
 ### 6. 🤖 Vérification (par l'assistant, sans se connecter) + 🧑 (connexion)
@@ -121,6 +127,12 @@ est à faire **par toi** : l'assistant ne saisit aucun mot de passe. Checklist :
   `.env.example`, sans valeurs réelles, est suivi).
 - **Secrets aléatoires** : `AUTH_SECRET` et le mot de passe de démo sont générés par
   `openssl`, propres à la production.
+- **Build indépendant de la machine locale** (vérifié) : le client Prisma est régénéré
+  au build ; le build ne se connecte à AUCUNE base (testé avec une URL injoignable) ;
+  aucun chemin absolu, aucun binaire natif (bcryptjs pur JS), `binaryTargets` non figé
+  donc le moteur Prisma est généré pour la plateforme de build (Linux/Vercel).
+- **Historique Git sans secret** (vérifié sur tous les commits) : aucun fichier `.env`
+  réel, aucune chaîne de connexion réelle, aucun token.
 
 ## Rejouer / réinitialiser la démo
 
