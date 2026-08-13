@@ -23,7 +23,10 @@ export function AppHeader({ userLabel, residences, activeId }: AppHeaderProps) {
   const t = useTranslations('app.header');
 
   return (
-    <header className="flex items-center justify-between gap-4 border-b border-sep bg-white px-6 py-3">
+    <header
+      data-print-hide
+      className="flex items-center justify-between gap-4 border-b border-sep bg-white px-6 py-3"
+    >
       <div className="flex items-center gap-3">
         {residences.length > 0 && <ResidenceSwitcher residences={residences} activeId={activeId} />}
         <span className="flex items-center gap-2 text-sm text-label-3">

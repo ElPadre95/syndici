@@ -70,6 +70,16 @@ async function auditCount(action: string): Promise<number> {
     ])
   )[0]!.n;
 }
+async function receiptFor(
+  paymentId: string,
+): Promise<{ number: string; amountMinor: number; voided: boolean } | null> {
+  const rows = await exec.query<{ number: string; amountMinor: number; voidedAt: string | null }>(
+    `SELECT number, "amountMinor", "voidedAt" FROM "Receipt" WHERE "paymentId" = $1`,
+    [paymentId],
+  );
+  const r = rows[0];
+  return r ? { number: r.number, amountMinor: r.amountMinor, voided: r.voidedAt != null } : null;
+}
 
 describe('writePayment', () => {
   it('crée un paiement, l’alloue à l’appel, et trace l’audit', async () => {
@@ -86,6 +96,56 @@ describe('writePayment', () => {
     await writePayment(runner, base({ amountMinor: 20000, method: 'VIREMENT' }));
     expect(await allocOf('call-1')).toBe(50000); // toujours partiel
     expect(await paymentCount()).toBe(2);
+  });
+});
+
+describe('reçu (B3) — émission séquentielle & annulation', () => {
+  it('émet un reçu numéroté (REC-<exercice>-<seq>) et trace l’audit receipt.issue', async () => {
+    const id = await writePayment(runner, base({ amountMinor: 65000 }));
+    const rec = await receiptFor(id);
+    expect(rec).toEqual({ number: 'REC-2026-0001', amountMinor: 65000, voided: false });
+    expect(await auditCount('receipt.issue')).toBe(1);
+  });
+
+  it('numérote de façon CONTINUE et SANS TROU par exercice', async () => {
+    const a = await writePayment(runner, base({ amountMinor: 10000 }));
+    const b = await writePayment(runner, base({ amountMinor: 10000 }));
+    const c = await writePayment(runner, base({ amountMinor: 10000 }));
+    expect((await receiptFor(a))!.number).toBe('REC-2026-0001');
+    expect((await receiptFor(b))!.number).toBe('REC-2026-0002');
+    expect((await receiptFor(c))!.number).toBe('REC-2026-0003');
+  });
+
+  it('l’exercice suit l’année d’encaissement', async () => {
+    const id = await writePayment(
+      runner,
+      base({ amountMinor: 10000, receivedAt: new Date('2027-01-03T00:00:00Z') }),
+    );
+    expect((await receiptFor(id))!.number).toBe('REC-2027-0001');
+  });
+
+  it('annuler un paiement VOIDe son reçu (le numéro est conservé)', async () => {
+    const id = await writePayment(runner, base({ amountMinor: 65000 }));
+    const before = await receiptFor(id);
+    expect(before!.voided).toBe(false);
+
+    const res = await reversePayment(runner, {
+      residenceId: RES,
+      paymentId: id,
+      reason: 'Chèque sans provision',
+      actorPersonId: 'recorder',
+    });
+    expect(res.ok).toBe(true);
+
+    const after = await receiptFor(id);
+    expect(after).toEqual({ number: before!.number, amountMinor: 65000, voided: true }); // numéro conservé, voidé
+    // l'écriture inverse (paiement négatif) ne porte PAS de reçu
+    const reversalId = (
+      await exec.query<{ id: string }>(`SELECT id FROM "Payment" WHERE "reversesPaymentId" = $1`, [
+        id,
+      ])
+    )[0]!.id;
+    expect(await receiptFor(reversalId)).toBeNull();
   });
 });
 

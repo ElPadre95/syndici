@@ -53,7 +53,10 @@ export function AppSidebar({ staff }: { staff: boolean }) {
   const items = staff ? [HOME_NAV, ...STAFF_NAV] : [HOME_NAV];
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col gap-1 border-e border-sep bg-white pb-6 pe-3 ps-4 pt-6">
+    <aside
+      data-print-hide
+      className="flex w-64 shrink-0 flex-col gap-1 border-e border-sep bg-white pb-6 pe-3 ps-4 pt-6"
+    >
       <div className="mb-6 ps-2">
         <span className="font-serif text-2xl text-label">{tCommon('appName')}</span>
       </div>

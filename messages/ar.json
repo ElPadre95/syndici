@@ -149,7 +149,30 @@
     "recuConfirme": "تم تأكيد الدفع",
     "recuAuto": "تم إنشاء هذا الإيصال تلقائياً بواسطة Syndici.",
     "recuPrint": "طباعة / PDF",
-    "recuDlCourt": "تحميل"
+    "recuDlCourt": "تحميل",
+    "back": "رجوع",
+    "print": "طباعة",
+    "forbidden": "الوصول محصور على المتصرّف.",
+    "notFound": "الإيصال غير موجود.",
+    "doc": {
+      "title": "إيصال الدفع",
+      "payer": "استُلم من",
+      "lot": "الوحدة",
+      "periods": "الفترات المسدّدة",
+      "method": "طريقة الدفع",
+      "reference": "المرجع",
+      "receivedAt": "تاريخ التحصيل",
+      "amount": "المبلغ",
+      "voided": "إيصال ملغى",
+      "issuedLine": "صدر في {date} بواسطة {by}.",
+      "issuedAtOnly": "صدر في {date}."
+    },
+    "method": {
+      "ESPECES": "نقداً",
+      "CHEQUE": "شيك",
+      "VIREMENT": "تحويل",
+      "CARTE": "بطاقة"
+    }
   },
   "vocab": {
     "vocAppartement": "شقة",

@@ -424,6 +424,11 @@ async function main() {
         after: { reverses: toCancel.id, reason: 'Virement rejeté' },
       },
     });
+    // Le reçu de l'encaissement annulé est voidé (B3) — son numéro reste consommé.
+    await prisma.receipt.updateMany({
+      where: { paymentId: toCancel.id, voidedAt: null },
+      data: { voidedAt: new Date() },
+    });
   }
 
   // Dépenses avec justificatif (référence de fichier)

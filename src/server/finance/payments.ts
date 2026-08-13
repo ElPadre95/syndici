@@ -11,6 +11,7 @@
 import { forResidence } from '@/server/db/tenant';
 import { prismaExecutor, type TxRunner } from '@/server/db/sql';
 import { listResidents } from '@/server/auth/person-access';
+import { NUMBER_SEQUENCE_UPSERT_SQL, formatReceiptNumber } from './numbering';
 import {
   deriveSettlementState,
   deriveTemporalState,
@@ -38,6 +39,17 @@ const INSERT_ALLOCATION = `
 const INSERT_AUDIT = `
   INSERT INTO "AuditLog" (id,"residenceId","actorPersonId",action,"entityType","entityId",after,at)
   VALUES (gen_random_uuid(),$1,$2,$3,$4,$5,$6::jsonb,now())`;
+
+const INSERT_RECEIPT = `
+  INSERT INTO "Receipt"
+    (id,"residenceId",exercice,sequence,number,"paymentId","lotId","amountMinor","issuedAt")
+  VALUES (gen_random_uuid(),$1,$2,$3,$4,$5,$6,$7,now())
+  RETURNING id`;
+
+/** Voide le reçu d'un paiement (le numéro est conservé, jamais réutilisé). */
+const VOID_RECEIPT = `
+  UPDATE "Receipt" SET "voidedAt" = now()
+   WHERE "paymentId" = $1 AND "voidedAt" IS NULL`;
 
 export interface RecordPaymentInput {
   residenceId: string;
@@ -86,6 +98,38 @@ export async function writePayment(runner: TxRunner, input: RecordPaymentInput):
         amountMinor: input.amountMinor,
         method: input.method,
       }),
+    ]);
+
+    // Reçu (B3) : numéro séquentiel CONTINU et SANS TROU par (résidence, exercice),
+    // émis DANS la même transaction que le paiement. L'exercice est l'année de la
+    // date d'encaissement. Un rollback annule aussi l'incrément du compteur.
+    const exercice = input.receivedAt.getUTCFullYear();
+    const seq = (
+      await tx.query<{ lastValue: number }>(NUMBER_SEQUENCE_UPSERT_SQL, [
+        input.residenceId,
+        exercice,
+        'RECU',
+      ])
+    )[0]!.lastValue;
+    const number = formatReceiptNumber(exercice, seq);
+    const receiptId = (
+      await tx.query<{ id: string }>(INSERT_RECEIPT, [
+        input.residenceId,
+        exercice,
+        seq,
+        number,
+        paymentId,
+        input.lotId,
+        input.amountMinor,
+      ])
+    )[0]!.id;
+    await tx.query(INSERT_AUDIT, [
+      input.residenceId,
+      input.actorPersonId,
+      'receipt.issue',
+      'Receipt',
+      receiptId,
+      JSON.stringify({ number, amountMinor: input.amountMinor }),
     ]);
     return paymentId;
   });
@@ -163,6 +207,9 @@ export async function reversePayment(
         -a.amountMinor,
       ]);
     }
+    // Le reçu de l'encaissement annulé est VOIDÉ (marqué annulé) : son numéro reste
+    // consommé (séquence sans trou), il ne sera jamais réutilisé ni réimprimé comme valide.
+    await tx.query(VOID_RECEIPT, [orig.id]);
     await tx.query(INSERT_AUDIT, [
       params.residenceId,
       params.actorPersonId,
@@ -200,6 +247,9 @@ export interface LotPayment {
   recordedByName: string | null;
   isReversal: boolean;
   reversed: boolean;
+  receiptId: string | null;
+  receiptNumber: string | null;
+  receiptVoided: boolean;
 }
 
 export interface LotFinance {
@@ -255,6 +305,14 @@ export async function getLotFinance(
     payments.filter((p) => p.reversesPaymentId).map((p) => p.reversesPaymentId as string),
   );
 
+  const receipts = payments.length
+    ? await scoped.receipt.findMany({
+        where: { paymentId: { in: payments.map((p) => p.id) } },
+        select: { id: true, number: true, paymentId: true, voidedAt: true },
+      })
+    : [];
+  const receiptByPayment = new Map(receipts.map((r) => [r.paymentId, r]));
+
   return {
     calls: calls.map((c) => {
       const alloc = Math.max(0, allocByCall.get(c.id) ?? 0);
@@ -272,16 +330,22 @@ export async function getLotFinance(
         daysLate: daysLate(c.dueDate, now),
       };
     }),
-    payments: payments.map((p) => ({
-      id: p.id,
-      method: p.method,
-      amountMinor: p.amountMinor,
-      receivedAt: p.receivedAt.toISOString(),
-      reference: p.reference,
-      note: p.note,
-      recordedByName: p.recordedByPersonId ? (nameById.get(p.recordedByPersonId) ?? null) : null,
-      isReversal: p.reversesPaymentId != null,
-      reversed: reversedSet.has(p.id),
-    })),
+    payments: payments.map((p) => {
+      const receipt = receiptByPayment.get(p.id);
+      return {
+        id: p.id,
+        method: p.method,
+        amountMinor: p.amountMinor,
+        receivedAt: p.receivedAt.toISOString(),
+        reference: p.reference,
+        note: p.note,
+        recordedByName: p.recordedByPersonId ? (nameById.get(p.recordedByPersonId) ?? null) : null,
+        isReversal: p.reversesPaymentId != null,
+        reversed: reversedSet.has(p.id),
+        receiptId: receipt?.id ?? null,
+        receiptNumber: receipt?.number ?? null,
+        receiptVoided: receipt?.voidedAt != null,
+      };
+    }),
   };
 }

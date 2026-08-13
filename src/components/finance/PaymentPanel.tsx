@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import { Wallet, Undo2, AlertCircle } from 'lucide-react';
+import { Wallet, Undo2, AlertCircle, Receipt } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
@@ -264,6 +265,20 @@ export function PaymentPanel({ finance, canRecord }: { finance: LotFinance; canR
                     </span>
                   )}
                   {p.note && <span className="italic text-label-4">« {p.note} »</span>}
+                  {p.receiptNumber && p.receiptId && (
+                    <Link
+                      href={`/recus/${p.receiptId}`}
+                      className={cn(
+                        'flex items-center gap-1 font-mono text-xs font-semibold',
+                        p.receiptVoided
+                          ? 'text-label-4 line-through'
+                          : 'text-indigo hover:underline',
+                      )}
+                    >
+                      <Receipt className="size-3.5" aria-hidden />
+                      {p.receiptNumber}
+                    </Link>
+                  )}
                   {canRecord && !p.isReversal && !p.reversed && (
                     <span className="ms-auto">
                       {reversingId === p.id ? (

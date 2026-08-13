@@ -25,3 +25,28 @@
     @apply font-serif;
   }
 }
+
+/*
+ * Impression (B3). Le reçu est le seul document imprimable : on masque le chrome de
+ * l'application (barre latérale, en-tête, boutons marqués data-print-hide) et on
+ * neutralise fond et marges pour ne sortir que le reçu (data-print-root).
+ */
+@media print {
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  body {
+    background-color: #fff;
+  }
+
+  main {
+    padding-block: 0;
+    padding-inline: 0;
+  }
+
+  [data-print-root] {
+    border-width: 0;
+    max-width: none;
+  }
+}

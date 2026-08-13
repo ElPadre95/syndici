@@ -84,7 +84,18 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       `reversePayment`) testé PGlite ET Postgres réel (6 invariants). Panneau « Charges & paiements » sur
       la fiche du lot (appels, encaisser, historique, annuler). Vérifié au navigateur (encaissement
       espèces → soldé, annulation → non réglé) ; capture arabe (RTL) incluse.
-- [ ] **B3** — Reçu (séquence en base, imprimable fr/ar, réimpression à l'identique).
+- [x] **B3** — Reçu. Chaque encaissement émet un reçu numéroté — `REC-<exercice>-<seq>`, séquence
+      CONTINUE et SANS TROU par (résidence, exercice) — DANS la même transaction que le paiement
+      (un rollback n'entame pas le compteur ; réémission par `writePayment`, tracée `receipt.issue`).
+      L'exercice suit l'année d'encaissement. Le reçu est un INSTANTANÉ comptable (numéro + montant
+      figés en base) : la réimpression rend TOUJOURS le même document (le paiement est immuable).
+      Annuler un paiement VOIDE son reçu (bandeau « annulé ») tout en conservant son numéro — jamais
+      réutilisé. Document imprimable fr/ar (propriétés logiques RTL), sobre et officiel (en-tête
+      cabinet + résidence, payeur, lot, période(s) réglée(s), mode, montant, émission) ; le chrome
+      de l'app est masqué à l'impression (`data-print-hide`). Le numéro du reçu est visible et
+      cliquable dans l'historique des paiements du lot. Réservé au staff (`receipt.issue`). Émission
+      et void testés PGlite ET Postgres réel. Vérifié au navigateur (reçu valide, reçu annulé,
+      capture arabe RTL incluse).
 - [ ] **B4** — Compte du lot et historique + vue globale des paiements.
 
 ## Règles permanentes

@@ -149,7 +149,30 @@
     "recuConfirme": "PAIEMENT CONFIRMÉ",
     "recuAuto": "Ce reçu a été généré automatiquement par Syndici.",
     "recuPrint": "Imprimer / PDF",
-    "recuDlCourt": "Télécharger"
+    "recuDlCourt": "Télécharger",
+    "back": "Retour",
+    "print": "Imprimer",
+    "forbidden": "Accès réservé au syndic.",
+    "notFound": "Reçu introuvable.",
+    "doc": {
+      "title": "Reçu de paiement",
+      "payer": "Reçu de",
+      "lot": "Lot",
+      "periods": "Période(s) réglée(s)",
+      "method": "Mode de règlement",
+      "reference": "Référence",
+      "receivedAt": "Date d'encaissement",
+      "amount": "Montant",
+      "voided": "Reçu annulé",
+      "issuedLine": "Émis le {date} par {by}.",
+      "issuedAtOnly": "Émis le {date}."
+    },
+    "method": {
+      "ESPECES": "Espèces",
+      "CHEQUE": "Chèque",
+      "VIREMENT": "Virement",
+      "CARTE": "Carte"
+    }
   },
   "vocab": {
     "vocAppartement": "Appartement",
