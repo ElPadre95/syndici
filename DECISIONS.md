@@ -315,6 +315,24 @@ perm)`, deny par défaut) — aucun test de rôle codé en dur ailleurs.
   une interface `SqlExecutor`/`TxRunner` exécutée à l'identique en prod (Prisma) et en test (PGlite) —
   pas de divergence entre ce qui est testé et ce qui tourne.
 
+### D32. Stockage d'objets : abstraction de driver + accès servi par l'application (C0)
+
+- **Décision** : couche `StorageDriver` (`src/server/storage/`) ; le fournisseur n'est jamais en dur.
+  Driver **local** en dev (sans réseau), **Vercel Blob** en prod, sélectionnés par l'environnement ;
+  chaque fichier porte son driver en préfixe de `storageKey` (`"<driver>:<ref>"`). La sécurité vit
+  AU-DESSUS du driver, identique quel que soit le backend : un fichier est toujours scopé à une
+  résidence (clé `residences/<id>/…`, isolation testée), et les octets ne sont servis QUE par
+  `/api/files/[id]` derrière trois gardes — signature HMAC expirante (`AUTH_SECRET`), session,
+  appartenance à la résidence active. Types (images + PDF) et taille (≤ 10 Mo) validés.
+- **Réserve assumée (Vercel Blob)** : Vercel Blob n'expose que des URLs **publiques** à suffixe
+  aléatoire, **permanentes** — la seule révocation est la **suppression du fichier**. Notre architecture
+  ne révèle jamais cette URL (les octets passent par la route authentifiée). MAIS si l'URL sous-jacente
+  **fuit** un jour — un journal, un bug, une copie manuelle — le justificatif devient consultable **sans
+  authentification**, jusqu'à suppression. **Acceptable pour des factures de charges.** À **revoir** si
+  l'on stocke un jour des **pièces d'identité ou des documents bancaires** : basculer alors sur un
+  stockage à URLs pré-signées **privées** (S3/**R2**) — le driver abstrait rend ce changement local
+  (un seul fichier), sans toucher au code métier.
+
 ### Zones où SPEC.md est muet/ambigu et où j'ai tranché
 
 - **Statut `UPCOMING`** : SPEC n'énumère que paid/partial/late. J'ai ajouté `UPCOMING` (impayé **avant**

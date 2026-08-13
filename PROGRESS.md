@@ -120,8 +120,17 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       session, et appartenance à la résidence active. Types acceptés (images + PDF) et taille (≤ 10 Mo)
       validés avec refus propre. Le contenu ne touche jamais la base (contrainte SQL anti-base64 conservée).
       Choix de stockage à valider par le propriétaire du projet ; action Vercel requise (créer le Blob store).
-- [ ] **C1** — Saisir une dépense (catégorie par type de résidence, montant, date, fournisseur, justificatif ;
-      visibilité copropriétaires / interne ; annulation par écriture inverse, audit).
+- [x] **C1** — Saisir une dépense. Formulaire rapide (le gérant photographie une facture depuis son
+      téléphone : input `capture`) — catégorie, montant en centimes, date, fournisseur, description,
+      **justificatif** (image ou PDF, ≤ 10 Mo) stocké réellement via C0, et **visibilité** PARTAGE
+      (copropriétaires) / INTERNE (syndic) qui pilote la transparence. Les catégories dépendent du type
+      de résidence (§7.3) — données modifiables (`ExpenseCategory`), pas un enum. Le numéro de justificatif
+      `DEP-<exercice>-<n>` est continu, alloué dans la transaction. Une dépense ne se supprime pas :
+      **annulation par écriture inverse** (dépense négative liant l'originale, total net nul) — comme les
+      paiements (contrainte alignée `<> 0`). Toute écriture est auditée (`expense.record`/`expense.reverse`).
+      Liste staff avec justificatif consultable en un clic (URL signée), badge INTERNE, annulation. Cœur
+      executor-based testé PGlite ET Postgres réel ; défauts §7.3 testés. Vérifié au navigateur (saisie,
+      justificatif PDF servi en 200 via la route signée / 403 si altéré, annulation, capture arabe RTL).
 - [ ] **C2** — Liste & transparence (filtres, recherche fournisseur, répartition par catégorie, trésorerie réelle).
 - [ ] **C3** — Contrats fournisseurs (échéance, compte à rebours, alerte visuelle ; seuils §7.2).
 

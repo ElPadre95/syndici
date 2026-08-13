@@ -623,27 +623,41 @@ model ExpenseCategory {
 
 /// Dépense de la résidence avec justificatif (référence de fichier, pas base64).
 /// Numéro de justificatif = DEP-<exercice>-<sequence> (série JUSTIFICATIF).
+/// Visibilité d'une dépense (C1) : PARTAGE = visible des copropriétaires (transparence),
+/// INTERNE = réservée au syndic. C'est le levier de la transparence pilotable.
+enum ExpenseVisibility {
+  PARTAGE
+  INTERNE
+}
+
 model Expense {
-  id              String           @id @default(uuid())
-  residenceId     String
-  categoryId      String?
-  description     String
-  amountMinor     Int
-  spentOn         DateTime         @db.Date
-  supplierName    String?
-  exercice        Int?
-  voucherSequence Int?
-  voucherNumber   String? // ex. "DEP-2026-0001"
-  justificatifId  String? // FileAsset
-  voidedAt        DateTime?
-  createdAt       DateTime         @default(now())
-  residence       Residence        @relation(fields: [residenceId], references: [id], onDelete: Cascade)
-  category        ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  justificatif    FileAsset?       @relation(fields: [justificatifId], references: [id], onDelete: SetNull)
+  id                String            @id @default(uuid())
+  residenceId       String
+  categoryId        String?
+  description       String
+  amountMinor       Int
+  spentOn           DateTime          @db.Date
+  supplierName      String?
+  visibility        ExpenseVisibility @default(PARTAGE)
+  exercice          Int?
+  voucherSequence   Int?
+  voucherNumber     String? // ex. "DEP-2026-0001"
+  justificatifId    String? // FileAsset
+  // Annulation par ÉCRITURE INVERSE (comme les paiements) : une dépense négative liant
+  // l'originale. L'originale n'est jamais supprimée ni modifiée.
+  reversesExpenseId String?
+  voidedAt          DateTime?
+  createdAt         DateTime          @default(now())
+  residence         Residence         @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  category          ExpenseCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  justificatif      FileAsset?        @relation(fields: [justificatifId], references: [id], onDelete: SetNull)
+  reverses          Expense?          @relation("ExpenseReversal", fields: [reversesExpenseId], references: [id], onDelete: SetNull)
+  reversedBy        Expense[]         @relation("ExpenseReversal")
 
   @@unique([residenceId, voucherNumber])
   @@index([residenceId])
   @@index([categoryId])
+  @@index([reversesExpenseId])
 }
 
 /// Contrat fournisseur avec échéance. Le compte à rebours et l'alerte sont

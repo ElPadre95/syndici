@@ -11,7 +11,11 @@
  * Toute la logique (statut, reçus) reste dérivée/allouée par la couche serveur.
  */
 import { PrismaClient } from '@prisma/client';
-import { createReceipt, createExpense } from '../src/server/finance/numbering';
+import { createReceipt } from '../src/server/finance/numbering';
+import { writeExpense } from '../src/server/finance/expenses';
+import { defaultExpenseCategories, type ResidenceKind } from '../src/server/finance/categories';
+import { storeFile } from '../src/server/storage/files';
+import { prismaTxRunner } from '../src/server/db/sql';
 import { distributeQuoteParts } from '../src/server/lots/quote-part';
 import { disconnectBase } from '../src/server/db/client';
 import { hashPassword } from '../src/server/auth/password';
@@ -26,6 +30,37 @@ const now = new Date();
 const YEAR = now.getFullYear();
 // 1er du mois, décalé de `offset` mois par rapport au mois courant.
 const monthStart = (offset: number): Date => new Date(Date.UTC(YEAR, now.getMonth() + offset, 1));
+
+/**
+ * Génère un PDF minimal (justificatif de démo) portant quelques lignes de texte. Sert à
+ * rendre les justificatifs RÉELLEMENT consultables via le stockage (pas une simple
+ * référence morte). Texte réduit à l'ASCII (latin-1) pour des offsets xref corrects.
+ */
+function makeInvoicePdf(lines: string[]): Buffer {
+  const ascii = (s: string) => s.normalize('NFKD').replace(/[^\x20-\x7e]/g, '');
+  const body =
+    'BT /F1 15 Tf 40 250 Td ' +
+    lines.map((l, i) => `${i === 0 ? '' : '0 -24 Td '}(${ascii(l)}) Tj`).join(' ') +
+    ' ET';
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 420 300] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>',
+    `<< /Length ${body.length} >>\nstream\n${body}\nendstream`,
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+  ];
+  let pdf = '%PDF-1.4\n';
+  const offsets: number[] = [];
+  objects.forEach((o, i) => {
+    offsets.push(pdf.length);
+    pdf += `${i + 1} 0 obj\n${o}\nendobj\n`;
+  });
+  const xref = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (const off of offsets) pdf += `${String(off).padStart(10, '0')} 00000 n \n`;
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  return Buffer.from(pdf, 'latin1');
+}
 
 // Les 4 combinaisons d'états à démontrer (jeu de démonstration) :
 //   SETTLED            → soldé
@@ -217,24 +252,8 @@ async function main() {
   // Règle de relance versionnée (défauts = valeurs du prototype)
   await prisma.reminderRule.create({ data: { residenceId: residence.id, version: 1 } });
 
-  // Catégories de dépenses (union immeuble + villa pour une résidence mixte)
-  const categories = [
-    'Nettoyage',
-    'Électricité',
-    'Eau commune',
-    'Maintenance',
-    'Ascenseur',
-    'Assurance',
-    'Travaux',
-    'Piscine commune',
-    'Jardins / espaces verts',
-    'Gardiennage',
-    'Éclairage public',
-    'Voirie / routes',
-    'Arrosage',
-    'Ramassage déchets',
-    'Autre',
-  ];
+  // Catégories de dépenses par défaut selon le type de résidence (SPEC §7.3).
+  const categories = defaultExpenseCategories(residence.type as ResidenceKind);
   const catByLabel = new Map<string, string>();
   for (let i = 0; i < categories.length; i++) {
     const c = await prisma.expenseCategory.create({
@@ -431,37 +450,108 @@ async function main() {
     });
   }
 
-  // Dépenses avec justificatif (référence de fichier)
-  const expenseData = [
-    { cat: 'Nettoyage', desc: 'Nettoyage mensuel — NetPro', amount: dh(3200), offset: -1 },
-    { cat: 'Électricité', desc: 'Facture RADEEMA', amount: dh(1840), offset: -1 },
-    { cat: 'Piscine commune', desc: 'Traitement de l’eau — AquaPro', amount: dh(2400), offset: 0 },
+  // Dépenses avec justificatif RÉELLEMENT stocké (C0/C1), fournisseurs marocains, et
+  // quelques dépenses INTERNE (non visibles des copropriétaires) pour piloter la transparence.
+  const expenseData: Array<{
+    cat: string;
+    desc: string;
+    supplier: string | null;
+    amount: number;
+    offset: number;
+    visibility: 'PARTAGE' | 'INTERNE';
+  }> = [
+    {
+      cat: 'Nettoyage',
+      desc: 'Nettoyage mensuel des parties communes',
+      supplier: 'NetPro Services',
+      amount: dh(3200),
+      offset: -1,
+      visibility: 'PARTAGE',
+    },
+    {
+      cat: 'Électricité',
+      desc: 'Facture électricité — communs',
+      supplier: 'RADEEMA',
+      amount: dh(1840),
+      offset: -1,
+      visibility: 'PARTAGE',
+    },
+    {
+      cat: 'Eau commune',
+      desc: 'Facture eau — arrosage & communs',
+      supplier: 'RADEEC',
+      amount: dh(920),
+      offset: -1,
+      visibility: 'PARTAGE',
+    },
+    {
+      cat: 'Piscine commune',
+      desc: "Traitement de l'eau de la piscine",
+      supplier: 'AquaPro',
+      amount: dh(2400),
+      offset: 0,
+      visibility: 'PARTAGE',
+    },
     {
       cat: 'Jardins / espaces verts',
-      desc: 'Taille des haies — GreenCare',
+      desc: 'Taille des haies et entretien',
+      supplier: 'GreenCare',
       amount: dh(1800),
       offset: 0,
+      visibility: 'PARTAGE',
     },
-    { cat: 'Assurance', desc: 'Assurance immeuble (acompte)', amount: dh(1000), offset: -2 },
+    {
+      cat: 'Assurance',
+      desc: 'Assurance multirisque (acompte annuel)',
+      supplier: 'Wafa Assurance',
+      amount: dh(1000),
+      offset: -2,
+      visibility: 'PARTAGE',
+    },
+    {
+      cat: 'Autre',
+      desc: 'Honoraires de gestion du syndic',
+      supplier: 'Cabinet Al Amane',
+      amount: dh(2500),
+      offset: -1,
+      visibility: 'INTERNE',
+    },
+    {
+      cat: 'Gardiennage',
+      desc: 'Prime exceptionnelle gardien',
+      supplier: null,
+      amount: dh(600),
+      offset: 0,
+      visibility: 'INTERNE',
+    },
   ];
   for (const e of expenseData) {
-    const file = await prisma.fileAsset.create({
-      data: {
-        residenceId: residence.id,
+    const pdf = makeInvoicePdf([
+      'Justificatif de depense',
+      `Fournisseur : ${e.supplier ?? '-'}`,
+      `Montant : ${(e.amount / 100).toFixed(2)} MAD`,
+      `Objet : ${e.desc}`,
+    ]);
+    const stored = await storeFile(
+      { residenceId: residence.id },
+      {
         bucket: 'justificatifs',
-        storageKey: `justificatifs/${e.cat.toLowerCase().replace(/[^a-z]/g, '')}-${Date.now()}.jpg`,
-        mimeType: 'image/jpeg',
-        originalName: 'facture.jpg',
+        body: pdf,
+        mimeType: 'application/pdf',
+        originalName: `facture-${(e.supplier ?? e.cat).replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
+        uploadedByPersonId: gerant.id,
       },
-    });
-    await createExpense({
+    );
+    await writeExpense(prismaTxRunner(), {
       residenceId: residence.id,
-      exercice: YEAR,
       categoryId: catByLabel.get(e.cat) ?? null,
       description: e.desc,
       amountMinor: e.amount,
       spentOn: monthStart(e.offset),
-      justificatifId: file.id,
+      supplierName: e.supplier,
+      visibility: e.visibility,
+      justificatifId: stored.ok ? stored.id : null,
+      actorPersonId: gerant.id,
     });
   }
 
