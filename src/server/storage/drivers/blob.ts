@@ -1,13 +1,11 @@
 /**
- * Driver de stockage Vercel Blob (C0) — production. La référence persistée est l'URL
- * renvoyée par Blob. IMPORTANT : cette URL n'est JAMAIS communiquée au navigateur ; le
- * contenu n'est servi que par `/api/files/[id]` après contrôle de droit et via une URL
- * signée à durée limitée. (Vercel Blob n'expose que des URLs « public » à suffixe
- * aléatoire ; on ne s'y appuie donc pas pour l'autorisation — elle vit dans notre route.
- * Un stockage à URLs pré-signées privées, ex. S3/R2, se brancherait ici sans toucher au
- * code métier.)
+ * Driver de stockage Vercel Blob (C0) — production, store PRIVÉ. Les objets sont écrits
+ * en `access: 'private'` : leur URL n'est PAS atteignable sans jeton. On persiste le
+ * `pathname` (clé déterministe) comme référence, et on relit via le `get()` AUTHENTIFIÉ
+ * du SDK (jeton), jamais par un `fetch` public. Le contenu n'est de toute façon servi au
+ * navigateur que par `/api/files/[id]` après contrôle de droit (signature + session + scope).
  */
-import { put as blobPut, del as blobDel } from '@vercel/blob';
+import { put as blobPut, get as blobGet, del as blobDel } from '@vercel/blob';
 import type { StorageDriver } from '../types';
 
 export function vercelBlobDriver(token: string): StorageDriver {
@@ -15,17 +13,17 @@ export function vercelBlobDriver(token: string): StorageDriver {
     name: 'blob',
     async put(key, body, contentType) {
       const res = await blobPut(key, body, {
-        access: 'public',
+        access: 'private',
         addRandomSuffix: false, // clé déterministe = idempotence (résidence + fileId)
         contentType,
         token,
       });
-      return res.url;
+      return res.pathname; // handle stable pour le get() privé
     },
     async get(ref) {
-      const r = await fetch(ref);
-      if (!r.ok) return null;
-      return Buffer.from(await r.arrayBuffer());
+      const res = await blobGet(ref, { access: 'private', token });
+      if (!res || res.statusCode !== 200 || !res.stream) return null;
+      return Buffer.from(await new Response(res.stream).arrayBuffer());
     },
     async delete(ref) {
       await blobDel(ref, { token });

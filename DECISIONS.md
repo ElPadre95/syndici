@@ -324,14 +324,16 @@ perm)`, deny par défaut) — aucun test de rôle codé en dur ailleurs.
   résidence (clé `residences/<id>/…`, isolation testée), et les octets ne sont servis QUE par
   `/api/files/[id]` derrière trois gardes — signature HMAC expirante (`AUTH_SECRET`), session,
   appartenance à la résidence active. Types (images + PDF) et taille (≤ 10 Mo) validés.
-- **Réserve assumée (Vercel Blob)** : Vercel Blob n'expose que des URLs **publiques** à suffixe
-  aléatoire, **permanentes** — la seule révocation est la **suppression du fichier**. Notre architecture
-  ne révèle jamais cette URL (les octets passent par la route authentifiée). MAIS si l'URL sous-jacente
-  **fuit** un jour — un journal, un bug, une copie manuelle — le justificatif devient consultable **sans
-  authentification**, jusqu'à suppression. **Acceptable pour des factures de charges.** À **revoir** si
-  l'on stocke un jour des **pièces d'identité ou des documents bancaires** : basculer alors sur un
-  stockage à URLs pré-signées **privées** (S3/**R2**) — le driver abstrait rend ce changement local
-  (un seul fichier), sans toucher au code métier.
+- **Store PRIVÉ (résolu)** : le store `syndici-blob` est créé en **accès privé**. Le driver écrit en
+  `access: 'private'` et relit via le `get()` **authentifié** du SDK (jeton), jamais par un `fetch`
+  public. Une URL Blob qui fuirait n'est donc **pas** atteignable sans le jeton — ce qui **lève la
+  réserve initiale** (ci-dessous) : plus d'exposition sans authentification, même en cas de fuite d'URL.
+  Le contenu reste servi au navigateur uniquement par `/api/files/[id]` (signature + session + scope).
+- **Réserve initiale (levée par le mode privé, conservée pour mémoire)** : historiquement Vercel Blob
+  n'exposait que des URLs **publiques** permanentes (révocation = suppression). Le mode privé rend ce
+  point caduc. Si un jour on stocke des **pièces d'identité ou documents bancaires**, on pourra tout de
+  même préférer un stockage à URLs pré-signées à TTL court (S3/**R2**) — le driver abstrait rend ce
+  changement local (un seul fichier), sans toucher au code métier.
 
 ### Zones où SPEC.md est muet/ambigu et où j'ai tranché
 
