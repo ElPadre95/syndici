@@ -134,6 +134,26 @@ est à faire **par toi** : l'assistant ne saisit aucun mot de passe. Checklist :
 - **Historique Git sans secret** (vérifié sur tous les commits) : aucun fichier `.env`
   réel, aucune chaîne de connexion réelle, aucun token.
 
+## Pièges rencontrés (à ne pas revivre)
+
+Deux causes réelles d'échec, vécues au premier déploiement — vérifiées et contournées :
+
+1. **L'intégration Neon ne crée PAS `DATABASE_URL`.** Elle ajoute `POSTGRES_URL`
+   (poolée), `POSTGRES_URL_NON_POOLING` / `DATABASE_URL_UNPOOLED` (directe), `PGHOST`,
+   etc. Or le schéma Prisma lit `env("DATABASE_URL")` et `env("DIRECT_URL")` :
+   **sans `DATABASE_URL`, l'application ne démarre pas** (aucune erreur au build, qui
+   ne se connecte pas — l'échec est au runtime). ➜ Crée explicitement `DATABASE_URL`
+   (poolée) et `DIRECT_URL` (directe) dans Vercel. Note : ces variables Neon sont
+   marquées _Sensitive_ → `vercel env pull` les renvoie **vides**, on ne peut pas
+   recopier leur valeur en ligne de commande ; prends les chaînes dans le dashboard Neon.
+
+2. **`vercel env add NAME env` ignore l'entrée en pipe** (CLI v54) : `echo … | vercel
+env add …` crée la variable avec une valeur **vide**, sans erreur visible. ➜ Utilise
+   **`vercel env add NAME env --value "<valeur>" --yes`**, puis **vérifie** derrière
+   (`vercel env ls`, et un redéploiement qui se connecte réellement à la base). Pour
+   _Preview_, la CLI exige en plus une branche git — inutile ici, la démo tourne en
+   Production.
+
 ## Rejouer / réinitialiser la démo
 
 Pour repartir d'une démo propre : relancer l'étape **3b** seule (le seed réinitialise
