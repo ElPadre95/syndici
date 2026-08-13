@@ -154,6 +154,14 @@ env add …` crée la variable avec une valeur **vide**, sans erreur visible. �
    _Preview_, la CLI exige en plus une branche git — inutile ici, la démo tourne en
    Production.
 
+3. **`AUTH_SECRET` peut être « présent » mais vide/inactif.** Symptôme : la page se
+   charge, la base répond, mais **la connexion renvoie 500** et `/api/auth/session`
+   affiche « There was a problem with the server configuration » (erreur `MissingSecret`
+   d'Auth.js ; le CSRF est aussi tronqué). Comme `vercel env pull` ne renvoie pas les
+   valeurs, **ne te fie pas à la simple présence** de la variable : vérifie par un **vrai
+   test de connexion** (HTTP ou navigateur). Correctif : reposer la valeur et redéployer —
+   `vercel env add AUTH_SECRET production --value "$(openssl rand -base64 32)" --yes`.
+
 ## Rejouer / réinitialiser la démo
 
 Pour repartir d'une démo propre : relancer l'étape **3b** seule (le seed réinitialise
