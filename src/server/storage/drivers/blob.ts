@@ -14,7 +14,8 @@ export function vercelBlobDriver(token: string): StorageDriver {
     async put(key, body, contentType) {
       const res = await blobPut(key, body, {
         access: 'private',
-        addRandomSuffix: false, // clé déterministe = idempotence (résidence + fileId)
+        addRandomSuffix: false, // clé déterministe (résidence + fileId)
+        allowOverwrite: true, // idempotent : un ré-envoi de la même clé ne casse pas
         contentType,
         token,
       });
