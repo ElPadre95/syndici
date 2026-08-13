@@ -75,6 +75,19 @@ export async function getResidenceBasics(
     : null;
 }
 
+/** Configuration financière d'une résidence (défauts de charges + jour d'échéance). */
+export async function getResidenceChargeConfig(residenceId: string): Promise<{
+  defaultChargeApptMinor: number;
+  defaultChargeVillaMinor: number;
+  dueDayOfMonth: number;
+} | null> {
+  const r = await getBaseClient().residence.findUnique({
+    where: { id: residenceId },
+    select: { defaultChargeApptMinor: true, defaultChargeVillaMinor: true, dueDayOfMonth: true },
+  });
+  return r ?? null;
+}
+
 /** Levée quand la personne n'a pas le droit de créer une résidence. */
 export class ResidenceAuthError extends Error {
   constructor() {

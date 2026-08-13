@@ -550,6 +550,7 @@
       "residences": "Résidences",
       "lots": "Lots",
       "residents": "Résidents",
+      "charges": "Appels de charges",
       "payments": "Paiements",
       "expenses": "Dépenses",
       "documents": "Documents",
@@ -640,6 +641,59 @@
     "switcher": {
       "label": "Résidence active",
       "none": "Aucune résidence"
+    }
+  },
+  "charges": {
+    "title": "Appels de charges",
+    "subtitle": "{residence} · {count, plural, =0 {aucune campagne} one {# campagne} other {# campagnes}}",
+    "generateCta": "Générer une campagne",
+    "noActiveTitle": "Aucune résidence active",
+    "noActiveBody": "Sélectionnez ou créez une résidence pour suivre ses appels de charges.",
+    "forbidden": "Vous n’avez pas accès aux appels de charges de cette résidence.",
+    "emptyTitle": "Aucune campagne",
+    "emptyBody": "Générez une première campagne d’appels pour la période de votre choix.",
+    "col": {
+      "period": "Période",
+      "lots": "Lots",
+      "called": "Appelé",
+      "collected": "Encaissé",
+      "remaining": "Reste dû",
+      "rate": "Collecte"
+    },
+    "generate": {
+      "title": "Générer une campagne d’appels",
+      "subtitle": "Un appel par lot pour la période choisie. Rien n’est écrit avant votre confirmation.",
+      "periodTitle": "Période",
+      "periodHint": "Le montant vient du lot (ou du défaut de la résidence) ; l’échéance est celle de la résidence.",
+      "month": "Mois",
+      "year": "Année",
+      "previewCta": "Aperçu",
+      "analyzing": "Analyse…",
+      "generating": "Génération…",
+      "forbidden": "Vous n’avez pas le droit de générer des appels de charges.",
+      "noResidence": "Sélectionnez une résidence active.",
+      "error": {
+        "invalid_period": "Période invalide.",
+        "not_found": "Résidence introuvable."
+      },
+      "preview": {
+        "title": "Aperçu avant génération",
+        "summary": "{toCall} à appeler · {already} déjà appelés · total {total}",
+        "colRef": "Lot",
+        "colPayer": "Redevable",
+        "colAmount": "Montant",
+        "colStatus": "État",
+        "statusToCall": "À appeler",
+        "statusAlready": "Déjà appelé",
+        "confirm": "Générer les {count} appels"
+      },
+      "report": {
+        "title": "Campagne générée",
+        "created": "{count} appel(s) créé(s)",
+        "skipped": "{count} lot(s) déjà appelés (ignorés)",
+        "total": "Total appelé : {amount}",
+        "back": "Voir le suivi"
+      }
     }
   },
   "lots": {

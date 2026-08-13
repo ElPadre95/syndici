@@ -58,6 +58,24 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       accents + arabe + téléphones hétérogènes + 7 lignes défectueuses) importé sur une résidence vide ;
       capture arabe (RTL) incluse.
 
+## Tranche B — la boucle métier (finance)
+
+- [x] **B1** — Appels de charges. Génération d'une campagne pour une période (an, mois) sur la résidence
+      active : un appel par lot non archivé, montant = charge du lot (sinon défaut résidence par type),
+      échéance = jour d'échéance de la résidence. Le REDEVABLE est DÉRIVÉ du rattachement actif porteur
+      des charges (propriétaire, ou locataire si délégation) — jamais figé sur l'appel. Idempotence par
+      l'index unique `(lotId, période)` + `ON CONFLICT DO NOTHING` : relancer ne duplique rien, les lots
+      déjà appelés sont signalés ; un lot vacant est appelé (le propriétaire reste redevable). Aperçu
+      avant génération (total, à appeler / déjà appelés). Écran de suivi : une ligne par campagne
+      (période, total appelé, encaissé, reste dû, taux de collecte). Toute génération tracée au journal
+      d'audit. Réservé au staff (`charge.manage`, ajouté à la matrice). Cœur pur (`computeCampaignPlan`,
+      `aggregateCampaigns`) + écriture executor-based (`writeCampaign`) testée PGlite ET Postgres réel.
+      Vérifié au navigateur (génération d'octobre 2026 : 25 appels, redevable dérivé dont un locataire
+      délégué, idempotence à la réémission) ; capture arabe (RTL) incluse.
+- [ ] **B2** — Encaissement (paiement sur appel, espèces en priorité, annulation par écriture inverse).
+- [ ] **B3** — Reçu (séquence en base, imprimable fr/ar, réimpression à l'identique).
+- [ ] **B4** — Compte du lot et historique + vue globale des paiements.
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

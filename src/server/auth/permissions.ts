@@ -39,6 +39,7 @@ export type Permission =
   // Finance
   | 'charge.view.all'
   | 'charge.view.own'
+  | 'charge.manage' // générer des campagnes d'appels de charges
   | 'payment.record' // enregistrer un paiement (immuable)
   | 'payment.view.own'
   | 'receipt.issue'
@@ -81,6 +82,7 @@ const MATRIX: Record<AppRole, ReadonlySet<Permission>> = {
     'resident.list',
     'invitation.manage',
     'charge.view.all',
+    'charge.manage',
     'payment.record',
     'receipt.issue',
     'expense.view',
@@ -101,6 +103,7 @@ const MATRIX: Record<AppRole, ReadonlySet<Permission>> = {
     'resident.list',
     'invitation.manage',
     'charge.view.all',
+    'charge.manage',
     'payment.record',
     'receipt.issue',
     'expense.view',
