@@ -79,10 +79,13 @@ async function main(): Promise<void> {
   }
 
   // 2. Appliquer les migrations sur la base de test.
+  //    `prisma migrate` se connecte via `directUrl` (DIRECT_URL) et non `url`
+  //    (DATABASE_URL) ; il faut donc surcharger LES DEUX, sinon les migrations
+  //    partent sur la base de dev (celle de .env) et la base de test reste en retard.
   console.log('• migrate deploy sur la base de test…');
   const migrate = spawnSync('npx', ['prisma', 'migrate', 'deploy'], {
     stdio: 'inherit',
-    env: { ...process.env, DATABASE_URL: testUrl },
+    env: { ...process.env, DATABASE_URL: testUrl, DIRECT_URL: testUrl },
   });
   if (migrate.status !== 0) process.exit(migrate.status ?? 1);
 

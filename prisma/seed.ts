@@ -341,7 +341,8 @@ async function main() {
 
       if (payAmount > 0) {
         const full = payAmount === amount;
-        const method = full && offset === -2 ? 'ESPECES' : full ? 'CARTE' : 'ESPECES';
+        // Aucun paiement par carte (tranche B) : espèces en priorité, virement sinon.
+        const method = full && offset === -2 ? 'ESPECES' : full ? 'VIREMENT' : 'ESPECES';
         if (method === 'ESPECES') cashCount++;
         const payment = await prisma.payment.create({
           data: {
@@ -379,6 +380,50 @@ async function main() {
     else if (spec.profile === 'PARTIAL_OVERDUE') partialCount++;
     else if (spec.profile === 'UNSETTLED_OVERDUE' || spec.profile === 'UNSETTLED_UPCOMING')
       lateCount++;
+  }
+
+  // Un paiement ANNULÉ pour la démo (B2) : annulation par écriture inverse. On prend un
+  // virement soldé et on l'annule (le lot redevient impayé par dérivation) — l'original
+  // n'est jamais supprimé.
+  const toCancel = await prisma.payment.findFirst({
+    where: { residenceId: residence.id, method: 'VIREMENT', amountMinor: { gt: 0 } },
+    orderBy: { receivedAt: 'desc' },
+    include: { allocations: true },
+  });
+  if (toCancel) {
+    const rev = await prisma.payment.create({
+      data: {
+        residenceId: residence.id,
+        lotId: toCancel.lotId,
+        payerPersonId: toCancel.payerPersonId,
+        recordedByPersonId: gerant.id,
+        method: toCancel.method,
+        amountMinor: -toCancel.amountMinor,
+        receivedAt: toCancel.receivedAt,
+        note: 'Virement rejeté',
+        reversesPaymentId: toCancel.id,
+      },
+    });
+    for (const a of toCancel.allocations) {
+      await prisma.paymentAllocation.create({
+        data: {
+          residenceId: residence.id,
+          paymentId: rev.id,
+          chargeCallId: a.chargeCallId,
+          amountMinor: -a.amountMinor,
+        },
+      });
+    }
+    await prisma.auditLog.create({
+      data: {
+        residenceId: residence.id,
+        actorPersonId: gerant.id,
+        action: 'payment.reverse',
+        entityType: 'Payment',
+        entityId: rev.id,
+        after: { reverses: toCancel.id, reason: 'Virement rejeté' },
+      },
+    });
   }
 
   // Dépenses avec justificatif (référence de fichier)

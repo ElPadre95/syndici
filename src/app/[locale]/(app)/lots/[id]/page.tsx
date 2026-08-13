@@ -10,6 +10,8 @@ import { can } from '@/server/auth/permissions';
 import { getLot } from '@/server/lots/data';
 import { listLotAttachments } from '@/server/lots/attachments';
 import { listInvitations } from '@/server/invitations/data';
+import { getLotFinance } from '@/server/finance/payments';
+import { PaymentPanel } from '@/components/finance/PaymentPanel';
 import { formatMoney } from '@/lib/money';
 import { cn } from '@/lib/cn';
 
@@ -56,6 +58,11 @@ export default async function LotFichePage({
     { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role },
     id,
   );
+  const finance = await getLotFinance(
+    { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role },
+    id,
+  );
+  const canRecord = can(ctx.role, 'payment.record');
   const fmtDate = new Intl.DateTimeFormat(activeLocale, {
     day: 'numeric',
     month: 'long',
@@ -169,6 +176,8 @@ export default async function LotFichePage({
           </ul>
         )}
       </div>
+
+      <PaymentPanel finance={finance} canRecord={canRecord} />
 
       <div className="rounded-lg border border-sep bg-white p-4">
         <h2 className="mb-4 text-sm font-bold text-label">{tInv('title')}</h2>

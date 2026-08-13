@@ -396,6 +396,59 @@
     "appDerniersPaiements": "آخر المدفوعات"
   },
   "payments": {
+    "title": "الرسوم والمدفوعات",
+    "record": "تحصيل",
+    "late": "{days} يوم تأخّر",
+    "call": {
+      "period": "الفترة",
+      "amount": "المبلغ",
+      "paid": "المحصَّل",
+      "remaining": "المتبقّي",
+      "status": "الحالة",
+      "none": "لا مطالبة رسوم لهذا العقار."
+    },
+    "settlement": {
+      "SETTLED": "مسدَّد",
+      "PARTIAL": "جزئي",
+      "UNSETTLED": "غير مسدَّد"
+    },
+    "method": {
+      "ESPECES": "نقداً",
+      "CHEQUE": "شيك",
+      "VIREMENT": "تحويل",
+      "CARTE": "بطاقة"
+    },
+    "form": {
+      "title": "تحصيل · {period}",
+      "amount": "المبلغ",
+      "method": "الطريقة",
+      "date": "تاريخ القيمة",
+      "reference": "المرجع",
+      "referenceHint": "رقم الشيك، التحويل…",
+      "confirm": "تسجيل الدفعة",
+      "cancel": "إلغاء"
+    },
+    "history": {
+      "title": "سجل المدفوعات",
+      "none": "لا دفعات.",
+      "reversal": "إلغاء",
+      "reversed": "مُلغى",
+      "by": "بواسطة {name}",
+      "reverse": "إلغاء",
+      "confirmReverse": "تأكيد",
+      "reasonHint": "سبب الإلغاء"
+    },
+    "error": {
+      "invalid_amount": "مبلغ غير صالح.",
+      "invalid_method": "طريقة دفع غير صالحة.",
+      "invalid_date": "تاريخ غير صالح.",
+      "not_found": "المطالبة غير موجودة.",
+      "reason_required": "حدّد سبب الإلغاء.",
+      "already_reversed": "هذه الدفعة مُلغاة سابقًا.",
+      "is_reversal": "لا يمكن إلغاء عملية إلغاء.",
+      "forbidden": "ليس لديك صلاحية التحصيل.",
+      "no_active_residence": "اختر إقامة نشطة."
+    },
     "appAddPaiement": "تسجيل دفعة",
     "appRetardJ": "أيام تأخر",
     "appRetard": "متأخر",

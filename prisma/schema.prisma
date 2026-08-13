@@ -120,8 +120,9 @@ enum Plan {
 
 enum PaymentMethod {
   ESPECES
-  CARTE
+  CARTE // hérité — plus proposé (aucun paiement par carte, cf. tranche B)
   VIREMENT
+  CHEQUE
 }
 
 // Statut d'un appel de charges — NON stocké, DÉRIVÉ sur DEUX AXES INDÉPENDANTS

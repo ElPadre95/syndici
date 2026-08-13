@@ -72,7 +72,18 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       `aggregateCampaigns`) + écriture executor-based (`writeCampaign`) testée PGlite ET Postgres réel.
       Vérifié au navigateur (génération d'octobre 2026 : 25 appels, redevable dérivé dont un locataire
       délégué, idempotence à la réémission) ; capture arabe (RTL) incluse.
-- [ ] **B2** — Encaissement (paiement sur appel, espèces en priorité, annulation par écriture inverse).
+- [x] **B2** — Encaissement. Enregistrer un paiement sur un appel de charges (montant, date, mode —
+      espèces en PRIORITÉ au Maroc, chèque, virement ; JAMAIS carte —, référence, enregistré par).
+      Formulaire pré-rempli sur le reste dû, en espèces, à aujourd'hui (3 gestes pour l'espèce).
+      Partiels et paiements multiples s'additionnent naturellement ; le STATUT de l'appel reste DÉRIVÉ
+      (jamais écrit) : « non réglé » → « partiel » → « soldé » se recalculent. Un paiement est IMMUABLE :
+      l'annulation passe par une ÉCRITURE INVERSE (paiement négatif liant l'original + allocations
+      négatives), avec un motif, tracée au journal d'audit ; le statut redevient donc « non réglé »/
+      « partiel » par dérivation. Refus d'annuler une annulation ou un paiement déjà annulé. Toute
+      écriture financière en centimes (helper `money`) et auditée. Cœur executor-based (`writePayment`,
+      `reversePayment`) testé PGlite ET Postgres réel (6 invariants). Panneau « Charges & paiements » sur
+      la fiche du lot (appels, encaisser, historique, annuler). Vérifié au navigateur (encaissement
+      espèces → soldé, annulation → non réglé) ; capture arabe (RTL) incluse.
 - [ ] **B3** — Reçu (séquence en base, imprimable fr/ar, réimpression à l'identique).
 - [ ] **B4** — Compte du lot et historique + vue globale des paiements.
 

@@ -379,6 +379,59 @@
     "appDerniersPaiements": "Derniers paiements"
   },
   "payments": {
+    "title": "Charges & paiements",
+    "record": "Encaisser",
+    "late": "{days} j de retard",
+    "call": {
+      "period": "Période",
+      "amount": "Montant",
+      "paid": "Encaissé",
+      "remaining": "Reste dû",
+      "status": "État",
+      "none": "Aucun appel de charges pour ce lot."
+    },
+    "settlement": {
+      "SETTLED": "Soldé",
+      "PARTIAL": "Partiel",
+      "UNSETTLED": "Non réglé"
+    },
+    "method": {
+      "ESPECES": "Espèces",
+      "CHEQUE": "Chèque",
+      "VIREMENT": "Virement",
+      "CARTE": "Carte"
+    },
+    "form": {
+      "title": "Encaisser · {period}",
+      "amount": "Montant",
+      "method": "Mode",
+      "date": "Date de valeur",
+      "reference": "Référence",
+      "referenceHint": "n° chèque, virement…",
+      "confirm": "Enregistrer le paiement",
+      "cancel": "Annuler"
+    },
+    "history": {
+      "title": "Historique des paiements",
+      "none": "Aucun paiement.",
+      "reversal": "Annulation",
+      "reversed": "Annulé",
+      "by": "par {name}",
+      "reverse": "Annuler",
+      "confirmReverse": "Confirmer",
+      "reasonHint": "Motif de l’annulation"
+    },
+    "error": {
+      "invalid_amount": "Montant invalide.",
+      "invalid_method": "Mode de paiement invalide.",
+      "invalid_date": "Date invalide.",
+      "not_found": "Appel introuvable.",
+      "reason_required": "Indiquez un motif d’annulation.",
+      "already_reversed": "Ce paiement est déjà annulé.",
+      "is_reversal": "Une annulation ne s’annule pas.",
+      "forbidden": "Vous n’avez pas le droit d’encaisser.",
+      "no_active_residence": "Sélectionnez une résidence active."
+    },
     "appAddPaiement": "Enregistrer un paiement",
     "appRetardJ": "jours de retard",
     "appRetard": "Retard",
