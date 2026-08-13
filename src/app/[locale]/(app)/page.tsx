@@ -5,13 +5,17 @@ import { Button } from '@/components/ui/Button';
 import { Link } from '@/i18n/navigation';
 import { getSessionContext } from '@/server/session';
 import { listResidentAttachments } from '@/server/residents/home';
+import { getStaffDashboard } from '@/server/finance/dashboard';
 import { ResidentHome } from '@/components/app/ResidentHome';
+import { StaffDashboard } from '@/components/app/StaffDashboard';
 
 /**
  * Page d'accueil. Selon le profil :
- *   - staff (syndic/gestionnaire) → premier pas « créer une résidence » (A1) ;
+ *   - staff avec une résidence ACTIVE → tableau de bord sobre (lots, collecte, impayés) ;
  *   - résident rattaché → accueil sobre, informatif (A7 §1), jamais l'invite syndic ;
- *   - compte nouveau sans rattachement → l'onboarding syndic (créer une résidence).
+ *   - compte SANS aucune résidence → l'onboarding « créer une résidence » (A1).
+ *
+ * « Premiers pas » ne s'affiche donc que si la personne n'a réellement aucune résidence.
  */
 export default async function DashboardPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -27,6 +31,17 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
     if (attachments.length > 0) {
       return <ResidentHome name={name} attachments={attachments} />;
     }
+  }
+
+  // Staff avec une résidence active : tableau de bord utile, pas « Premiers pas ».
+  const activeResidence = ctx?.residences.find((r) => r.id === ctx.activeId) ?? null;
+  if (ctx?.isStaff && ctx.activeId && ctx.role && activeResidence) {
+    const data = await getStaffDashboard({
+      personId: ctx.personId,
+      residenceId: ctx.activeId,
+      role: ctx.role,
+    });
+    return <StaffDashboard name={name} residenceName={activeResidence.name} data={data} />;
   }
 
   return (

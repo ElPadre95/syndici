@@ -573,7 +573,17 @@
       "getStartedTitle": "Premiers pas",
       "getStartedBody": "Créez votre première résidence, puis ajoutez ses lots et ses occupants.",
       "createResidence": "Créer une résidence",
-      "viewResidences": "Voir mes résidences"
+      "viewResidences": "Voir mes résidences",
+      "staff": {
+        "residenceLabel": "Résidence active : {residence}",
+        "lots": "Lots",
+        "viewLots": "Voir les lots",
+        "collection": "Collecte · {period}",
+        "viewCharges": "Voir les appels",
+        "remaining": "Reste dû (total)",
+        "collectedMonth": "Encaissé ce mois",
+        "noCampaign": "Aucune campagne"
+      }
     },
     "residentHome": {
       "sectionLabel": "Mon espace",

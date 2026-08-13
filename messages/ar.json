@@ -570,7 +570,17 @@
       "getStartedTitle": "الخطوات الأولى",
       "getStartedBody": "أنشئ أول إقامة، ثم أضف عقاراتها وشاغليها.",
       "createResidence": "إنشاء إقامة",
-      "viewResidences": "عرض إقاماتي"
+      "viewResidences": "عرض إقاماتي",
+      "staff": {
+        "residenceLabel": "الإقامة النشطة: {residence}",
+        "lots": "العقارات",
+        "viewLots": "عرض العقارات",
+        "collection": "التحصيل · {period}",
+        "viewCharges": "عرض المطالبات",
+        "remaining": "المتبقّي (الإجمالي)",
+        "collectedMonth": "المحصَّل هذا الشهر",
+        "noCampaign": "لا حملة"
+      }
     },
     "residentHome": {
       "sectionLabel": "مساحتي",
