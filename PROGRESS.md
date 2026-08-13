@@ -107,6 +107,24 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       staff via un nouveau droit `payment.view.all` (matrice + test). Vérifié au navigateur (relevé fr, vue
       globale fr, capture arabe RTL du relevé incluse).
 
+## Tranche C — Dépenses & transparence
+
+- [x] **C0** — Stockage de fichiers réel. Couche d'abstraction `StorageDriver` (le fournisseur n'est
+      jamais en dur) : driver **local** (dev, sans réseau, `.storage/` gitignoré) et driver **Vercel Blob**
+      (prod), choisis par l'environnement ; chaque fichier porte son driver en préfixe de `storageKey`
+      (`"<driver>:<ref>"`) pour une relecture toujours correcte. Un fichier est TOUJOURS scopé à une
+      résidence (clé `residences/<id>/…`, segments assainis = pas de traversée) ; `findAccessibleFile`
+      ne le renvoie que pour sa résidence — isolation inter-résidences testée (PGlite ET Postgres réel).
+      Les octets ne sont JAMAIS servis par une URL de fournisseur : seule la route authentifiée
+      `/api/files/[id]` les rend, derrière trois gardes — signature HMAC expirante (`AUTH_SECRET`),
+      session, et appartenance à la résidence active. Types acceptés (images + PDF) et taille (≤ 10 Mo)
+      validés avec refus propre. Le contenu ne touche jamais la base (contrainte SQL anti-base64 conservée).
+      Choix de stockage à valider par le propriétaire du projet ; action Vercel requise (créer le Blob store).
+- [ ] **C1** — Saisir une dépense (catégorie par type de résidence, montant, date, fournisseur, justificatif ;
+      visibilité copropriétaires / interne ; annulation par écriture inverse, audit).
+- [ ] **C2** — Liste & transparence (filtres, recherche fournisseur, répartition par catégorie, trésorerie réelle).
+- [ ] **C3** — Contrats fournisseurs (échéance, compte à rebours, alerte visuelle ; seuils §7.2).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·
