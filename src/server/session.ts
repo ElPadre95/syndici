@@ -10,6 +10,7 @@
  * (mandat ACTIF non expiré pour le staff, rattachement de lot courant pour un
  * résident). Un cookie hors de cet ensemble est ignoré, sans erreur.
  */
+import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { auth } from '@/auth';
 import { prismaExecutor } from '@/server/db/sql';
@@ -33,8 +34,12 @@ export interface SessionContext {
   isStaff: boolean;
 }
 
-/** Renvoie le contexte, ou `null` si non authentifié (le middleware garde déjà les routes). */
-export async function getSessionContext(): Promise<SessionContext | null> {
+/**
+ * Renvoie le contexte, ou `null` si non authentifié (le middleware garde déjà les routes).
+ * Mémoïsé par requête (`react/cache`) : le layout ET la page l'appellent, mais les requêtes
+ * de contexte (accès, résidences, rôle) ne s'exécutent qu'UNE fois par rendu.
+ */
+export const getSessionContext = cache(async (): Promise<SessionContext | null> => {
   const session = await auth();
   const personId = session?.user?.personId;
   if (!personId) return null;
@@ -57,4 +62,4 @@ export async function getSessionContext(): Promise<SessionContext | null> {
   const isStaff = residences.length > 0;
 
   return { personId, userLabel, residences, activeId, role, isStaff };
-}
+});
