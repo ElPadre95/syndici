@@ -8,9 +8,13 @@ import {
   listCategoriesForSettings,
   getSubscription,
 } from '@/server/settings/data';
+import { prismaExecutor } from '@/server/db/sql';
+import { listMembers } from '@/server/org/data';
+import { isLastActiveAdmin } from '@/server/org/members';
 import { ResidenceSettingsForm } from '@/components/settings/ResidenceSettingsForm';
 import { ReminderRuleForm } from '@/components/settings/ReminderRuleForm';
 import { CategoriesManager } from '@/components/settings/CategoriesManager';
+import { MembersManager } from '@/components/settings/MembersManager';
 import { Card } from '@/components/ui/Card';
 
 /**
@@ -53,6 +57,23 @@ export default async function ReglagesPage({ params }: { params: Promise<{ local
   ]);
   if (!residence) return null;
 
+  // Membres du cabinet (F4) — réservé à l'administrateur (`member.manage` = SYNDIC).
+  const canManageMembers = can(ctx.role, 'member.manage');
+  const org = canManageMembers ? await listMembers(prismaExecutor(), scopedCtx) : null;
+  const memberRows = org
+    ? org.members.map((m) => ({
+        membershipId: m.membershipId,
+        fullName: `${m.firstName} ${m.lastName}`.trim(),
+        email: m.email,
+        role: m.role,
+        status: m.status,
+        hasAccount: m.hasAccount,
+        endedAt: m.endedAt,
+        isProtected: isLastActiveAdmin(org.members, m.membershipId),
+        isSelf: m.personId === ctx.personId,
+      }))
+    : [];
+
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <div>
@@ -94,6 +115,9 @@ export default async function ReglagesPage({ params }: { params: Promise<{ local
           </div>
         </div>
       </Card>
+
+      {/* Membres du cabinet (F4) — administrateur seulement ; le dernier admin est protégé. */}
+      {canManageMembers && org && <MembersManager rows={memberRows} />}
     </div>
   );
 }

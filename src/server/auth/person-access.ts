@@ -180,6 +180,56 @@ export async function listResidentDirectory(
   return [...byPerson.values()];
 }
 
+/** Un membre du cabinet (F4) : la personne + son rôle/état d'organisation + a-t-il un compte. */
+export interface OrgMemberView {
+  membershipId: string;
+  personId: string;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  role: string; // OrgRole
+  status: string; // MembershipStatus
+  hasAccount: boolean;
+  endedAt: string | null;
+}
+
+/**
+ * Membres d'une organisation (F4). Joint `Person` → doit vivre ici (couche d'accès). Les
+ * administrateurs actifs d'abord, puis par état et nom. `hasAccount` sans jamais exposer
+ * l'identifiant de compte. Le périmètre (organizationId) est résolu et autorisé par
+ * l'appelant (action gardée par `member.manage`).
+ */
+export async function listOrgMembers(
+  exec: SqlExecutor,
+  organizationId: string,
+): Promise<OrgMemberView[]> {
+  return exec.query<OrgMemberView>(
+    `SELECT m.id AS "membershipId", p.id AS "personId", p."firstName", p."lastName", p.email,
+            m.role AS role, m.status AS status,
+            (p."authUserId" IS NOT NULL) AS "hasAccount",
+            m."endedAt"::text AS "endedAt"
+       FROM "Membership" m
+       JOIN "Person" p ON p.id = m."personId"
+      WHERE m."organizationId" = $1
+      ORDER BY (m.role = 'OWNER_ADMIN') DESC, (m.status = 'ACTIVE') DESC, p."lastName", p."firstName"`,
+    [organizationId],
+  );
+}
+
+/** Id d'une personne par e-mail exact (tous périmètres) — pour dédoublonner un membre invité. */
+export async function findPersonIdByEmail(
+  exec: SqlExecutor,
+  email: string,
+): Promise<string | null> {
+  const q = email.trim().toLowerCase();
+  if (q === '') return null;
+  const rows = await exec.query<{ id: string }>(
+    `SELECT id FROM "Person" WHERE lower(email) = $1 LIMIT 1`,
+    [q],
+  );
+  return rows[0]?.id ?? null;
+}
+
 /** Données d'une nouvelle personne (créée par le staff lors d'un rattachement). */
 export interface CreatePersonInput {
   firstName: string;

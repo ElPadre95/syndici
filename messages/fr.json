@@ -1466,6 +1466,37 @@
     }
   },
   "settings": {
+    "members": {
+      "title": "Membres du cabinet",
+      "subtitle": "Déléguez l'accès à un gestionnaire. Le retrait garde l'historique.",
+      "saved": "Membres mis à jour",
+      "you": "(vous)",
+      "noAccount": "compte non activé",
+      "roleLabel": "Rôle",
+      "role": { "OWNER_ADMIN": "Administrateur", "MANAGER": "Gestionnaire", "STAFF": "Agent" },
+      "lastAdmin": "Dernier administrateur",
+      "lastAdminHint": "Impossible de retirer ou rétrograder le dernier administrateur du cabinet.",
+      "remove": "Retirer",
+      "endedTitle": "Accès retirés",
+      "status": { "ACTIVE": "Actif", "ENDED": "Retiré", "SUSPENDED": "Suspendu" },
+      "inviteTitle": "Inviter un membre",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Adresse e-mail",
+      "invite": "Inviter",
+      "inviteHint": "Le membre reçoit l'accès ; il se connecte avec un lien envoyé à son e-mail.",
+      "err": {
+        "forbidden": "Seul l'administrateur peut gérer les membres.",
+        "no_active_residence": "Aucune résidence active.",
+        "no_organization": "Aucun cabinet actif.",
+        "name_required": "Le prénom et le nom sont requis.",
+        "email_required": "L'e-mail est requis.",
+        "invalid_email": "Adresse e-mail invalide.",
+        "invalid_role": "Rôle invalide.",
+        "not_found": "Membre introuvable.",
+        "last_admin": "Impossible : c'est le dernier administrateur du cabinet."
+      }
+    },
     "noActiveTitle": "Aucune résidence active",
     "noActiveBody": "Sélectionnez une résidence pour la régler.",
     "forbidden": "Réglages réservés au syndic.",

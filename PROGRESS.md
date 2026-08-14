@@ -232,6 +232,20 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       navigateur : dépôt (formulaire types/portées), filtres, **route signée qui sert bien le PDF**
       (200, application/pdf), **le syndic ne voit PAS l'attestation privée du résident**, capture arabe RTL.
 
+- [x] **F4** — Membres du cabinet. Un cabinet peut **déléguer à un gestionnaire**. Section dans les
+      **Réglages** (naturel : déjà réservé au syndic) : liste des membres avec leur rôle et l'état de leur
+      compte ; **invitation par e-mail** (prénom, nom, e-mail, rôle) — dédoublonnée par e-mail, réactive un
+      accès retiré sans jamais créer de doublon (`upsert` sur `@@unique(org, personne)`) ; **retrait d'un
+      accès = statut ENDED + date de fin** (`endedAt`, migration) — **jamais une suppression**, l'historique
+      reste et s'affiche (« Accès retirés · date »). **Verrou dernier administrateur** transcrit en cœur pur
+      testé (`isLastActiveAdmin`, 5 cas) : on ne peut ni retirer ni rétrograder le dernier `OWNER_ADMIN`
+      actif — l'UI le protège (badge, pas de bouton) ET l'action le refuse. **Réservé au syndic**
+      (`member.manage`) ; un **gestionnaire ne peut pas** gérer les membres (matrice vérifiée). Identités via
+      la couche person-access (`listOrgMembers`, `findPersonIdByEmail`) — **test méta vert**. Toute
+      modification tracée au journal d'audit (`member.invite` / `member.role.change` / `member.remove`).
+      Vérifié au navigateur : liste (admin + gestionnaire), retrait (ENDED daté, en historique), réinvitation
+      (réactivée sans doublon), dernier admin protégé, capture arabe RTL de la section mirroré.
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

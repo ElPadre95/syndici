@@ -351,6 +351,7 @@ model Membership {
   role           OrgRole          @default(STAFF)
   status         MembershipStatus @default(ACTIVE)
   createdAt      DateTime         @default(now())
+  endedAt        DateTime? // date de fin d'accès (F4) — retrait sans jamais effacer l'historique
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   person         Person           @relation(fields: [personId], references: [id], onDelete: Cascade)
 
