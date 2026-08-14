@@ -644,6 +644,56 @@
     "appPayerSimple": "Payer"
   },
   "residents": {
+    "dir": {
+      "title": "Annuaire des résidents",
+      "subtitle": "{residence} — qui est qui, et comment le joindre.",
+      "noActiveTitle": "Aucune résidence active",
+      "noActiveBody": "Sélectionnez une résidence pour consulter son annuaire.",
+      "forbidden": "Vous n'avez pas accès à l'annuaire des résidents.",
+      "searchHint": "Rechercher par nom, pays ou n° de lot…",
+      "filterRole": "Filtrer par rôle",
+      "filterStatus": "Filtrer par état de compte",
+      "empty": "Aucun résident ne correspond à ces critères.",
+      "contact": "Contacter sur WhatsApp",
+      "invite": "Inviter",
+      "reinvite": "Relancer l'invitation",
+      "waMessage": "Bonjour {name}, je vous contacte au sujet de votre résidence.",
+      "col": {
+        "name": "Nom",
+        "lots": "Lots",
+        "country": "Pays de résidence",
+        "lang": "Langue",
+        "phone": "Téléphone",
+        "account": "Compte"
+      },
+      "role": { "all": "Tous les rôles", "OWNER": "Propriétaire", "TENANT": "Locataire" },
+      "roleShort": { "OWNER": "prop.", "TENANT": "loc." },
+      "status": {
+        "all": "Tous les états",
+        "ACTIVE": "Compte activé",
+        "PENDING": "Invité",
+        "NEVER": "Jamais invité"
+      },
+      "stat": {
+        "total": "Résidents",
+        "active": "Comptes activés",
+        "pending": "Invitations en attente"
+      },
+      "lang": {
+        "fr": "Français",
+        "ar": "Arabe",
+        "en": "Anglais",
+        "nl": "Néerlandais",
+        "es": "Espagnol",
+        "de": "Allemand"
+      },
+      "err": {
+        "forbidden": "Action non autorisée.",
+        "no_active_residence": "Aucune résidence active.",
+        "no_active_attachment": "Cette personne n'a pas de rattachement actif à inviter.",
+        "not_found": "Introuvable."
+      }
+    },
     "appResidentsTitle": "Tous les résidents",
     "appAddResident": "+ Ajouter résident",
     "appFiche": "Fiche",

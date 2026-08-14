@@ -274,6 +274,11 @@ async function main() {
   let lateCount = 0;
   let cashCount = 0;
   const overdueForDunning: Array<{ lotId: string; payerPersonId: string }> = [];
+  // Cas MRE : un propriétaire à l'étranger qui détient DEUX lots (une résidence
+  // secondaire vide en plus de son bien principal). L'annuaire (F2) doit le montrer
+  // une seule fois, avec ses deux lots — jamais en doublon.
+  let mreOwnerId: string | null = null;
+  let vacantLotId: string | null = null;
 
   for (const [lotIndex, spec] of specs.entries()) {
     const lot = await prisma.lot.create({
@@ -288,7 +293,10 @@ async function main() {
     });
 
     // Lot vacant en dur : aucun occupant, aucun appel de charges.
-    if (!spec.owner) continue;
+    if (!spec.owner) {
+      vacantLotId = lot.id; // réservé au 2e lot du MRE (voir après la boucle).
+      continue;
+    }
 
     const owner = await prisma.person.create({
       data: {
@@ -312,6 +320,8 @@ async function main() {
         startDate: monthStart(-24),
       },
     });
+    // Premier propriétaire à l'étranger rencontré : ce sera notre MRE multi-lots.
+    if (spec.owner.abroad && mreOwnerId === null) mreOwnerId = owner.id;
 
     let payerPersonId = owner.id;
     if (spec.tenant) {
@@ -408,6 +418,21 @@ async function main() {
     else if (spec.profile === 'PARTIAL_OVERDUE') partialCount++;
     else if (spec.profile === 'UNSETTLED_OVERDUE' || spec.profile === 'UNSETTLED_UPCOMING')
       lateCount++;
+  }
+
+  // Le MRE prend possession du lot vacant en dur comme seconde propriété : il détient
+  // désormais deux lots et doit apparaître UNE seule fois dans l'annuaire (F2).
+  if (mreOwnerId && vacantLotId) {
+    await prisma.lotAttachment.create({
+      data: {
+        residenceId: residence.id,
+        lotId: vacantLotId,
+        personId: mreOwnerId,
+        role: 'OWNER',
+        isChargePayer: true,
+        startDate: monthStart(-12),
+      },
+    });
   }
 
   // Historique de relances (E1) pour la démo : certains impayés déjà relancés une ou deux

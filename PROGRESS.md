@@ -200,6 +200,21 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       seuil de retard 3→5 persisté + audité, catégorie créée/renommée/archivée persistée + auditée,
       capture arabe RTL de l'écran mirroré.
 
+- [x] **F2** — Annuaire des résidents. L'écran `/residents` n'est plus un placeholder : « qui est
+      Untel et comment le joindre. » Toutes les personnes rattachées à la résidence active — nom, rôle
+      (propriétaire / locataire), **lot(s)**, pays de résidence, langue préférée, téléphone, et **état de
+      compte** (jamais invité / invité en attente / compte activé). Recherche par nom (aussi pays & n° de
+      lot), filtres par rôle et par état de compte. Chaque lot mène à sa fiche (`/lots/[id]`). **Cas MRE :
+      une personne détenant plusieurs lots apparaît UNE fois, ses lots agrégés — jamais en doublon** (seed
+      enrichi : Sara Tahiri détient A1 + A7 ; prouvé en base par `person-access.db.test.ts`). Actions
+      rapides par ligne : lien WhatsApp pré-rempli dans la **langue du destinataire**, et **émission
+      d'invitation** si la personne n'a pas de compte. Tout passe par la couche `person-access`
+      (`listResidentDirectory`, seul module autorisé à lire `Person`) — le **test méta reste vert**. Staff
+      uniquement (`resident.list`) ; invitation gardée par `invitation.manage` + rattachement actif.
+      Dérivations pures testées (`residentAccountStatus`, `matchesResidentFilters`). Vérifié au navigateur :
+      MRE dédoublé (A1+A7), recherche/filtres, invitation émise (PENDING en base), états NEVER/PENDING
+      affichés, capture arabe RTL de l'écran mirroré.
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

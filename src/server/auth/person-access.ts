@@ -109,6 +109,77 @@ export async function listResidents(exec: SqlExecutor, ctx: ActiveContext): Prom
   );
 }
 
+/** Un lot rattaché à une personne, avec son rôle et son état (annuaire F2). */
+export interface ResidentLot {
+  lotId: string;
+  reference: string;
+  role: 'OWNER' | 'TENANT';
+  active: boolean;
+}
+
+/**
+ * Une entrée d'annuaire : la personne (vue publique) + le fait qu'elle a un compte
+ * activé + TOUS ses lots dans la résidence active. Une personne détenant plusieurs
+ * lots (cas MRE) apparaît UNE fois, avec ses lots — jamais en doublon.
+ */
+export interface ResidentDirectoryEntry extends PersonView {
+  hasAccount: boolean;
+  lots: ResidentLot[];
+}
+
+/**
+ * Annuaire complet de la résidence active (F2) — staff uniquement. Une ligne par
+ * personne, ses lots agrégés (le cas MRE multi-lots n'est jamais dédoublé). `hasAccount`
+ * dérive de `authUserId` SANS jamais exposer l'identifiant du compte lui-même.
+ */
+export async function listResidentDirectory(
+  exec: SqlExecutor,
+  ctx: ActiveContext,
+): Promise<ResidentDirectoryEntry[]> {
+  if (!isStaff(ctx.role)) throw new PersonAccessError('resident.list interdit pour ce rôle');
+  const rows = await exec.query<
+    PersonView & {
+      hasAccount: boolean;
+      lotId: string;
+      reference: string;
+      role: 'OWNER' | 'TENANT';
+      active: boolean;
+    }
+  >(
+    `SELECT p.id, p."firstName", p."lastName", p.email, p.phone, p.nationality, p."preferredLocale",
+            (p."authUserId" IS NOT NULL) AS "hasAccount",
+            la."lotId" AS "lotId", l.reference AS reference, la.role AS role,
+            (la."endDate" IS NULL OR la."endDate" >= CURRENT_DATE) AS active
+       FROM "Person" p
+       JOIN "LotAttachment" la ON la."personId" = p.id
+       JOIN "Lot" l ON l.id = la."lotId"
+      WHERE la."residenceId" = $1
+      ORDER BY p."lastName", p."firstName", l.reference`,
+    [ctx.residenceId],
+  );
+
+  const byPerson = new Map<string, ResidentDirectoryEntry>();
+  for (const r of rows) {
+    let entry = byPerson.get(r.id);
+    if (!entry) {
+      entry = {
+        id: r.id,
+        firstName: r.firstName,
+        lastName: r.lastName,
+        email: r.email,
+        phone: r.phone,
+        nationality: r.nationality,
+        preferredLocale: r.preferredLocale,
+        hasAccount: r.hasAccount,
+        lots: [],
+      };
+      byPerson.set(r.id, entry);
+    }
+    entry.lots.push({ lotId: r.lotId, reference: r.reference, role: r.role, active: r.active });
+  }
+  return [...byPerson.values()];
+}
+
 /** Données d'une nouvelle personne (créée par le staff lors d'un rattachement). */
 export interface CreatePersonInput {
   firstName: string;
