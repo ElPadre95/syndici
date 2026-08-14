@@ -333,6 +333,54 @@
     "voteResultatPublie": "résultat publié"
   },
   "documents": {
+    "f3": {
+      "title": "Documents",
+      "subtitle": "{residence} — règlement, PV d'AG, contrats et pièces.",
+      "noActiveTitle": "Aucune résidence active",
+      "noActiveBody": "Sélectionnez une résidence pour consulter ses documents.",
+      "depositTitle": "Déposer un document",
+      "deposit": "Déposer",
+      "saved": "Document déposé",
+      "open": "Ouvrir",
+      "empty": "Aucun document.",
+      "filterType": "Filtrer par type",
+      "filterScope": "Filtrer par portée",
+      "lot": "Lot {lot}",
+      "field": {
+        "name": "Titre",
+        "nameHint": "Ex. Règlement de copropriété",
+        "type": "Type",
+        "scope": "Portée",
+        "file": "Fichier",
+        "fileHint": "Image ou PDF, 10 Mo maximum."
+      },
+      "type": {
+        "all": "Tous les types",
+        "REGLEMENT": "Règlement",
+        "PV_AG": "PV d'assemblée",
+        "ASSURANCE": "Assurance",
+        "ATTESTATION": "Attestation",
+        "AUTRE": "Autre"
+      },
+      "scope": {
+        "all": "Toutes les portées",
+        "PRIVE": "Privé",
+        "PARTAGE": "Partagé avec le syndic",
+        "RESIDENCE": "Toute la résidence",
+        "INTERNE": "Dossier interne"
+      },
+      "err": {
+        "forbidden": "Action non autorisée.",
+        "no_active_residence": "Aucune résidence active.",
+        "file_required": "Choisissez un fichier.",
+        "title_required": "Le titre est requis.",
+        "invalid_type": "Type invalide.",
+        "invalid_scope": "Portée invalide.",
+        "empty": "Le fichier est vide.",
+        "too_large": "Fichier trop volumineux (10 Mo max).",
+        "unsupported_type": "Type de fichier non supporté (image ou PDF)."
+      }
+    },
     "docAjouter": "Ajouter un fichier",
     "docPhoto": "Photo",
     "docPartages": "Documents partagés",
@@ -898,7 +946,8 @@
       "roleOwner": "Propriétaire",
       "roleTenant": "Locataire",
       "spaceComing": "Votre espace résident arrive prochainement.",
-      "newsTitle": "Actualités"
+      "newsTitle": "Actualités",
+      "docsTitle": "Documents de la résidence"
     },
     "comingSoon": {
       "title": "Section à venir",

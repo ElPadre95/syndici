@@ -764,28 +764,74 @@ async function main() {
     });
   }
 
-  // Un document interne, un partagé ; une invitation en attente
-  const fileDoc = await prisma.fileAsset.create({
-    data: {
-      residenceId: residence.id,
-      bucket: 'documents',
-      storageKey: `documents/pv-ag-${Date.now()}.pdf`,
-      mimeType: 'application/pdf',
-      originalName: 'pv-ag-2025.pdf',
-    },
-  });
+  // Documents (F3) : les TROIS portées représentées, fichiers réellement stockés via la
+  // couche C0 (en local sur disque, en prod dans le Blob privé) — plus de `FileAsset`
+  // fantôme sans octets. Règlement + PV = toute la résidence ; assurance = partagée avec
+  // le syndic ; attestation = privée à un résident.
   const firstLot = someLots[0]!;
-  await prisma.document.create({
-    data: {
-      residenceId: residence.id,
-      lotId: firstLot.id,
-      fileAssetId: fileDoc.id,
-      name: 'PV AG 2025',
-      scope: 'PARTAGE',
-      origin: 'GERANT',
-    },
+  const firstOwner = firstLot.attachments[0]?.personId ?? null;
+  const tinyPdf = (title: string) =>
+    Buffer.from(`%PDF-1.4\n% ${title} — document de démonstration Syndici\n%%EOF\n`, 'utf8');
+  const seedDoc = async (opts: {
+    name: string;
+    type: 'REGLEMENT' | 'PV_AG' | 'ASSURANCE' | 'ATTESTATION' | 'AUTRE';
+    scope: 'PRIVE' | 'PARTAGE' | 'RESIDENCE';
+    uploadedByPersonId: string | null;
+    origin?: 'GERANT' | 'RESIDENT';
+    personId?: string | null;
+  }) => {
+    const stored = await storeFile(
+      { residenceId: residence.id },
+      {
+        bucket: 'documents',
+        body: tinyPdf(opts.name),
+        mimeType: 'application/pdf',
+        originalName: `${opts.name}.pdf`,
+        uploadedByPersonId: opts.uploadedByPersonId,
+      },
+    );
+    if (!stored.ok) throw new Error(`seed document échoué (${opts.name}) : ${stored.error}`);
+    await prisma.document.create({
+      data: {
+        residenceId: residence.id,
+        fileAssetId: stored.id,
+        name: opts.name,
+        type: opts.type,
+        scope: opts.scope,
+        origin: opts.origin ?? 'GERANT',
+        personId: opts.personId ?? null,
+      },
+    });
+  };
+  await seedDoc({
+    name: 'Règlement de copropriété',
+    type: 'REGLEMENT',
+    scope: 'RESIDENCE',
+    uploadedByPersonId: gerant.id,
   });
-  const firstOwner = firstLot.attachments[0]?.personId;
+  await seedDoc({
+    name: 'PV AG 2025',
+    type: 'PV_AG',
+    scope: 'RESIDENCE',
+    uploadedByPersonId: gerant.id,
+  });
+  await seedDoc({
+    name: 'Contrat d’assurance',
+    type: 'ASSURANCE',
+    scope: 'PARTAGE',
+    uploadedByPersonId: gerant.id,
+  });
+  if (firstOwner)
+    await seedDoc({
+      name: 'Attestation fiscale',
+      type: 'ATTESTATION',
+      scope: 'PRIVE',
+      uploadedByPersonId: firstOwner,
+      origin: 'RESIDENT',
+      personId: firstOwner,
+    });
+
+  // Une invitation en attente
   if (firstOwner) {
     const { createHash, randomBytes } = await import('node:crypto');
     const plainCode = randomBytes(6).toString('base64url'); // code non devinable, jamais stocké en clair

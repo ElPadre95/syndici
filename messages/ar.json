@@ -333,6 +333,54 @@
     "voteResultatPublie": "تم نشر النتيجة"
   },
   "documents": {
+    "f3": {
+      "title": "الوثائق",
+      "subtitle": "{residence} — النظام الداخلي، محاضر الجمع العام، العقود والوثائق.",
+      "noActiveTitle": "لا توجد إقامة نشطة",
+      "noActiveBody": "اختر إقامة لعرض وثائقها.",
+      "depositTitle": "إيداع وثيقة",
+      "deposit": "إيداع",
+      "saved": "تم إيداع الوثيقة",
+      "open": "فتح",
+      "empty": "لا توجد وثائق.",
+      "filterType": "تصفية حسب النوع",
+      "filterScope": "تصفية حسب النطاق",
+      "lot": "الوحدة {lot}",
+      "field": {
+        "name": "العنوان",
+        "nameHint": "مثال: النظام الداخلي للملكية المشتركة",
+        "type": "النوع",
+        "scope": "النطاق",
+        "file": "الملف",
+        "fileHint": "صورة أو PDF، 10 ميغابايت كحد أقصى."
+      },
+      "type": {
+        "all": "كل الأنواع",
+        "REGLEMENT": "النظام الداخلي",
+        "PV_AG": "محضر الجمع العام",
+        "ASSURANCE": "التأمين",
+        "ATTESTATION": "شهادة",
+        "AUTRE": "أخرى"
+      },
+      "scope": {
+        "all": "كل النطاقات",
+        "PRIVE": "خاص",
+        "PARTAGE": "مشترك مع المسيّر",
+        "RESIDENCE": "كامل الإقامة",
+        "INTERNE": "ملف داخلي"
+      },
+      "err": {
+        "forbidden": "إجراء غير مصرّح به.",
+        "no_active_residence": "لا توجد إقامة نشطة.",
+        "file_required": "اختر ملفاً.",
+        "title_required": "العنوان مطلوب.",
+        "invalid_type": "نوع غير صالح.",
+        "invalid_scope": "نطاق غير صالح.",
+        "empty": "الملف فارغ.",
+        "too_large": "الملف كبير جداً (10 ميغابايت كحد أقصى).",
+        "unsupported_type": "نوع ملف غير مدعوم (صورة أو PDF)."
+      }
+    },
     "docAjouter": "إضافة ملف",
     "docPhoto": "صورة",
     "docPartages": "المستندات المشتركة",
@@ -895,7 +943,8 @@
       "roleOwner": "مالك",
       "roleTenant": "مستأجر",
       "spaceComing": "مساحتك كمقيم ستتوفّر قريبًا.",
-      "newsTitle": "الأخبار"
+      "newsTitle": "الأخبار",
+      "docsTitle": "وثائق الإقامة"
     },
     "comingSoon": {
       "title": "قسم قادم",

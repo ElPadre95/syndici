@@ -6,6 +6,8 @@ import { Link } from '@/i18n/navigation';
 import { getSessionContext } from '@/server/session';
 import { listResidentAttachments } from '@/server/residents/home';
 import { listAnnouncementsForResident } from '@/server/announcements/data';
+import { listResidenceDocuments } from '@/server/documents/data';
+import { signedFilePath } from '@/server/storage/sign';
 import { getStaffDashboard } from '@/server/finance/dashboard';
 import { ResidentHome } from '@/components/app/ResidentHome';
 import { StaffDashboard } from '@/components/app/StaffDashboard';
@@ -30,15 +32,27 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
   if (ctx && !ctx.isStaff) {
     const attachments = await listResidentAttachments(ctx.personId);
     if (attachments.length > 0) {
-      const announcements =
+      const rctx =
         ctx.activeId && ctx.role
-          ? await listAnnouncementsForResident({
-              personId: ctx.personId,
-              residenceId: ctx.activeId,
-              role: ctx.role,
-            })
-          : [];
-      return <ResidentHome name={name} attachments={attachments} announcements={announcements} />;
+          ? { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role }
+          : null;
+      const announcements = rctx ? await listAnnouncementsForResident(rctx) : [];
+      const tDoc = await getTranslations('documents.f3');
+      const docs = rctx ? await listResidenceDocuments(rctx) : [];
+      const documents = docs.map((d) => ({
+        id: d.id,
+        name: d.name,
+        typeLabel: tDoc(`type.${d.type}`),
+        href: signedFilePath(d.fileAssetId, 3600),
+      }));
+      return (
+        <ResidentHome
+          name={name}
+          attachments={attachments}
+          announcements={announcements}
+          documents={documents}
+        />
+      );
     }
   }
 

@@ -215,6 +215,23 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       MRE dédoublé (A1+A7), recherche/filtres, invitation émise (PENDING en base), états NEVER/PENDING
       affichés, capture arabe RTL de l'écran mirroré.
 
+- [x] **F3** — Documents. L'écran `/documents` n'est plus un placeholder. Dépôt (staff,
+      `document.manage`) : **titre, type** (règlement, PV d'AG, assurance, attestation, autre) **et
+      portée**. Le cahier des charges demandait « privé au déposant / partagé avec le syndic / visible de
+      toute la résidence » : les deux premières existaient (`PRIVE`, `PARTAGE`), la troisième non — **ajout
+      de la portée `RESIDENCE`** (migration `ALTER TYPE … ADD VALUE`, isolée comme l'ajout de CHEQUE) +
+      **type de document** (`DocumentType`, migration). Le fichier passe par la **couche de stockage C0
+      réutilisée** (`storeFile`, jamais refaite) ; consultation par la **route signée** `/api/files/[id]`
+      (HMAC + session + scope résidence). Liste filtrable **par type et par portée**. Les documents
+      `RESIDENCE` apparaissent chez le résident, dans son **accueil** (comme les actualités). **Étanchéité
+      transcrite en cœur pur testé** (`documentVisibleTo`, 6 cas) : un `PRIVE` n'est visible que de son
+      déposant (même pas du syndic), un `PARTAGE` n'est pas visible des autres résidents, un locataire ne
+      voit jamais le `PRIVE` du propriétaire de son lot, `RESIDENCE` est visible de tous, `INTERNE` du
+      staff seul. Seed enrichi : règlement + PV (RESIDENCE), contrat d'assurance (PARTAGE), attestation
+      (PRIVE d'un résident) — **fichiers réellement stockés** (plus de `FileAsset` fantôme). Vérifié au
+      navigateur : dépôt (formulaire types/portées), filtres, **route signée qui sert bien le PDF**
+      (200, application/pdf), **le syndic ne voit PAS l'attestation privée du résident**, capture arabe RTL.
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

@@ -1,9 +1,17 @@
 import { getTranslations } from 'next-intl/server';
-import { Home, Clock, Newspaper } from 'lucide-react';
+import { Home, Clock, Newspaper, FileText, Download } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { AnnouncementList } from '@/components/announcements/AnnouncementList';
 import type { ResidentAttachment } from '@/server/residents/home';
 import type { AnnouncementView } from '@/server/announcements/data';
+
+/** Document « de toute la résidence » présenté au résident (F3) — lien signé prêt. */
+export interface ResidentDocument {
+  id: string;
+  name: string;
+  typeLabel: string;
+  href: string;
+}
 
 /**
  * Accueil d'un résident (propriétaire/locataire invité) — A7 §1 + E3. Informatif : son
@@ -14,10 +22,12 @@ export async function ResidentHome({
   name,
   attachments,
   announcements,
+  documents,
 }: {
   name: string | null;
   attachments: ResidentAttachment[];
   announcements: AnnouncementView[];
+  documents: ResidentDocument[];
 }) {
   const t = await getTranslations('app.residentHome');
 
@@ -68,6 +78,35 @@ export async function ResidentHome({
             {t('newsTitle')}
           </h2>
           <AnnouncementList items={announcements} />
+        </section>
+      )}
+
+      {/* Documents « de toute la résidence » (F3) — règlement, PV d'AG… lien signé. */}
+      {documents.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="flex items-center gap-2 text-base font-bold text-label">
+            <FileText className="size-4 text-indigo" aria-hidden />
+            {t('docsTitle')}
+          </h2>
+          <ul className="flex flex-col gap-2">
+            {documents.map((d) => (
+              <li key={d.id}>
+                <a
+                  href={d.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-md bg-bg px-3 py-2 text-sm hover:bg-indigo-soft"
+                >
+                  <FileText className="size-4 shrink-0 text-indigo" aria-hidden />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold text-label">{d.name}</span>
+                    <span className="text-xs text-label-4">{d.typeLabel}</span>
+                  </span>
+                  <Download className="size-4 shrink-0 text-label-4" aria-hidden />
+                </a>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

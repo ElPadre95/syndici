@@ -171,14 +171,25 @@ enum VoteStatus {
 }
 
 enum DocumentScope {
-  PRIVE // résident seul
-  PARTAGE // résident ↔ syndic
+  PRIVE // déposant seul
+  PARTAGE // déposant ↔ syndic (staff)
   INTERNE // syndic seul (invisible du résident)
+  RESIDENCE // visible de toute la résidence (F3)
 }
 
 enum DocumentOrigin {
   GERANT
   RESIDENT
+}
+
+// Nature d'un document (F3) — pour classer et filtrer. Texte libre insuffisant :
+// un syndic cherche « le règlement » ou « le dernier PV », pas une chaîne exacte.
+enum DocumentType {
+  REGLEMENT // règlement de copropriété
+  PV_AG // procès-verbal d'assemblée générale
+  ASSURANCE // contrat / attestation d'assurance
+  ATTESTATION // attestation (fiscale, de propriété…)
+  AUTRE
 }
 
 enum AnnouncementType {
@@ -830,6 +841,7 @@ model Document {
   personId    String? // résident concerné
   fileAssetId String
   name        String
+  type        DocumentType   @default(AUTRE)
   scope       DocumentScope  @default(PARTAGE)
   origin      DocumentOrigin @default(RESIDENT)
   createdAt   DateTime       @default(now())
