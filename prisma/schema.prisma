@@ -907,6 +907,7 @@ model Reminder {
   reminderRuleId    String?
   chargeCallId      String?
   channel           ReminderChannel @default(WHATSAPP)
+  message           String? // texte réellement préparé (preuve ; intention d'envoi)
   sentAt            DateTime        @default(now())
   sentByPersonId    String?
   residence         Residence       @relation(fields: [residenceId], references: [id], onDelete: Cascade)

@@ -39,6 +39,8 @@ export interface LotDunningInput {
   lotReference: string;
   recipientPersonId: string | null;
   recipientName: string | null;
+  recipientPhone: string | null;
+  recipientLocale: string;
   calls: DunningCall[];
   remindersSent: number;
   lastReminderAt: Date | null;
@@ -49,6 +51,8 @@ export interface DunningItem {
   lotReference: string;
   recipientPersonId: string | null;
   recipientName: string | null;
+  recipientPhone: string | null;
+  recipientLocale: string;
   amountDueMinor: number;
   retardDays: number;
   lateFee: boolean; // retard >= lateFeeThresholdDays (le message mentionnera les frais)
@@ -88,6 +92,8 @@ export function evaluateDunning(
       lotReference: lot.lotReference,
       recipientPersonId: lot.recipientPersonId,
       recipientName: lot.recipientName,
+      recipientPhone: lot.recipientPhone,
+      recipientLocale: lot.recipientLocale,
       amountDueMinor: qualifying.reduce((s, c) => s + c.remainingMinor, 0),
       retardDays,
       lateFee: retardDays >= rule.lateFeeThresholdDays,
@@ -171,8 +177,12 @@ export async function listDunning(
   }
   const payerByLot = new Map(payers.map((p) => [p.lotId, p.personId]));
   const nameById = new Map<string, string>();
+  const phoneById = new Map<string, string | null>();
+  const localeById = new Map<string, string>();
   for (const p of await listResidents(prismaExecutor(), ctx)) {
     nameById.set(p.id, `${p.firstName} ${p.lastName}`.trim());
+    phoneById.set(p.id, p.phone);
+    localeById.set(p.id, p.preferredLocale);
   }
 
   const callsByLot = new Map<string, DunningCall[]>();
@@ -198,6 +208,8 @@ export async function listDunning(
       lotReference: lot.reference,
       recipientPersonId: payerId,
       recipientName: payerId ? (nameById.get(payerId) ?? null) : null,
+      recipientPhone: payerId ? (phoneById.get(payerId) ?? null) : null,
+      recipientLocale: (payerId ? localeById.get(payerId) : null) ?? 'fr',
       calls: callsByLot.get(lot.id) ?? [],
       remindersSent: rem?.count ?? 0,
       lastReminderAt: rem?.last ?? null,

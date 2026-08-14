@@ -139,7 +139,9 @@ function buildLotSpecs(): LotSpec[] {
             first: first ?? 'Résident',
             last: last ?? 'Inconnu',
             nationality: 'Maroc',
-            locale: 'fr' as const,
+            // Résidents marocains : préfèrent l'arabe (le message de relance WhatsApp part
+            // alors en arabe). Les MRE à l'étranger restent en français/néerlandais.
+            locale: 'ar' as const,
           };
         })();
     // Loue 1 lot étranger sur 2 (propriétaire absent -> locataire occupant).

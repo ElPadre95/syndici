@@ -163,8 +163,18 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       (`reminder.manage`). Seed : impayés à stades variés, certains relancés 1–2 fois, d'autres jamais, et
       **un cas relancé aujourd'hui que l'anti-harcèlement exclut** (prouve que le moteur protège).
       Vérifié au navigateur (12 à relancer, tri par retard, A6 exclu ; capture arabe RTL incluse).
-- [ ] **E2** — Envoi WhatsApp (lien wa.me pré-rempli, message fr/ar dans les catalogues, aperçu éditable,
-      relance unitaire et groupée, trace = intention d'envoi).
+- [x] **E2** — Envoi WhatsApp. Le canal est un **lien wa.me pré-rempli** (pas d'API Meta, pas de coût) :
+      le message s'ouvre dans WhatsApp, le gérant appuie sur envoyer. Le message vit dans les **catalogues**
+      (contenu, pas code) et part dans la **langue préférée du destinataire** — fr ou ar, indépendamment de
+      la langue de l'interface — avec nom, lot, résidence, période(s), montant dû, jours de retard, et
+      comment régler. **Aperçu éditable** avant envoi (ajustable au cas par cas). Relance **unitaire** et
+      **groupée** (séquence des liens un par un, chaque envoi marqué). Chaque relance est **tracée** (à qui,
+      quand, quelle règle, quel canal, **le texte envoyé** — via `Reminder.message`, migration) ; cette
+      trace nourrit l'anti-harcèlement. ⚠ La trace reflète une **INTENTION** d'envoi, pas une certitude de
+      réception — l'interface le dit explicitement (le gérant peut ouvrir le lien sans envoyer). Cœur pur
+      (`waLink`/`waPhoneDigits`) + écriture testés PGlite ET Postgres réel. Vérifié au navigateur (aperçu
+      éditable, message fr pour un MRE et **arabe pour un résident même en interface française**, trace en
+      base, capture arabe RTL).
 - [ ] **E3** — Actualités (type, titre, corps, audience ; lecture côté résident).
 
 ## Règles permanentes

@@ -420,6 +420,33 @@
     "history": {
       "never": "Jamais relancé",
       "sent": "{count} envoyée(s) · dernière {date}"
+    },
+    "message": {
+      "whatsapp": "Bonjour {name},\n\nUn rappel concernant les charges de copropriété de votre lot {lot} à la {residence}.\n\nPériode(s) concernée(s) : {periods}\nMontant dû : {amount}\nRetard : {days} jours\n\nMerci de régulariser votre situation, en espèces auprès du gérant ou par virement. Pour toute question, contactez le syndic.\n\n{residence}"
+    },
+    "remind": "Relancer",
+    "remindAll": "Relancer tous",
+    "marked": "Relance marquée",
+    "preview": {
+      "title": "Relance — {lot}",
+      "messageLabel": "Message (modifiable)",
+      "open": "Ouvrir WhatsApp & marquer",
+      "cancel": "Annuler",
+      "intentNote": "Ceci marque une INTENTION de relance et ouvre WhatsApp pré-rempli. L'envoi effectif se fait dans WhatsApp — la trace ne garantit pas la réception.",
+      "phone": "WhatsApp : {phone}",
+      "noPhone": "Aucun numéro enregistré — WhatsApp s'ouvrira sans destinataire (à choisir)."
+    },
+    "group": {
+      "title": "Relance groupée",
+      "progress": "{current} sur {total}",
+      "open": "Ouvrir & marquer, puis suivant",
+      "finish": "Terminer"
+    },
+    "error": {
+      "forbidden": "Accès refusé.",
+      "no_active_residence": "Aucune résidence active.",
+      "not_found": "Lot introuvable.",
+      "empty_message": "Le message est vide."
     }
   },
   "subscription": {

@@ -20,6 +20,8 @@ const lot = (over: Partial<LotDunningInput> = {}): LotDunningInput => ({
   lotReference: 'A1',
   recipientPersonId: 'p1',
   recipientName: 'Youssef',
+  recipientPhone: '+212661000000',
+  recipientLocale: 'fr',
   calls: [
     {
       settlement: 'UNSETTLED',
