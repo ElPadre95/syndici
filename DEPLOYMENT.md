@@ -162,7 +162,40 @@ env add …` crée la variable avec une valeur **vide**, sans erreur visible. �
    test de connexion** (HTTP ou navigateur). Correctif : reposer la valeur et redéployer —
    `vercel env add AUTH_SECRET production --value "$(openssl rand -base64 32)" --yes`.
 
+4. **Un reseed sans `DEMO_SYNDIC_PASSWORD` ORPHELINE le compte de démo.** Le seed vide
+   toutes les personnes, puis ne recrée le compte de démo QUE si ce mot de passe est
+   fourni. Sans lui, le bloc démo est sauté : l'`User` d'authentification survit mais sa
+   `Person` métier n'est jamais recréée. Symptôme : la connexion réussit, mais l'app
+   n'affiche qu'« Tableau de bord » sur un écran vide — le jeton porte un `personId` qui
+   n'existe plus. **C'est arrivé plusieurs fois.** ➜ Toujours reseeder **avec**
+   `DEMO_SYNDIC_PASSWORD` (voir ci-dessous). Depuis le correctif « session » (DECISIONS.md
+   D33), une session ainsi périmée est renvoyée **explicitement** vers la connexion (plus
+   de coquille vide) ; et l'`id stable` de la Person de démo fait que les reseeds
+   **suivants** ne cassent plus la session.
+
 ## Rejouer / réinitialiser la démo
 
-Pour repartir d'une démo propre : relancer l'étape **3b** seule (le seed réinitialise
-les données et recrée le compte de démo).
+Pour repartir d'une démo propre : relancer l'étape **3b**, **impérativement avec
+`DEMO_SYNDIC_EMAIL` ET `DEMO_SYNDIC_PASSWORD`** (sinon compte de démo orphelin — piège 4
+ci-dessus). Pour éviter que le `.env` local n'écrase les variables passées en ligne de
+commande (le CLI Prisma charge `.env`), utilise `npx tsx` directement :
+
+```bash
+DATABASE_URL="<POOLED>" DIRECT_URL="<DIRECT>" \
+  DEMO_SYNDIC_EMAIL="demo@syndici.ma" \
+  DEMO_SYNDIC_PASSWORD="<DEMO_PWD>" \
+  npx tsx prisma/seed.ts
+```
+
+La `Person` du compte de démo porte un **id STABLE** (`prisma/seed.ts` → `DEMO_PERSON_ID` ;
+en dev, `scripts/dev-account.ts` → `DEV_PERSON_ID`). Comme le rôle et la résidence sont
+recalculés à chaque requête à partir du `personId`, un id stable suffit à faire **survivre
+la session au reseed** — à condition que le mot de passe soit fourni pour que la Person
+soit bien recréée. En local, relancer `npm run dev:account` après chaque `npm run db:seed`.
+
+**Réparer un compte de démo déjà orphelin** (reseed passé sans le mot de passe), sans
+tout recharger : recréer uniquement la `Person` de démo à l'**id stable**, son adhésion
+`OWNER_ADMIN` `ACTIVE` dans l'organisation qui détient le mandat actif, et le lien
+`authUserId` vers l'`User` existant (dont le `passwordHash` a survécu). Vérifier ensuite
+par un test HTTP du flux d'auth (`/api/auth/csrf` → POST `/api/auth/callback/password` →
+`/api/auth/session` doit renvoyer le `personId` stable).
