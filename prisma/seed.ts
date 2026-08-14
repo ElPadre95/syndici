@@ -890,8 +890,20 @@ async function main() {
   const demoPassword = process.env.DEMO_SYNDIC_PASSWORD;
   if (demoPassword && demoPassword.length >= 12) {
     const demoEmail = process.env.DEMO_SYNDIC_EMAIL ?? 'demo@syndici.ma';
+    // Identité STABLE du compte de démo : la Person garde le MÊME id à chaque rechargement
+    // des données. Sans cela, un reseed recrée la personne avec un nouvel id et périme le
+    // jeton de session (personId disparu) → l'utilisateur retombait sur une coquille vide.
+    // Avec un id fixe, la session survit au reseed (le rôle et la résidence sont recalculés
+    // à chaque requête à partir de ce personId stable).
+    const DEMO_PERSON_ID = '5eed0000-0000-4000-8000-000000000001';
     const demoPerson = await prisma.person.create({
-      data: { firstName: 'Démo', lastName: 'Syndic', email: demoEmail, preferredLocale: 'fr' },
+      data: {
+        id: DEMO_PERSON_ID,
+        firstName: 'Démo',
+        lastName: 'Syndic',
+        email: demoEmail,
+        preferredLocale: 'fr',
+      },
     });
     await prisma.membership.create({
       data: {

@@ -335,6 +335,30 @@ perm)`, deny par défaut) — aucun test de rôle codé en dur ailleurs.
   même préférer un stockage à URLs pré-signées à TTL court (S3/**R2**) — le driver abstrait rend ce
   changement local (un seul fichier), sans toucher au code métier.
 
+### D33. Session non résoluble : invalidation explicite, jamais de coquille vide (correctif)
+
+- **Bug** : le JWT porte un `personId` figé à la connexion. Un rechargement des données (reseed)
+  recréait les personnes avec de nouveaux identifiants → le `personId` du jeton ne correspondait plus à
+  aucune personne. `getSessionContext` fabriquait alors un contexte **non nul mais vide** (aucune
+  résidence, rôle nul, `isStaff` faux), rendu silencieusement en coquille résident vide (seule l'entrée
+  « Tableau de bord »). Le **silence** était le vrai défaut.
+- **Correctif racine** : la résolution d'identité (`resolveIdentity`, `src/server/auth/identity.ts`,
+  isolée d'Auth.js → testée PGlite + PG) distingue explicitement **`stale`** (personId absent ou pointant
+  vers une personne inexistante) de **`active`** (personne réelle, même sans résidence = onboarding
+  légitime). Le **layout connecté** est l'autorité : une session `stale` est **renvoyée vers la connexion
+  avec un message clair** (`?reason=session_invalide`), jamais dégradée. Cas voisin couvert : une
+  résidence active disparue ou hors périmètre est ignorée (repli sur une accessible ou `null`), sans
+  jamais casser.
+- **Motif traité ailleurs** : les `return null` silencieux des écrans (`reglages`, `lots/generer`)
+  deviennent des messages explicites ; les fiches `/lots/[id]/*` affichaient déjà « introuvable ».
+- **Reseed sans casser les comptes (résolu)** : la Person liée au **compte de démonstration** reçoit un
+  **id STABLE** (`prisma/seed.ts` : `DEMO_PERSON_ID` ; `scripts/dev-account.ts` : `DEV_PERSON_ID`). Comme
+  le rôle et la résidence sont **recalculés à chaque requête** à partir du `personId`, un id stable suffit
+  à faire **survivre la session** à un reseed (prouvé : id identique après deux reseeds). Procédure :
+  un reseed de prod doit être lancé **avec `DEMO_SYNDIC_PASSWORD`** (sinon la démo n'a ni personne ni
+  accès) ; en local, relancer `npm run dev:account` après chaque `npm run db:seed`. Le correctif de
+  redirection reste le filet de sécurité pour toute session résiduellement périmée.
+
 ### Zones où SPEC.md est muet/ambigu et où j'ai tranché
 
 - **Statut `UPCOMING`** : SPEC n'énumère que paid/partial/late. J'ai ajouté `UPCOMING` (impayé **avant**

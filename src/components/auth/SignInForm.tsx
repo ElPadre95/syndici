@@ -11,7 +11,13 @@ import { Link } from '@/i18n/navigation';
  * Volontairement sans travail de design. Aucun préremplissage, aucun message
  * distinctif qui permettrait d'énumérer les comptes.
  */
-export function SignInForm({ callbackUrl = '/' }: { callbackUrl?: string }) {
+export function SignInForm({
+  callbackUrl = '/',
+  notice,
+}: {
+  callbackUrl?: string;
+  notice?: 'session_invalide';
+}) {
   const t = useTranslations('auth.signIn');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,6 +50,12 @@ export function SignInForm({ callbackUrl = '/' }: { callbackUrl?: string }) {
         <h1 className="text-2xl font-extrabold text-label">{t('title')}</h1>
         <p className="mt-1 text-sm text-label-3">{t('subtitle')}</p>
       </div>
+
+      {notice === 'session_invalide' && (
+        <p className="rounded-md bg-orange-soft px-3 py-2 text-sm font-semibold text-orange">
+          {t('sessionInvalid')}
+        </p>
+      )}
 
       <form className="flex flex-col gap-3" onSubmit={onPassword}>
         <label className="flex flex-col gap-1 text-sm font-semibold text-label">

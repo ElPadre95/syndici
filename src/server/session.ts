@@ -14,7 +14,7 @@ import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { auth } from '@/auth';
 import { prismaExecutor } from '@/server/db/sql';
-import { getResidenceRole, listAccessibleResidences } from '@/server/auth/context';
+import { resolveIdentity } from '@/server/auth/identity';
 import { resolveActiveResidenceId } from '@/server/auth/active-residence';
 import { listResidencesForPerson, type ResidenceListItem } from '@/server/residences/data';
 import type { AppRole } from '@/server/auth/permissions';
@@ -35,31 +35,56 @@ export interface SessionContext {
 }
 
 /**
- * Renvoie le contexte, ou `null` si non authentifié (le middleware garde déjà les routes).
- * Mémoïsé par requête (`react/cache`) : le layout ET la page l'appellent, mais les requêtes
- * de contexte (accès, résidences, rôle) ne s'exécutent qu'UNE fois par rendu.
+ * État d'authentification résolu, EXPLICITE (jamais silencieux) :
+ *   - `anonymous` : aucune session (le middleware garde déjà les routes) ;
+ *   - `stale`     : session présente mais IDENTITÉ NON RÉSOLUBLE — le `personId` du
+ *                   jeton ne correspond à aucune personne (données de démo rechargées,
+ *                   compte non lié). Doit être invalidée et renvoyée vers la connexion,
+ *                   JAMAIS dégradée en coquille vide ;
+ *   - `active`    : identité résolue, contexte utilisable (résidences éventuellement vides
+ *                   pour une personne réelle sans résidence — c'est l'onboarding, pas une panne).
  */
-export const getSessionContext = cache(async (): Promise<SessionContext | null> => {
+export type AuthState =
+  { status: 'anonymous' } | { status: 'stale' } | { status: 'active'; context: SessionContext };
+
+/**
+ * État d'authentification pour la requête courante. Mémoïsé (`react/cache`). Le layout
+ * connecté en fait l'autorité : `stale` → connexion + message ; `active` → rendu normal.
+ */
+export const getAuthState = cache(async (): Promise<AuthState> => {
   const session = await auth();
-  const personId = session?.user?.personId;
-  if (!personId) return null;
+  if (!session?.user) return { status: 'anonymous' };
 
   const exec = prismaExecutor();
-  const accessibleIds = await listAccessibleResidences(exec, personId);
-  // Liste d'affichage (staff) restreinte aux résidences réellement accessibles.
-  const managed = await listResidencesForPerson(personId);
-  const residences = managed.filter((r) => accessibleIds.includes(r.id));
-
   const store = await cookies();
-  const activeId = resolveActiveResidenceId(
-    accessibleIds,
+  const id = await resolveIdentity(
+    exec,
+    session.user.personId,
     store.get(ACTIVE_RESIDENCE_COOKIE)?.value,
   );
-  const role = activeId ? await getResidenceRole(exec, personId, activeId) : null;
-  const userLabel = session.user?.name ?? session.user?.email ?? null;
-  // Staff = au moins une résidence gérée (mandat actif). Sinon, la personne est un
-  // résident : l'accueil et la navigation lui présentent une vue réduite (A7 §1).
+  if (id.status === 'stale') return { status: 'stale' };
+
+  const personId = session.user.personId!;
+  // Liste d'affichage (staff) restreinte aux résidences réellement accessibles.
+  const managed = await listResidencesForPerson(personId);
+  const residences = managed.filter((r) => id.accessibleIds.includes(r.id));
+  const userLabel = session.user.name ?? session.user.email ?? null;
+  // Staff = au moins une résidence gérée (mandat actif). Sinon, résident : vue réduite (A7 §1).
   const isStaff = residences.length > 0;
 
-  return { personId, userLabel, residences, activeId, role, isStaff };
+  return {
+    status: 'active',
+    context: { personId, userLabel, residences, activeId: id.activeId, role: id.role, isStaff },
+  };
+});
+
+/**
+ * Contexte de session, ou `null` si la session n'est pas `active` (anonyme ou périmée).
+ * Les écrans continuent de l'utiliser tel quel ; l'invalidation d'une session périmée
+ * est portée par le layout via `getAuthState` (redirection vers la connexion).
+ * Mémoïsé : le layout ET la page l'appellent, sans requêtes redondantes.
+ */
+export const getSessionContext = cache(async (): Promise<SessionContext | null> => {
+  const state = await getAuthState();
+  return state.status === 'active' ? state.context : null;
 });

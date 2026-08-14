@@ -55,7 +55,19 @@ export default async function ReglagesPage({ params }: { params: Promise<{ local
     listCategoriesForSettings(scopedCtx),
     getSubscription(scopedCtx),
   ]);
-  if (!residence) return null;
+  if (!residence) {
+    // Résidence active introuvable (supprimée en cours de session) : message explicite,
+    // jamais une page blanche silencieuse.
+    return (
+      <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 rounded-lg border border-dashed border-sep bg-white px-6 py-16 text-center">
+        <span className="flex size-12 items-center justify-center rounded-full bg-bg text-label-4">
+          <Building2 className="size-6" aria-hidden />
+        </span>
+        <p className="text-base font-bold text-label">{t('noActiveTitle')}</p>
+        <p className="max-w-sm text-sm text-label-3">{t('noActiveBody')}</p>
+      </div>
+    );
+  }
 
   // Membres du cabinet (F4) — réservé à l'administrateur (`member.manage` = SYNDIC).
   const canManageMembers = can(ctx.role, 'member.manage');

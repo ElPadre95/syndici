@@ -71,6 +71,7 @@
       "passwordLabel": "Mot de passe",
       "submit": "Se connecter",
       "invalid": "E-mail ou mot de passe incorrect.",
+      "sessionInvalid": "Votre session n'est plus valide. Veuillez vous reconnecter.",
       "orSeparator": "ou",
       "magicTitle": "Recevoir un lien de connexion",
       "magicSubmit": "Envoyer le lien",

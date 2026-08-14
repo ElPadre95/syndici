@@ -316,6 +316,19 @@ export async function searchPersons(
 }
 
 /**
+ * La personne existe-t-elle encore ? Garde-fou des sessions périmées : un jeton peut
+ * porter un `personId` supprimé (données de démo rechargées → nouveaux identifiants).
+ * Sans cette vérification, la session dégrade silencieusement vers une coquille vide.
+ */
+export async function personExists(exec: SqlExecutor, personId: string): Promise<boolean> {
+  const rows = await exec.query<{ ok: number }>(
+    `SELECT 1 AS ok FROM "Person" WHERE id = $1 LIMIT 1`,
+    [personId],
+  );
+  return rows.length > 0;
+}
+
+/**
  * Résout la Person métier liée à un compte d'authentification. Point d'entrée
  * unique pour transformer une session (User.id) en identité métier (Person.id).
  */

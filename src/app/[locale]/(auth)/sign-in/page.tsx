@@ -13,10 +13,12 @@ export default async function SignInPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ callbackUrl?: string | string[] }>;
+  searchParams: Promise<{ callbackUrl?: string | string[]; reason?: string | string[] }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { callbackUrl } = await searchParams;
-  return <SignInForm callbackUrl={safeCallback(callbackUrl)} />;
+  const { callbackUrl, reason } = await searchParams;
+  const reasonValue = Array.isArray(reason) ? reason[0] : reason;
+  const notice = reasonValue === 'session_invalide' ? 'session_invalide' : undefined;
+  return <SignInForm callbackUrl={safeCallback(callbackUrl)} notice={notice} />;
 }

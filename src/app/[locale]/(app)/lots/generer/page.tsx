@@ -25,7 +25,17 @@ export default async function GenerateLotsPage({
     );
   }
   const basics = await getResidenceBasics(ctx.activeId);
-  if (!basics) return null;
+  if (!basics) {
+    // Résidence active introuvable (supprimée en cours de session) : message explicite,
+    // jamais une page blanche.
+    return (
+      <div className="mx-auto max-w-2xl">
+        <p className="rounded-md bg-orange-soft px-3 py-2 text-sm text-orange">
+          {tList('noActiveBody')}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">

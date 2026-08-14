@@ -14,6 +14,10 @@ import { hashPassword } from '../src/server/auth/password';
 
 const EMAIL = 'syndic@dev.local';
 const PASSWORD = 'dev-syndic-2026';
+// Id STABLE de la Person dev : conservé d'un reseed à l'autre pour que le jeton de session
+// (personId) reste valide (rôle et résidence recalculés à chaque requête). Sans lui, chaque
+// reseed recréait la personne avec un nouvel id → session périmée → coquille vide.
+const DEV_PERSON_ID = '5eed0000-0000-4000-8000-000000000002';
 
 async function main() {
   if (process.env.NODE_ENV === 'production') {
@@ -36,7 +40,13 @@ async function main() {
     let person = await prisma.person.findFirst({ where: { email: EMAIL } });
     if (!person) {
       person = await prisma.person.create({
-        data: { firstName: 'Dev', lastName: 'Syndic', email: EMAIL, preferredLocale: 'fr' },
+        data: {
+          id: DEV_PERSON_ID,
+          firstName: 'Dev',
+          lastName: 'Syndic',
+          email: EMAIL,
+          preferredLocale: 'fr',
+        },
       });
     }
     const membership = await prisma.membership.findUnique({
