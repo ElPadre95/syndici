@@ -401,11 +401,26 @@
     "appNouveauSignalBtn": "بلاغ جديد"
   },
   "relances": {
-    "relanceAutoEnvoyee": "تم إرسال تذكير تلقائي",
-    "relanceAujourdhui": "اليوم",
-    "relanceJours": "ي",
-    "appRelancer": "تذكير",
-    "appRelancerTous": "تذكير جميع المتأخرين"
+    "noActiveTitle": "لا توجد إقامة نشطة",
+    "noActiveBody": "اختر إقامة لعرض المطالبات.",
+    "forbidden": "الوصول محصور على المتصرّف.",
+    "title": "المطالبات",
+    "banner": "{count} ساكن للمطالبة",
+    "autoDetected": "· كشف تلقائي",
+    "emptyTitle": "لا متأخرات للمطالبة",
+    "emptyBody": "لا يكتشف المحرّك أي مطالبة لازمة (وفق عتبات الإقامة، بما فيها مانع الإزعاج).",
+    "lateDays": "{days} يوم تأخير",
+    "col": {
+      "lot": "الوحدة",
+      "payer": "المدين",
+      "amount": "المبلغ المستحق",
+      "late": "التأخير",
+      "history": "المطالبات"
+    },
+    "history": {
+      "never": "لم تتم مطالبته",
+      "sent": "{count} مُرسلة · آخرها {date}"
+    }
   },
   "subscription": {
     "aboTitre": "باقات الاشتراك",
@@ -757,7 +772,8 @@
       "documents": "الوثائق",
       "settings": "الإعدادات",
       "invitations": "الدعوات",
-      "contracts": "العقود"
+      "contracts": "العقود",
+      "reminders": "المطالبات"
     },
     "header": {
       "account": "الحساب",
@@ -787,7 +803,9 @@
         "noCampaign": "لا حملة",
         "treasury": "الخزينة الفعلية",
         "treasuryCollected": "المحصّل",
-        "treasurySpent": "المصروف"
+        "treasurySpent": "المصروف",
+        "dunning": "{count} ساكن للمطالبة",
+        "dunningAuto": "· كشف تلقائي"
       }
     },
     "residentHome": {

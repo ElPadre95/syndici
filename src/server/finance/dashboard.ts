@@ -7,6 +7,7 @@
 import { forResidence } from '@/server/db/tenant';
 import { listCampaigns } from './campaigns';
 import { getTreasury, type Treasury } from './treasury';
+import { listDunning } from './dunning';
 import type { ActiveContext } from '@/server/auth/context';
 
 export interface StaffDashboard {
@@ -22,6 +23,7 @@ export interface StaffDashboard {
   totalRemainingMinor: number; // impayés cumulés (toutes campagnes)
   collectedThisMonthMinor: number; // net encaissé ce mois calendaire (annulations comprises)
   treasury: Treasury; // trésorerie réelle : encaissé − dépensé (tout l'historique)
+  dunningCount: number; // relances nécessaires (moteur §7.1, anti-harcèlement appliqué)
 }
 
 export async function getStaffDashboard(
@@ -38,13 +40,14 @@ export async function getStaffDashboard(
 
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const [lots, agg, treasury] = await Promise.all([
+  const [lots, agg, treasury, dunning] = await Promise.all([
     scoped.lot.count({ where: { archivedAt: null } }),
     scoped.payment.aggregate({
       _sum: { amountMinor: true },
       where: { receivedAt: { gte: monthStart, lt: nextMonth } },
     }),
     getTreasury(ctx), // tout l'historique : encaissé − dépensé
+    listDunning(ctx, now), // relances nécessaires (§7.1)
   ]);
 
   return {
@@ -61,5 +64,6 @@ export async function getStaffDashboard(
     totalRemainingMinor: campaigns.reduce((s, c) => s + c.remainingMinor, 0),
     collectedThisMonthMinor: agg._sum.amountMinor ?? 0,
     treasury,
+    dunningCount: dunning.items.length,
   };
 }

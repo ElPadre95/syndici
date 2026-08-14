@@ -401,11 +401,26 @@
     "appNouveauSignalBtn": "Nouveau signalement"
   },
   "relances": {
-    "relanceAutoEnvoyee": "Relance auto envoyée",
-    "relanceAujourdhui": "aujourd'hui",
-    "relanceJours": "j",
-    "appRelancer": "Relancer",
-    "appRelancerTous": "Relancer tous les impayés"
+    "noActiveTitle": "Aucune résidence active",
+    "noActiveBody": "Sélectionnez une résidence pour voir les relances.",
+    "forbidden": "Accès réservé au syndic.",
+    "title": "Relances",
+    "banner": "{count} résident(s) à relancer",
+    "autoDetected": "· détection auto",
+    "emptyTitle": "Aucun impayé à relancer",
+    "emptyBody": "Le moteur ne détecte aucune relance nécessaire (seuils de la résidence, anti-harcèlement compris).",
+    "lateDays": "{days} j de retard",
+    "col": {
+      "lot": "Lot",
+      "payer": "Redevable",
+      "amount": "Montant dû",
+      "late": "Retard",
+      "history": "Relances"
+    },
+    "history": {
+      "never": "Jamais relancé",
+      "sent": "{count} envoyée(s) · dernière {date}"
+    }
   },
   "subscription": {
     "aboTitre": "Formules d'abonnement",
@@ -760,7 +775,8 @@
       "documents": "Documents",
       "settings": "Réglages",
       "invitations": "Invitations",
-      "contracts": "Contrats"
+      "contracts": "Contrats",
+      "reminders": "Relances"
     },
     "header": {
       "account": "Compte",
@@ -790,7 +806,9 @@
         "noCampaign": "Aucune campagne",
         "treasury": "Trésorerie réelle",
         "treasuryCollected": "Encaissé",
-        "treasurySpent": "Dépensé"
+        "treasurySpent": "Dépensé",
+        "dunning": "{count} résident(s) à relancer",
+        "dunningAuto": "· détection auto"
       }
     },
     "residentHome": {

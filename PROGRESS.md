@@ -150,6 +150,23 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       Postgres réel. Écran `/contrats` (nav). Vérifié au navigateur (4 contrats seed : un expiré rouge,
       deux orange, un vert ; tri par urgence ; capture arabe RTL incluse).
 
+## Tranche E — Relances & communication
+
+- [x] **E1** — Détection & relance. Moteur §7.1 transcrit **à l'identique** du prototype
+      (`evaluateDunning`, cœur pur testé) : statuts concernés, **seuil de retard**, et surtout la condition
+      **anti-harcèlement** (on ne relance pas quelqu'un relancé il y a moins de N jours), tri par retard
+      décroissant. Les seuils NE sont pas codés en dur : ils viennent de l'entité `ReminderRule`
+      (configurable par résidence — `overdueThresholdDays`, `minDaysBetweenReminders`,
+      `concernedSettlementStates`, `lateFeeThresholdDays`). Écran `/relances` : lot, redevable, montant dû,
+      jours de retard, et l'historique (nombre de relances envoyées + date de la dernière) ; bandeau
+      « N résidents à relancer · détection auto » sur l'écran ET sur le tableau de bord. Réservé au staff
+      (`reminder.manage`). Seed : impayés à stades variés, certains relancés 1–2 fois, d'autres jamais, et
+      **un cas relancé aujourd'hui que l'anti-harcèlement exclut** (prouve que le moteur protège).
+      Vérifié au navigateur (12 à relancer, tri par retard, A6 exclu ; capture arabe RTL incluse).
+- [ ] **E2** — Envoi WhatsApp (lien wa.me pré-rempli, message fr/ar dans les catalogues, aperçu éditable,
+      relance unitaire et groupée, trace = intention d'envoi).
+- [ ] **E3** — Actualités (type, titre, corps, audience ; lecture côté résident).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

@@ -250,7 +250,9 @@ async function main() {
   });
 
   // Règle de relance versionnée (défauts = valeurs du prototype)
-  await prisma.reminderRule.create({ data: { residenceId: residence.id, version: 1 } });
+  const reminderRule = await prisma.reminderRule.create({
+    data: { residenceId: residence.id, version: 1 },
+  });
 
   // Catégories de dépenses par défaut selon le type de résidence (SPEC §7.3).
   const categories = defaultExpenseCategories(residence.type as ResidenceKind);
@@ -269,6 +271,7 @@ async function main() {
   let partialCount = 0;
   let lateCount = 0;
   let cashCount = 0;
+  const overdueForDunning: Array<{ lotId: string; payerPersonId: string }> = [];
 
   for (const [lotIndex, spec] of specs.entries()) {
     const lot = await prisma.lot.create({
@@ -329,6 +332,10 @@ async function main() {
         },
       });
       if (spec.tenantPaysCharges) payerPersonId = tenant.id;
+    }
+
+    if (spec.profile === 'PARTIAL_OVERDUE' || spec.profile === 'UNSETTLED_OVERDUE') {
+      overdueForDunning.push({ lotId: lot.id, payerPersonId });
     }
 
     const amount = spec.villa ? CHARGE_VILLA : CHARGE_APPT;
@@ -399,6 +406,38 @@ async function main() {
     else if (spec.profile === 'PARTIAL_OVERDUE') partialCount++;
     else if (spec.profile === 'UNSETTLED_OVERDUE' || spec.profile === 'UNSETTLED_UPCOMING')
       lateCount++;
+  }
+
+  // Historique de relances (E1) pour la démo : certains impayés déjà relancés une ou deux
+  // fois, d'autres jamais, et UN cas relancé AUJOURD'HUI que l'anti-harcèlement doit
+  // EXCLURE de la liste — pour prouver que le moteur protège. Canal WhatsApp (E2).
+  const daysAgo = (d: number) => new Date(now.getTime() - d * 24 * 3600 * 1000);
+  const mkReminder = (lotId: string, personId: string, sentAt: Date) =>
+    prisma.reminder.create({
+      data: {
+        residenceId: residence.id,
+        lotId,
+        recipientPersonId: personId,
+        reminderRuleId: reminderRule.id,
+        channel: 'WHATSAPP',
+        sentAt,
+        sentByPersonId: gerant.id,
+      },
+    });
+  let remindersSeeded = 0;
+  const [t0, t1, t2] = overdueForDunning;
+  if (t0) {
+    await mkReminder(t0.lotId, t0.payerPersonId, daysAgo(14)); // relancé 2 fois,
+    await mkReminder(t0.lotId, t0.payerPersonId, daysAgo(10)); // dernière il y a 10 j → éligible
+    remindersSeeded += 2;
+  }
+  if (t1) {
+    await mkReminder(t1.lotId, t1.payerPersonId, daysAgo(15)); // relancé 1 fois → éligible
+    remindersSeeded += 1;
+  }
+  if (t2) {
+    await mkReminder(t2.lotId, t2.payerPersonId, now); // relancé AUJOURD'HUI → exclu (< 4 j)
+    remindersSeeded += 1;
   }
 
   // Un paiement ANNULÉ pour la démo (B2) : annulation par écriture inverse. On prend un
@@ -802,6 +841,7 @@ async function main() {
     receipts: await prisma.receipt.count(),
     expenses: await prisma.expense.count(),
     contracts: await prisma.supplierContract.count(),
+    reminders: remindersSeeded,
   };
   console.log('✔ Seed terminé:', JSON.stringify(counts, null, 2));
 }

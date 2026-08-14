@@ -11,6 +11,7 @@ import {
   Receipt,
   FileText,
   FileSignature,
+  BellRing,
   Settings,
   type LucideIcon,
 } from 'lucide-react';
@@ -34,6 +35,7 @@ const STAFF_NAV: readonly NavItem[] = [
   { href: '/invitations', key: 'invitations', Icon: Send },
   { href: '/charges', key: 'charges', Icon: CalendarClock },
   { href: '/paiements', key: 'payments', Icon: CreditCard },
+  { href: '/relances', key: 'reminders', Icon: BellRing },
   { href: '/depenses', key: 'expenses', Icon: Receipt },
   { href: '/contrats', key: 'contracts', Icon: FileSignature },
   { href: '/documents', key: 'documents', Icon: FileText },

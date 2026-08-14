@@ -1,5 +1,13 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import { DoorOpen, TrendingUp, AlertTriangle, Wallet, ArrowRight, Landmark } from 'lucide-react';
+import {
+  DoorOpen,
+  TrendingUp,
+  AlertTriangle,
+  Wallet,
+  ArrowRight,
+  Landmark,
+  BellRing,
+} from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { formatMoney } from '@/lib/money';
 import { cn } from '@/lib/cn';
@@ -74,6 +82,23 @@ export async function StaffDashboard({
           {name ? t('welcome', { name }) : t('welcomeGuest')}
         </h1>
       </header>
+
+      {/* Bandeau « N résidents à relancer · détection auto » (moteur §7.1). */}
+      {data.dunningCount > 0 && (
+        <Link
+          href="/relances"
+          className="border-orange/30 group flex items-center justify-between gap-3 rounded-lg border bg-orange-soft px-4 py-3 transition-colors hover:border-orange"
+        >
+          <span className="flex items-center gap-3">
+            <BellRing className="size-5 shrink-0 text-orange" aria-hidden />
+            <span className="text-sm font-bold text-orange">
+              {t('staff.dunning', { count: data.dunningCount })}
+              <span className="text-orange/80 ms-2 font-semibold">{t('staff.dunningAuto')}</span>
+            </span>
+          </span>
+          <ArrowRight className="size-4 text-orange rtl:-scale-x-100" aria-hidden />
+        </Link>
+      )}
 
       {/* Trésorerie réelle : encaissé − dépensé (tout l'historique). */}
       <Link
