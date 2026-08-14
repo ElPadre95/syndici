@@ -12,6 +12,7 @@ import {
   FileText,
   FileSignature,
   BellRing,
+  Newspaper,
   Settings,
   type LucideIcon,
 } from 'lucide-react';
@@ -38,6 +39,7 @@ const STAFF_NAV: readonly NavItem[] = [
   { href: '/relances', key: 'reminders', Icon: BellRing },
   { href: '/depenses', key: 'expenses', Icon: Receipt },
   { href: '/contrats', key: 'contracts', Icon: FileSignature },
+  { href: '/actualites', key: 'news', Icon: Newspaper },
   { href: '/documents', key: 'documents', Icon: FileText },
   { href: '/reglages', key: 'settings', Icon: Settings },
 ];

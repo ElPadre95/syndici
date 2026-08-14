@@ -800,7 +800,8 @@
       "settings": "الإعدادات",
       "invitations": "الدعوات",
       "contracts": "العقود",
-      "reminders": "المطالبات"
+      "reminders": "المطالبات",
+      "news": "الأخبار"
     },
     "header": {
       "account": "الحساب",
@@ -843,7 +844,8 @@
       "lot": "العقار {lot}",
       "roleOwner": "مالك",
       "roleTenant": "مستأجر",
-      "spaceComing": "مساحتك كمقيم ستتوفّر قريبًا."
+      "spaceComing": "مساحتك كمقيم ستتوفّر قريبًا.",
+      "newsTitle": "الأخبار"
     },
     "comingSoon": {
       "title": "قسم قادم",
@@ -1319,6 +1321,46 @@
       "CHEQUE": "شيك",
       "VIREMENT": "تحويل",
       "CARTE": "بطاقة"
+    }
+  },
+  "announcements": {
+    "noActiveTitle": "لا توجد إقامة نشطة",
+    "noActiveBody": "اختر إقامة لنشر الأخبار.",
+    "forbidden": "الوصول محصور على المتصرّف.",
+    "title": "الأخبار",
+    "subtitle": "{residence}",
+    "publishedTitle": "المنشورة",
+    "emptyTitle": "لا أخبار",
+    "emptyBody": "انشر خبراً لإعلام السكان.",
+    "type": {
+      "INFORMATION": "معلومة",
+      "TRAVAUX": "أشغال",
+      "URGENT": "عاجل",
+      "REUNION": "اجتماع",
+      "TERMINE": "منتهٍ"
+    },
+    "audience": {
+      "ALL": "الجميع",
+      "OWNERS": "المُلّاك",
+      "TENANTS": "المكترون"
+    },
+    "form": {
+      "title": "نشر خبر",
+      "type": "النوع",
+      "audience": "الجمهور",
+      "subject": "العنوان",
+      "subjectHint": "مثال: انقطاع الماء يوم الثلاثاء",
+      "body": "الرسالة",
+      "bodyHint": "فصّل المعلومة…",
+      "publish": "نشر"
+    },
+    "error": {
+      "forbidden": "تم رفض الوصول.",
+      "no_active_residence": "لا توجد إقامة نشطة.",
+      "title_required": "العنوان إلزامي.",
+      "body_required": "الرسالة إلزامية.",
+      "invalid_type": "نوع غير صالح.",
+      "invalid_audience": "جمهور غير صالح."
     }
   }
 }

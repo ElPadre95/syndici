@@ -175,7 +175,16 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       (`waLink`/`waPhoneDigits`) + écriture testés PGlite ET Postgres réel. Vérifié au navigateur (aperçu
       éditable, message fr pour un MRE et **arabe pour un résident même en interface française**, trace en
       base, capture arabe RTL).
-- [ ] **E3** — Actualités (type, titre, corps, audience ; lecture côté résident).
+- [x] **E3** — Actualités. Le syndic publie vers les résidents : **type** (information, travaux, urgence,
+      réunion), titre, corps, et **audience** — tous, propriétaires seulement, ou locataires seulement.
+      Écran `/actualites` (nav) : formulaire de publication + liste (badges type & audience). La lecture
+      côté résident est **prête au niveau des données** (`listAnnouncementsForResident`) et affichée dans
+      l'**accueil sobre du résident invité** (`ResidentHome`) — l'audience est filtrée par un cœur pur
+      `audiencesFor` (testé) : un propriétaire voit ALL+OWNERS, un locataire ALL+TENANTS ; l'un ne voit
+      jamais les actus de l'autre (prouvé sur données réelles). Publication réservée au staff
+      (`announcement.manage`) ; lecture ouverte (`announcement.view`). Seed : actualités de types et
+      audiences variés, dont une réservée aux locataires. Vérifié au navigateur (publication → liste,
+      filtrage propriétaire/locataire au niveau données, capture arabe RTL).
 
 ## Règles permanentes
 

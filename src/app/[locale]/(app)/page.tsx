@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Link } from '@/i18n/navigation';
 import { getSessionContext } from '@/server/session';
 import { listResidentAttachments } from '@/server/residents/home';
+import { listAnnouncementsForResident } from '@/server/announcements/data';
 import { getStaffDashboard } from '@/server/finance/dashboard';
 import { ResidentHome } from '@/components/app/ResidentHome';
 import { StaffDashboard } from '@/components/app/StaffDashboard';
@@ -29,7 +30,15 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
   if (ctx && !ctx.isStaff) {
     const attachments = await listResidentAttachments(ctx.personId);
     if (attachments.length > 0) {
-      return <ResidentHome name={name} attachments={attachments} />;
+      const announcements =
+        ctx.activeId && ctx.role
+          ? await listAnnouncementsForResident({
+              personId: ctx.personId,
+              residenceId: ctx.activeId,
+              role: ctx.role,
+            })
+          : [];
+      return <ResidentHome name={name} attachments={attachments} announcements={announcements} />;
     }
   }
 

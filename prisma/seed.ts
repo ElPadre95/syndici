@@ -662,23 +662,40 @@ async function main() {
     },
   });
 
-  // Actualités typées
+  // Actualités typées, audiences variées (dont une réservée aux locataires) pour montrer
+  // le filtrage : un propriétaire ne voit pas l'actu « locataires », et inversement.
   await prisma.announcement.createMany({
     data: [
       {
         residenceId: residence.id,
         type: 'URGENT',
         title: 'Panne ascenseur',
-        body: 'Technicien prévu demain matin.',
+        body: "Ascenseur du bloc B à l'arrêt. Technicien prévu demain matin. Merci de votre patience.",
+        audience: 'ALL',
+        publishedByPersonId: gerant.id,
+      },
+      {
+        residenceId: residence.id,
+        type: 'TRAVAUX',
+        title: 'Nettoyage de la façade',
+        body: 'Travaux de nettoyage de la façade la semaine prochaine, du lundi au mercredi.',
         audience: 'ALL',
         publishedByPersonId: gerant.id,
       },
       {
         residenceId: residence.id,
         type: 'REUNION',
-        title: 'AG annuelle',
-        body: 'Vendredi 20 à 19h.',
+        title: 'Assemblée générale annuelle',
+        body: "L'AG se tiendra le vendredi 20 à 19h en salle commune. Ordre du jour à venir.",
         audience: 'OWNERS',
+        publishedByPersonId: gerant.id,
+      },
+      {
+        residenceId: residence.id,
+        type: 'INFORMATION',
+        title: 'Rappel — dépôt des ordures',
+        body: 'Merci de sortir les poubelles après 20h uniquement, et de respecter le tri.',
+        audience: 'TENANTS',
         publishedByPersonId: gerant.id,
       },
     ],
@@ -844,6 +861,7 @@ async function main() {
     expenses: await prisma.expense.count(),
     contracts: await prisma.supplierContract.count(),
     reminders: remindersSeeded,
+    announcements: await prisma.announcement.count(),
   };
   console.log('✔ Seed terminé:', JSON.stringify(counts, null, 2));
 }

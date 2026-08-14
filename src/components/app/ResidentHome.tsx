@@ -1,19 +1,23 @@
 import { getTranslations } from 'next-intl/server';
-import { Home, Clock } from 'lucide-react';
+import { Home, Clock, Newspaper } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
+import { AnnouncementList } from '@/components/announcements/AnnouncementList';
 import type { ResidentAttachment } from '@/server/residents/home';
+import type { AnnouncementView } from '@/server/announcements/data';
 
 /**
- * Accueil d'un résident (propriétaire/locataire invité) — A7 §1. Strictement
- * informatif : son nom, ses rattachements (résidence, lot, rôle), et l'indication
- * que son espace complet arrive. Aucune action, aucune fonction de gestion.
+ * Accueil d'un résident (propriétaire/locataire invité) — A7 §1 + E3. Informatif : son
+ * nom, ses rattachements, et les ACTUALITÉS qui le concernent (audience filtrée). Aucune
+ * fonction de gestion. Son espace complet arrive.
  */
 export async function ResidentHome({
   name,
   attachments,
+  announcements,
 }: {
   name: string | null;
   attachments: ResidentAttachment[];
+  announcements: AnnouncementView[];
 }) {
   const t = await getTranslations('app.residentHome');
 
@@ -55,6 +59,17 @@ export async function ResidentHome({
           </div>
         </div>
       </Card>
+
+      {/* Actualités concernant le résident (E3) — audience déjà filtrée côté données. */}
+      {announcements.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="flex items-center gap-2 text-base font-bold text-label">
+            <Newspaper className="size-4 text-indigo" aria-hidden />
+            {t('newsTitle')}
+          </h2>
+          <AnnouncementList items={announcements} />
+        </section>
+      )}
 
       <div className="flex items-center gap-2 text-sm text-label-3">
         <Clock className="size-4 text-label-4" aria-hidden />

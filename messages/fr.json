@@ -803,7 +803,8 @@
       "settings": "Réglages",
       "invitations": "Invitations",
       "contracts": "Contrats",
-      "reminders": "Relances"
+      "reminders": "Relances",
+      "news": "Actualités"
     },
     "header": {
       "account": "Compte",
@@ -846,7 +847,8 @@
       "lot": "Lot {lot}",
       "roleOwner": "Propriétaire",
       "roleTenant": "Locataire",
-      "spaceComing": "Votre espace résident arrive prochainement."
+      "spaceComing": "Votre espace résident arrive prochainement.",
+      "newsTitle": "Actualités"
     },
     "comingSoon": {
       "title": "Section à venir",
@@ -1322,6 +1324,46 @@
       "CHEQUE": "Chèque",
       "VIREMENT": "Virement",
       "CARTE": "Carte"
+    }
+  },
+  "announcements": {
+    "noActiveTitle": "Aucune résidence active",
+    "noActiveBody": "Sélectionnez une résidence pour publier des actualités.",
+    "forbidden": "Accès réservé au syndic.",
+    "title": "Actualités",
+    "subtitle": "{residence}",
+    "publishedTitle": "Publiées",
+    "emptyTitle": "Aucune actualité",
+    "emptyBody": "Publiez une actualité pour informer les résidents.",
+    "type": {
+      "INFORMATION": "Information",
+      "TRAVAUX": "Travaux",
+      "URGENT": "Urgent",
+      "REUNION": "Réunion",
+      "TERMINE": "Terminé"
+    },
+    "audience": {
+      "ALL": "Tous",
+      "OWNERS": "Propriétaires",
+      "TENANTS": "Locataires"
+    },
+    "form": {
+      "title": "Publier une actualité",
+      "type": "Type",
+      "audience": "Audience",
+      "subject": "Titre",
+      "subjectHint": "ex. Coupure d'eau mardi",
+      "body": "Message",
+      "bodyHint": "Détaillez l'information…",
+      "publish": "Publier"
+    },
+    "error": {
+      "forbidden": "Accès refusé.",
+      "no_active_residence": "Aucune résidence active.",
+      "title_required": "Le titre est obligatoire.",
+      "body_required": "Le message est obligatoire.",
+      "invalid_type": "Type invalide.",
+      "invalid_audience": "Audience invalide."
     }
   }
 }
