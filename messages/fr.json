@@ -1365,5 +1365,78 @@
       "invalid_type": "Type invalide.",
       "invalid_audience": "Audience invalide."
     }
+  },
+  "settings": {
+    "noActiveTitle": "Aucune résidence active",
+    "noActiveBody": "Sélectionnez une résidence pour la régler.",
+    "forbidden": "Réglages réservés au syndic.",
+    "title": "Réglages",
+    "subtitle": "{residence}",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "residence": {
+      "title": "Résidence",
+      "name": "Nom",
+      "address": "Adresse",
+      "city": "Ville",
+      "type": "Type",
+      "typeOpt": {
+        "IMMEUBLE": "Immeuble",
+        "VILLA": "Lotissement de villas",
+        "MIXTE": "Mixte"
+      },
+      "chargeAppt": "Charges appartement (MAD)",
+      "chargeVilla": "Charges villa (MAD)",
+      "dueDay": "Jour d'échéance (1–28)",
+      "err": {
+        "required": "Champ obligatoire.",
+        "invalidType": "Type invalide.",
+        "amountInvalid": "Montant invalide.",
+        "dueDayRange": "Entre 1 et 28."
+      }
+    },
+    "reminder": {
+      "title": "Relances",
+      "subtitle": "Ces seuils pilotent la détection automatique des impayés à relancer (§7.1).",
+      "overdue": "Seuil de retard (jours)",
+      "overdueHint": "Nombre de jours de retard avant qu'un impayé soit à relancer.",
+      "cooldown": "Délai minimal entre deux relances (jours)",
+      "cooldownHint": "Anti-harcèlement : on ne relance pas plus souvent.",
+      "states": "Statuts concernés",
+      "state": {
+        "PARTIAL": "Partiels",
+        "UNSETTLED": "Non réglés"
+      },
+      "err": {
+        "min0": "Doit être ≥ 0.",
+        "min1": "Doit être ≥ 1.",
+        "atLeastOne": "Choisissez au moins un statut."
+      }
+    },
+    "categories": {
+      "title": "Catégories de dépenses",
+      "subtitle": "Ajoutez, renommez ou désactivez les postes de dépense de la résidence.",
+      "add": "Ajouter",
+      "addHint": "Nouvelle catégorie…",
+      "archived": "Désactivée",
+      "err": {
+        "label_required": "Le libellé est obligatoire.",
+        "duplicate": "Cette catégorie existe déjà.",
+        "not_found": "Catégorie introuvable.",
+        "forbidden": "Accès refusé.",
+        "no_active_residence": "Aucune résidence active."
+      }
+    },
+    "subscription": {
+      "title": "Abonnement",
+      "note": "Affichage indicatif — aucune fonctionnalité verrouillée.",
+      "plan": "Formule",
+      "units": "Unités gérées",
+      "plans": {
+        "STARTER": "Starter",
+        "PRO": "Pro",
+        "ENTREPRISE": "Entreprise"
+      }
+    }
   }
 }

@@ -1,10 +1,99 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { PagePlaceholder } from '@/components/app/PagePlaceholder';
+import { Building2, CreditCard } from 'lucide-react';
+import { getSessionContext } from '@/server/session';
+import { can } from '@/server/auth/permissions';
+import {
+  getResidenceSettings,
+  getActiveReminderRule,
+  listCategoriesForSettings,
+  getSubscription,
+} from '@/server/settings/data';
+import { ResidenceSettingsForm } from '@/components/settings/ResidenceSettingsForm';
+import { ReminderRuleForm } from '@/components/settings/ReminderRuleForm';
+import { CategoriesManager } from '@/components/settings/CategoriesManager';
+import { Card } from '@/components/ui/Card';
 
-export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
+/**
+ * Réglages (F1). Éditer la résidence, régler les seuils de relance, gérer les catégories
+ * de dépenses, voir l'abonnement. Réservé au syndic (`residence.settings`) ; toute
+ * modification est tracée au journal d'audit.
+ */
+export default async function ReglagesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const tNav = await getTranslations('app.nav');
-  const t = await getTranslations('app.comingSoon');
-  return <PagePlaceholder title={tNav('settings')} note={t('title')} body={t('body')} />;
+  const t = await getTranslations('settings');
+
+  const ctx = await getSessionContext();
+  const active = ctx?.residences.find((r) => r.id === ctx.activeId) ?? null;
+  if (!ctx?.activeId || !ctx.role || !active) {
+    return (
+      <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 rounded-lg border border-dashed border-sep bg-white px-6 py-16 text-center">
+        <span className="flex size-12 items-center justify-center rounded-full bg-bg text-label-4">
+          <Building2 className="size-6" aria-hidden />
+        </span>
+        <p className="text-base font-bold text-label">{t('noActiveTitle')}</p>
+        <p className="max-w-sm text-sm text-label-3">{t('noActiveBody')}</p>
+      </div>
+    );
+  }
+  if (!can(ctx.role, 'residence.settings')) {
+    return (
+      <p className="mx-auto max-w-3xl rounded-md bg-orange-soft px-3 py-2 text-sm text-orange">
+        {t('forbidden')}
+      </p>
+    );
+  }
+  const scopedCtx = { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role };
+
+  const [residence, rule, categories, subscription] = await Promise.all([
+    getResidenceSettings(ctx.activeId),
+    getActiveReminderRule(ctx.activeId),
+    listCategoriesForSettings(scopedCtx),
+    getSubscription(scopedCtx),
+  ]);
+  if (!residence) return null;
+
+  return (
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      <div>
+        <h1 className="text-3xl font-extrabold text-label">{t('title')}</h1>
+        <p className="mt-1 text-sm text-label-3">{t('subtitle', { residence: active.name })}</p>
+      </div>
+
+      <ResidenceSettingsForm current={residence} />
+
+      {rule && <ReminderRuleForm current={rule} />}
+
+      <CategoriesManager categories={categories} />
+
+      {/* Abonnement — affichage seul, aucun verrouillage (modèle tarifaire non arrêté). */}
+      <Card>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-md bg-indigo-soft text-indigo">
+              <CreditCard className="size-5" aria-hidden />
+            </span>
+            <div>
+              <h2 className="text-base font-bold text-label">{t('subscription.title')}</h2>
+              <p className="text-xs text-label-3">{t('subscription.note')}</p>
+            </div>
+          </div>
+          <div className="flex gap-6 text-sm">
+            <div className="text-end">
+              <p className="text-xs font-semibold uppercase tracking-wide text-label-4">
+                {t('subscription.plan')}
+              </p>
+              <p className="font-bold text-label">{t(`subscription.plans.${subscription.plan}`)}</p>
+            </div>
+            <div className="text-end">
+              <p className="text-xs font-semibold uppercase tracking-wide text-label-4">
+                {t('subscription.units')}
+              </p>
+              <p className="font-bold tabular-nums text-label">{subscription.unitsCount}</p>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
 }

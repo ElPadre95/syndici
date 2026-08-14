@@ -186,6 +186,20 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       audiences variés, dont une réservée aux locataires. Vérifié au navigateur (publication → liste,
       filtrage propriétaire/locataire au niveau données, capture arabe RTL).
 
+## Tranche F — combler les écrans vides
+
+- [x] **F1** — Réglages. L'écran `/reglages` n'est plus un placeholder : le syndic édite **sa résidence**
+      (nom, adresse, ville, type immeuble/villa/mixte, charges appartement & villa, jour d'échéance 1–28),
+      règle les **seuils de relance** qui pilotent la détection §7.1 (**seuil de retard**, **délai
+      anti-harcèlement**, statuts concernés — « je mets 5 jours au lieu de 3 » se fait ici, pas dans le
+      code), et gère les **catégories de dépenses** (ajouter, renommer, désactiver/réactiver). Le plan
+      d'abonnement (offre + nombre d'unités) est affiché, sans verrou de fonctionnalité. Validation **pure
+      et testée** (`validateResidenceEdit`, `validateReminderRule`, `validateCategoryLabel` : montants en
+      centimes, échéance bornée, au moins un statut, virgule/espace-milliers tolérés). Réservé au syndic
+      (`residence.settings`) ; **toute modification est tracée au journal d'audit**. Vérifié au navigateur :
+      seuil de retard 3→5 persisté + audité, catégorie créée/renommée/archivée persistée + auditée,
+      capture arabe RTL de l'écran mirroré.
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·
