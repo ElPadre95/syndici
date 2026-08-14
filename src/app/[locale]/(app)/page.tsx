@@ -9,6 +9,9 @@ import { listAnnouncementsForResident } from '@/server/announcements/data';
 import { listResidenceDocuments } from '@/server/documents/data';
 import { signedFilePath } from '@/server/storage/sign';
 import { getStaffDashboard } from '@/server/finance/dashboard';
+import { listResidencePayments } from '@/server/finance/payments';
+import { listExpenses } from '@/server/finance/expenses';
+import { listContracts } from '@/server/finance/contracts';
 import { ResidentHome } from '@/components/app/ResidentHome';
 import { StaffDashboard } from '@/components/app/StaffDashboard';
 
@@ -59,12 +62,25 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
   // Staff avec une résidence active : tableau de bord utile, pas « Premiers pas ».
   const activeResidence = ctx?.residences.find((r) => r.id === ctx.activeId) ?? null;
   if (ctx?.isStaff && ctx.activeId && ctx.role && activeResidence) {
-    const data = await getStaffDashboard({
-      personId: ctx.personId,
-      residenceId: ctx.activeId,
-      role: ctx.role,
-    });
-    return <StaffDashboard name={name} residenceName={activeResidence.name} data={data} />;
+    const actx = { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role };
+    // Page d'accueil : chargée à chaque connexion → les 4 lectures sont parallélisées.
+    // (`getStaffDashboard` regroupe déjà ses agrégats internes ; on n'en refait aucun.)
+    const [data, payments, expenses, contracts] = await Promise.all([
+      getStaffDashboard(actx),
+      listResidencePayments(actx),
+      listExpenses(actx, { includeInternal: true }),
+      listContracts(actx),
+    ]);
+    return (
+      <StaffDashboard
+        name={name}
+        residenceName={activeResidence.name}
+        data={data}
+        payments={payments}
+        expenses={expenses}
+        contracts={contracts}
+      />
+    );
   }
 
   return (

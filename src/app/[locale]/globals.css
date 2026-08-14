@@ -24,6 +24,19 @@
   h3 {
     @apply font-serif;
   }
+
+  /* Sélection : accent indigo discret plutôt que le bleu système. */
+  ::selection {
+    background-color: var(--indigo-soft);
+    color: var(--indigo-deep);
+  }
+
+  /* Focus visible cohérent au clavier (anneau indigo), jamais au clic souris. */
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-sm);
+  }
 }
 
 /*

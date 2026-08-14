@@ -246,6 +246,30 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       Vérifié au navigateur : liste (admin + gestionnaire), retrait (ENDED daté, en historique), réinvitation
       (réactivée sans doublon), dernier admin protégé, capture arabe RTL de la section mirroré.
 
+## Refonte visuelle
+
+- [x] **R1** — Le système, appliqué au tableau de bord (écran de référence). **Design uniquement** :
+      aucune logique, aucun schéma, aucune route, aucune permission, aucun texte de contenu réécrit ;
+      les **272 tests restent verts sans adaptation**. Système posé d'abord : **échelle typographique à
+      rôles** (eyebrow, note, body, section, title, stat, display) ; **palette à rôles STRICTS** (indigo =
+      action, vert = succès, ambre = alerte, rouge = danger, encre bleu-nuit pour l'identité — aucune
+      couleur décorative) ; **espacement/densité** (cartes aérées, listes compactes) ; **bibliothèque
+      `ui/`** (Button variantes+états, Field, Select, Table, Card, Badge, EmptyState, Alert, Spinner).
+      Deux éléments de chrome : **sélecteur de langue en MENU compact** prêt pour 4 langues (fr, en, ar,
+      nl — seuls fr/ar câblés ; ajouter en/nl est un travail d'i18n) et **bulle de messagerie** (FAB indigo
+      + compteur + tiroir glissant, défini visuellement, non branché). **Nav responsive** : barre latérale
+      fixe en grand écran, repliée en tiroir sur mobile (le sidebar ne mange plus l'écran). Tableau de bord
+      **recomposé et enrichi** avec la hiérarchie du prototype : d'abord ce qui appelle une action (impayés,
+      contrats qui expirent), puis **l'argent en bloc indigo dominant** (trésorerie disponible + encaissé/
+      dépensé/solde du mois + raccourci « Encaisser »), puis la **collecte du mois** (taux + barre de
+      progression + reste), puis **trois listes courtes** cliquables (derniers paiements, dernières
+      dépenses, échéances de contrats). Toutes les données viennent des lectures B/C/E existantes,
+      **4 lectures parallélisées** côté page (aucune agrégation nouvelle). Vérifié au navigateur : fr + ar
+      (RTL intégralement mirroré : héros, barre de progression, tiroir, FAB), desktop + mobile. Gate
+      complet vert. Deux manques signalés (non bricolés) : le détail soldés/partiels/en retard + retard
+      moyen exigerait une agrégation nouvelle ; « Encaisser » pointe vers `/paiements` faute de route
+      d'enregistrement autonome.
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

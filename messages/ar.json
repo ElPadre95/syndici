@@ -907,6 +907,7 @@
       "signIn": "تسجيل الدخول",
       "signOut": "تسجيل الخروج",
       "guest": "غير مسجّل",
+      "menu": "القائمة",
       "residencesCount": "{count, plural, =0 {لا توجد إقامة} one {# إقامة} other {# إقامات}}"
     },
     "dashboard": {
@@ -932,7 +933,19 @@
         "treasuryCollected": "المحصّل",
         "treasurySpent": "المصروف",
         "dunning": "{count} ساكن للمطالبة",
-        "dunningAuto": "· كشف تلقائي"
+        "dunningAuto": "· كشف تلقائي",
+        "available": "الخزينة المتاحة",
+        "spentMonth": "المصروف هذا الشهر",
+        "netMonth": "الرصيد الصافي (الشهر)",
+        "rate": "نسبة التحصيل",
+        "toCollect": "المتبقّي تحصيله",
+        "ofCalled": "{collected} من {called}",
+        "recentPayments": "آخر المدفوعات المستلمة",
+        "recentExpenses": "آخر المصاريف",
+        "contractsExpiring": "آجال العقود",
+        "viewAll": "عرض الكل",
+        "nothingYet": "لا شيء بعد",
+        "record": "تسجيل دفعة"
       }
     },
     "residentHome": {

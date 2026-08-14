@@ -910,6 +910,7 @@
       "signIn": "Se connecter",
       "signOut": "Se déconnecter",
       "guest": "Non connecté",
+      "menu": "Menu",
       "residencesCount": "{count, plural, =0 {Aucune résidence} one {# résidence} other {# résidences}}"
     },
     "dashboard": {
@@ -935,7 +936,19 @@
         "treasuryCollected": "Encaissé",
         "treasurySpent": "Dépensé",
         "dunning": "{count} résident(s) à relancer",
-        "dunningAuto": "· détection auto"
+        "dunningAuto": "· détection auto",
+        "available": "Trésorerie disponible",
+        "spentMonth": "Dépensé ce mois",
+        "netMonth": "Solde net (mois)",
+        "rate": "Taux de collecte",
+        "toCollect": "Reste à collecter",
+        "ofCalled": "{collected} sur {called}",
+        "recentPayments": "Derniers paiements reçus",
+        "recentExpenses": "Dernières dépenses",
+        "contractsExpiring": "Échéances de contrats",
+        "viewAll": "Voir tout",
+        "nothingYet": "Rien pour l'instant",
+        "record": "Encaisser un paiement"
       }
     },
     "residentHome": {

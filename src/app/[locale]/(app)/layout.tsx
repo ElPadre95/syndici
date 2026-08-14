@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { AppSidebar } from '@/components/app/AppSidebar';
 import { AppHeader } from '@/components/app/AppHeader';
+import { MessagingBubble } from '@/components/app/MessagingBubble';
 import { getAuthState } from '@/server/session';
 
 /**
@@ -30,7 +31,7 @@ export default async function AppLayout({
 
   const ctx = state.context;
   return (
-    <div className="flex min-h-screen bg-bg">
+    <div className="min-h-screen bg-bg lg:flex">
       <AppSidebar staff={ctx.isStaff} />
       <div className="flex min-h-screen flex-1 flex-col">
         <AppHeader
@@ -40,6 +41,7 @@ export default async function AppLayout({
         />
         <main className="flex-1 px-6 py-6">{children}</main>
       </div>
+      <MessagingBubble />
     </div>
   );
 }

@@ -25,11 +25,11 @@ export function AppHeader({ userLabel, residences, activeId }: AppHeaderProps) {
   return (
     <header
       data-print-hide
-      className="flex items-center justify-between gap-4 border-b border-sep bg-white px-6 py-3"
+      className="bg-card/90 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-sep px-4 py-3 backdrop-blur sm:px-6 lg:sticky lg:top-0"
     >
       <div className="flex items-center gap-3">
         {residences.length > 0 && <ResidenceSwitcher residences={residences} activeId={activeId} />}
-        <span className="flex items-center gap-2 text-sm text-label-3">
+        <span className="hidden items-center gap-2 text-body text-label-3 sm:flex">
           <UserCircle2 className="size-5 text-label-4" aria-hidden />
           {userLabel ? (
             <span className="font-semibold text-label">{userLabel}</span>
@@ -39,7 +39,7 @@ export function AppHeader({ userLabel, residences, activeId }: AppHeaderProps) {
         </span>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <LocaleSwitcher />
         {userLabel ? (
           <Button variant="ghost" onClick={() => signOut({ callbackUrl: '/' })}>
