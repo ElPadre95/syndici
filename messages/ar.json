@@ -856,7 +856,18 @@
     "colMethod": "الطريقة",
     "colReceipt": "الوصل",
     "noCharges": "لا توجد مطالبات لهذه الوحدة.",
-    "noPayments": "لا توجد مدفوعات مسجّلة."
+    "noPayments": "لا توجد مدفوعات مسجّلة.",
+    "transparencyTitle": "الشفافية",
+    "treasuryTitle": "الميزانية والخزينة",
+    "collected": "المحصّل",
+    "spent": "المصروف",
+    "byCategory": "المصاريف حسب الفئة",
+    "expensesTitle": "مصاريف الإقامة",
+    "justificatif": "المُبرِّر",
+    "contractsTitle": "العقود الجارية",
+    "noExpenses": "لا توجد مصاريف ظاهرة.",
+    "noContracts": "لا توجد عقود جارية.",
+    "uncategorized": "غير مصنّف"
   },
   "transparency": {
     "transpTitre": "رسوم الإقامة · يونيو",
@@ -937,7 +948,8 @@
       "contracts": "العقود",
       "reminders": "المطالبات",
       "news": "الأخبار",
-      "myCharges": "رسومي"
+      "myCharges": "رسومي",
+      "transparency": "الشفافية"
     },
     "header": {
       "account": "الحساب",

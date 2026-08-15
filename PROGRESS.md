@@ -309,6 +309,20 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       reçu, relevé B4 (solde de clôture 650 MAD, annulation re-débitée) ; fr + ar (RTL intégral). Gate
       complet vert (279 PGlite, 95 Postgres réel).
 
+- [x] **G3** — La transparence (l'écran qu'on montre). `/proprietaire/transparence` : le propriétaire voit
+      les **dépenses VISIBLES** de sa résidence (jamais l'**INTERNE**), leur **répartition par catégorie**
+      (barres de proportion), et surtout les **justificatifs consultables** via la **route signée C0**
+      (vérifié : le PDF est bien servi, 200/application/pdf) ; plus le **budget & trésorerie** (encaissé /
+      dépensé / disponible, bloc indigo dominant) et les **contrats en cours** (avec échéances). Réutilise
+      les lectures existantes **sûres pour un non-staff** (`getTreasury`, `listExpenses` avec
+      `includeInternal: false`, `aggregateByCategory` pur, `listContracts`) — aucune ne touche au modèle
+      Person. **Étanchéité** : `includeInternal: false` rend l'interne invisible, et on ne signe QUE les
+      justificatifs des dépenses visibles (aucun lien vers un fichier interne). Réservé au rôle
+      PROPRIETAIRE via **`expense.view`** — permission que le **locataire N'A PAS**, donc il n'atteint
+      jamais cet écran (matrice inchangée). Vérifié connecté en propriétaire : budget/trésorerie, 6
+      catégories, dépenses avec justificatif ouvrable, contrats ; fr + ar (RTL intégral — barres remplies
+      depuis la droite). Gate complet vert (279 PGlite, 95 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

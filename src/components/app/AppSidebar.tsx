@@ -17,6 +17,7 @@ import {
   Settings,
   Menu,
   X,
+  Eye,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -54,6 +55,7 @@ const HOME_NAV: NavItem = { href: '/', key: 'dashboard', Icon: LayoutDashboard }
 // mort » : on n'ajoute une entrée que quand son écran existe.
 const OWNER_NAV: readonly NavItem[] = [
   { href: '/proprietaire/charges', key: 'myCharges', Icon: CreditCard },
+  { href: '/proprietaire/transparence', key: 'transparency', Icon: Eye },
 ];
 
 /** Variante de navigation selon le rôle effectif : staff, propriétaire, ou locataire (minimal). */

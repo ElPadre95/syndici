@@ -842,7 +842,18 @@
     "colMethod": "Mode",
     "colReceipt": "Reçu",
     "noCharges": "Aucun appel de charges pour ce lot.",
-    "noPayments": "Aucun paiement enregistré."
+    "noPayments": "Aucun paiement enregistré.",
+    "transparencyTitle": "Transparence",
+    "treasuryTitle": "Budget & trésorerie",
+    "collected": "Encaissé",
+    "spent": "Dépensé",
+    "byCategory": "Dépenses par catégorie",
+    "expensesTitle": "Dépenses de la résidence",
+    "justificatif": "Justificatif",
+    "contractsTitle": "Contrats en cours",
+    "noExpenses": "Aucune dépense visible.",
+    "noContracts": "Aucun contrat en cours.",
+    "uncategorized": "Non catégorisé"
   },
   "transparency": {
     "transpTitre": "Charges de la résidence · Juin",
@@ -940,7 +951,8 @@
       "contracts": "Contrats",
       "reminders": "Relances",
       "news": "Actualités",
-      "myCharges": "Mes charges"
+      "myCharges": "Mes charges",
+      "transparency": "Transparence"
     },
     "header": {
       "account": "Compte",
