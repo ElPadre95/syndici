@@ -1,14 +1,22 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { formatMoney } from '@/lib/money';
+import { SecondaryAmount } from '@/components/finance/SecondaryAmount';
 import type { OwnerMonthlyStatement as Statement } from '@/server/finance/owner';
 import type { LedgerEntry } from '@/server/finance/account';
+import type { ResolvedRate } from '@/server/finance/currency';
 
 /**
  * Relevé mensuel du propriétaire (H4) imprimable, fr/ar. Sa situation du mois (appels,
  * paiements, frais de retard), son solde à ce jour, et les dépenses visibles de la
  * résidence sur la période. Téléchargement via impression PDF (comme le reçu / le relevé).
  */
-export async function OwnerMonthlyStatement({ statement }: { statement: Statement }) {
+export async function OwnerMonthlyStatement({
+  statement,
+  rate = null,
+}: {
+  statement: Statement;
+  rate?: ResolvedRate | null;
+}) {
   const t = await getTranslations('monthly');
   const tAcc = await getTranslations('account');
   const locale = await getLocale();
@@ -87,10 +95,13 @@ export async function OwnerMonthlyStatement({ statement }: { statement: Statemen
       {/* Solde à ce jour */}
       <section className="flex items-center justify-between rounded-md border border-sep bg-bg px-4 py-3">
         <span className="text-sm font-bold uppercase tracking-wide text-label-3">{t('balance')}</span>
-        <span
-          className={`text-xl font-extrabold tabular-nums ${statement.closingBalanceMinor > 0 ? 'text-orange' : 'text-green'}`}
-        >
-          {m(statement.closingBalanceMinor)}
+        <span className="flex flex-col items-end">
+          <span
+            className={`text-xl font-extrabold tabular-nums ${statement.closingBalanceMinor > 0 ? 'text-orange' : 'text-green'}`}
+          >
+            {m(statement.closingBalanceMinor)}
+          </span>
+          <SecondaryAmount minor={statement.closingBalanceMinor} rate={rate} />
         </span>
       </section>
 

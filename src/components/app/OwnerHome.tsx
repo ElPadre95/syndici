@@ -1,11 +1,15 @@
 import { getTranslations } from 'next-intl/server';
-import { Newspaper, FileText, Download, Users2, CheckCircle2 } from 'lucide-react';
+import { Newspaper, FileText, Download, Users2, CheckCircle2, Coins } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { AnnouncementList } from '@/components/announcements/AnnouncementList';
 import { OwnerLotPanel, type OwnerLotView } from '@/components/app/OwnerLotPanel';
+import { CurrencySelector } from '@/components/finance/CurrencySelector';
 import type { ResidentDocument } from '@/components/app/ResidentHome';
 import type { ActiveContext } from '@/server/auth/context';
 import type { AnnouncementView } from '@/server/announcements/data';
+import { prismaExecutor } from '@/server/db/sql';
+import { getSecondaryCurrency } from '@/server/auth/person-access';
+import { resolveSecondaryRate, listCurrencyRates } from '@/server/finance/currency';
 import {
   listOwnerLots,
   getOwnerLotCharges,
@@ -33,11 +37,15 @@ export async function OwnerHome({
   documents: ResidentDocument[];
 }) {
   const t = await getTranslations('owner');
+  const tCur = await getTranslations('currency');
 
   const lots = await listOwnerLots(ctx);
-  const [chargesByLot, counts] = await Promise.all([
+  const [chargesByLot, counts, rate, rates, currentCurrency] = await Promise.all([
     Promise.all(lots.map((l) => getOwnerLotCharges(ctx, l.lotId))),
     getResidenceCollectionCounts(ctx),
+    resolveSecondaryRate(ctx),
+    listCurrencyRates(ctx),
+    getSecondaryCurrency(prismaExecutor(), ctx.personId),
   ]);
 
   const lotViews: OwnerLotView[] = lots.map((l, i) => {
@@ -65,8 +73,22 @@ export async function OwnerHome({
         </h1>
       </header>
 
-      {/* Situation de paiement (par lot) */}
-      {lotViews.length > 0 && <OwnerLotPanel lots={lotViews} />}
+      {/* Situation de paiement (par lot) — avec conversion indicative si activée */}
+      {lotViews.length > 0 && (
+        <OwnerLotPanel lots={lotViews} rate={rate ? { currency: rate.currency, madPerUnitMinor: rate.madPerUnitMinor } : null} />
+      )}
+
+      {/* Devise secondaire (H5) — choix du propriétaire, désactivée par défaut */}
+      <Card className="flex flex-wrap items-center gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-indigo-soft text-indigo">
+          <Coins className="size-5" aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-eyebrow font-bold uppercase text-label-4">{tCur('title')}</p>
+          <p className="text-note text-label-4">{tCur('ownerNote')}</p>
+        </div>
+        <CurrencySelector current={currentCurrency} available={rates.map((r) => r.currency)} />
+      </Card>
 
       {/* Indicateur collectif — des NOMBRES seulement */}
       {counts.totalLots > 0 && (

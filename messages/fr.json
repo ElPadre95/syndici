@@ -288,6 +288,21 @@
     "residenceExpenses": "Dépenses de la résidence sur le mois",
     "noExpenses": "Aucune dépense visible ce mois-ci."
   },
+  "currency": {
+    "title": "Devise secondaire",
+    "indicative": "conversion indicative",
+    "ownerNote": "Conversion indicative — les montants réels restent en dirhams.",
+    "yourCurrency": "Votre devise secondaire",
+    "none": "Aucune (dirham seul)",
+    "noRates": "Aucun taux n'a encore été configuré par votre syndic.",
+    "rateHint": "Taux saisi manuellement (jamais un service externe). Le montant réel reste toujours en dirhams.",
+    "currencyCode": "Code (ISO)",
+    "madPerUnit": "MAD pour 1 unité",
+    "asOfDate": "Date du taux",
+    "saveRate": "Enregistrer le taux",
+    "saved": "Enregistré.",
+    "error": "L'opération a échoué."
+  },
   "receipts": {
     "succTitle": "Paiement réussi !",
     "succDl": "Télécharger le reçu",

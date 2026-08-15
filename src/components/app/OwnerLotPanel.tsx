@@ -24,14 +24,31 @@ export interface OwnerLotView {
  * dû + échéance, avec un bandeau rouge s'il est en retard. Si les charges sont déléguées au
  * locataire, c'est dit clairement — le propriétaire reste concerné même s'il ne paie pas.
  */
-export function OwnerLotPanel({ lots }: { lots: OwnerLotView[] }) {
+export function OwnerLotPanel({
+  lots,
+  rate = null,
+}: {
+  lots: OwnerLotView[];
+  rate?: { currency: string; madPerUnitMinor: number } | null;
+}) {
   const t = useTranslations('owner');
+  const tCur = useTranslations('currency');
   const locale = useLocale();
   const [sel, setSel] = useState(0);
   const lot = lots[sel];
   if (!lot) return null;
 
   const fmt = (m: number) => formatMoney(m, locale);
+  // Conversion INDICATIVE (H5) — à côté du dirham, jamais à la place. `madPerUnitMinor` =
+  // centimes MAD pour 1 unité de la devise. Le montant réel reste en MAD.
+  const secondary = (minor: number): string | null =>
+    rate && rate.madPerUnitMinor > 0
+      ? new Intl.NumberFormat(locale, {
+          style: 'currency',
+          currency: rate.currency,
+          maximumFractionDigits: 0,
+        }).format(minor / rate.madPerUnitMinor)
+      : null;
   const dueDate = lot.nextDueDate
     ? new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(
         new Date(lot.nextDueDate),
@@ -105,6 +122,11 @@ export function OwnerLotPanel({ lots }: { lots: OwnerLotView[] }) {
                 >
                   {fmt(lot.totalRemainingMinor)}
                 </p>
+                {secondary(lot.totalRemainingMinor) && (
+                  <p className="text-note text-label-4">
+                    ≈ {secondary(lot.totalRemainingMinor)} · {tCur('indicative')}
+                  </p>
+                )}
               </div>
               {dueDate && (
                 <div className="flex items-center gap-2 text-body text-label-3">

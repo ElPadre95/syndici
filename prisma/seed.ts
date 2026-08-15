@@ -261,6 +261,17 @@ async function main() {
     data: { organizationId: org.id, provider: 'CMI', merchantId: 'CMI-PENDING', status: 'PENDING' },
   });
 
+  // Taux de change indicatif (H5) — donnée de config, avec sa date. 1 EUR = 10,75 MAD.
+  // Le propriétaire MRE de démo (Bruxelles) choisira EUR ; les autres restent en dirham.
+  await prisma.currencyRate.create({
+    data: {
+      residenceId: residence.id,
+      currency: 'EUR',
+      madPerUnitMinor: 1075,
+      asOfDate: monthStart(0),
+    },
+  });
+
   // Règle de relance versionnée (défauts = valeurs du prototype)
   const reminderRule = await prisma.reminderRule.create({
     data: { residenceId: residence.id, version: 1 },
@@ -452,6 +463,12 @@ async function main() {
   // Le MRE prend possession du lot vacant en dur comme seconde propriété : il détient
   // désormais deux lots et doit apparaître UNE seule fois dans l'annuaire (F2).
   if (mreOwnerId && vacantLotId) {
+    // Devise secondaire (H5) : le MRE de démo (Bruxelles) raisonne en euros. Les autres
+    // propriétaires restent en dirham (désactivé par défaut).
+    await prisma.person.update({
+      where: { id: mreOwnerId },
+      data: { secondaryCurrency: 'EUR' },
+    });
     await prisma.lotAttachment.create({
       data: {
         residenceId: residence.id,

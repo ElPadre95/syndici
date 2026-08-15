@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { PrintButton } from '@/components/finance/PrintButton';
 import { OwnerMonthlyStatement } from '@/components/finance/OwnerMonthlyStatement';
 import { listOwnerLots, getOwnerMonthlyStatement } from '@/server/finance/owner';
+import { resolveSecondaryRate } from '@/server/finance/currency';
 
 /**
  * Relevé mensuel (H4) — propriétaire. Un document téléchargeable (impression PDF) : sa
@@ -56,7 +57,10 @@ export default async function OwnerMonthlyPage({
   const monthName = (y: number, mo: number) =>
     new Intl.DateTimeFormat(localeC, { month: 'long', year: 'numeric' }).format(new Date(y, mo - 1, 1));
 
-  const statement = await getOwnerMonthlyStatement(actx, activeLot.lotId, year, month);
+  const [statement, rate] = await Promise.all([
+    getOwnerMonthlyStatement(actx, activeLot.lotId, year, month),
+    resolveSecondaryRate(actx),
+  ]);
   if (statement) statement.ownerName = ctx.userLabel;
 
   return (
@@ -100,7 +104,7 @@ export default async function OwnerMonthlyPage({
         ))}
       </div>
 
-      {statement && <OwnerMonthlyStatement statement={statement} />}
+      {statement && <OwnerMonthlyStatement statement={statement} rate={rate} />}
     </div>
   );
 }

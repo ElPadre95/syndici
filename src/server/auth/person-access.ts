@@ -315,6 +315,33 @@ export async function searchPersons(
   );
 }
 
+/** Devise secondaire choisie par une personne (H5) — lecture de SA propre préférence. */
+export async function getSecondaryCurrency(
+  exec: SqlExecutor,
+  personId: string,
+): Promise<string | null> {
+  const rows = await exec.query<{ secondaryCurrency: string | null }>(
+    `SELECT "secondaryCurrency" FROM "Person" WHERE id = $1 LIMIT 1`,
+    [personId],
+  );
+  return rows[0]?.secondaryCurrency ?? null;
+}
+
+/**
+ * Fixe la devise secondaire d'une personne (H5). À appeler avec SON PROPRE `personId`
+ * (le propriétaire n'édite que sa fiche) — jamais celle d'un tiers. `null` = désactivé.
+ */
+export async function setSecondaryCurrency(
+  exec: SqlExecutor,
+  personId: string,
+  currency: string | null,
+): Promise<void> {
+  await exec.query(
+    `UPDATE "Person" SET "secondaryCurrency" = $1, "updatedAt" = now() WHERE id = $2`,
+    [currency, personId],
+  );
+}
+
 /**
  * La personne existe-t-elle encore ? Garde-fou des sessions périmées : un jeton peut
  * porter un `personId` supprimé (données de démo rechargées → nouveaux identifiants).

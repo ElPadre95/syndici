@@ -10,6 +10,8 @@ import {
   getSubscription,
 } from '@/server/settings/data';
 import { LateFeeSettings } from '@/components/settings/LateFeeSettings';
+import { CurrencyRatesForm } from '@/components/settings/CurrencyRatesForm';
+import { listCurrencyRates } from '@/server/finance/currency';
 import { prismaExecutor } from '@/server/db/sql';
 import { listMembers } from '@/server/org/data';
 import { isLastActiveAdmin } from '@/server/org/members';
@@ -51,14 +53,16 @@ export default async function ReglagesPage({ params }: { params: Promise<{ local
   }
   const scopedCtx = { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role };
 
-  const [residence, rule, lateFee, categories, subscription] = await Promise.all([
+  const [residence, rule, lateFee, currencyRates, categories, subscription] = await Promise.all([
     getResidenceSettings(ctx.activeId),
     getActiveReminderRule(ctx.activeId),
     getLateFeeSettings(ctx.activeId),
+    listCurrencyRates(scopedCtx),
     listCategoriesForSettings(scopedCtx),
     getSubscription(scopedCtx),
   ]);
   const tLate = await getTranslations('lateFees');
+  const tCur = await getTranslations('currency');
   if (!residence) {
     // Résidence active introuvable (supprimée en cours de session) : message explicite,
     // jamais une page blanche silencieuse.
@@ -107,6 +111,11 @@ export default async function ReglagesPage({ params }: { params: Promise<{ local
           <LateFeeSettings settings={lateFee} />
         </Card>
       )}
+
+      <Card className="flex flex-col gap-4">
+        <h2 className="text-base font-bold text-label">{tCur('title')}</h2>
+        <CurrencyRatesForm rates={currencyRates} />
+      </Card>
 
       <CategoriesManager categories={categories} />
 

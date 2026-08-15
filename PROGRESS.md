@@ -427,6 +427,19 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       propriétaire : A1 (soldé, solde 0) et A7 (appel + 3 frais de retard, solde 2.197,50 DH), dépenses de la
       résidence du mois ; fr + ar (RTL intégral). Gate complet vert (298 PGlite, 113 Postgres réel).
 
+- [x] **H5** — La **devise secondaire**. Un propriétaire à Bruxelles voit une **conversion INDICATIVE** à côté
+      des dirhams, **dans son espace uniquement** ; les montants réels restent en MAD. Le **taux est une DONNÉE
+      de configuration** (jamais un appel externe) : saisi par le **syndic dans les réglages, avec sa date**
+      (`CurrencyRate` : `madPerUnitMinor` = centimes MAD pour 1 unité, unicité par devise → **extensible** à
+      plusieurs devises). **Désactivée par défaut** ; **activée par le propriétaire** qui choisit sa devise sur
+      **sa propre fiche** (`Person.secondaryCurrency`, via **person-access** — jamais celle d'un tiers). Affichage
+      composé : `resolveSecondaryRate` croise le choix du propriétaire et le taux de sa résidence, et une note
+      « conversion indicative » accompagne chaque montant. Branché sur le **montant dû** (accueil) et le **solde
+      du relevé mensuel**. Migration `Person.secondaryCurrency` + table `CurrencyRate`. Test pur (`convertMinor`).
+      Seed : taux **1 EUR = 10,75 MAD** sur Al Firdaous, le MRE de démo (Sara) en **EUR**, les autres en dirham.
+      Vérifié connecté en propriétaire : montant dû A7 « 1.950,00 MAD ≈ 181 € · conversion indicative », sélecteur
+      de devise, réglages (taux + date) ; fr + ar (RTL intégral). Gate complet vert (301 PGlite, 113 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

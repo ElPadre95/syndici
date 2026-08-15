@@ -275,6 +275,9 @@ model Person {
   phone            String?
   nationality      String?
   preferredLocale  Locale           @default(fr)
+  // Devise secondaire (H5) — CHOIX du propriétaire (code ISO, ex. « EUR »). null = désactivé
+  // (défaut). Affiche une conversion INDICATIVE à côté des dirhams, dans son espace seulement.
+  secondaryCurrency String?
   authUserId       String?          @unique
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
@@ -424,7 +427,26 @@ model Residence {
   invitations        InvitationCode[]
   attachments        LotAttachment[]
   settlementAccounts SettlementAccount[]
+  currencyRates      CurrencyRate[]
   auditLogs          AuditLog[]
+}
+
+/// Taux de change INDICATIF (H5) — DONNÉE de configuration (jamais un appel externe),
+/// saisie par le syndic avec sa date. `madPerUnitMinor` = centimes de dirham pour UNE
+/// unité de la devise (ex. 1 EUR = 10,75 MAD → 1075). Sert uniquement à afficher une
+/// conversion indicative dans l'espace du propriétaire ; les montants réels restent en MAD.
+model CurrencyRate {
+  id              String    @id @default(uuid())
+  residenceId     String
+  currency        String // code ISO, ex. « EUR », « USD »
+  madPerUnitMinor Int // centimes MAD pour 1 unité de la devise
+  asOfDate        DateTime  @db.Date
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  residence       Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+
+  @@unique([residenceId, currency])
+  @@index([residenceId])
 }
 
 /// Mandat de gestion daté entre une organisation et une résidence.
