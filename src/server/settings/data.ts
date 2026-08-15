@@ -31,6 +31,33 @@ export async function getResidenceSettings(residenceId: string): Promise<Residen
   });
 }
 
+export interface LateFeeSettings {
+  autoLateFee: boolean;
+  fixedMinor: number;
+  percentBps: number;
+  capMinor: number | null;
+}
+
+/** Config des frais de retard (H2) — résidence. Désactivée par défaut. */
+export async function getLateFeeSettings(residenceId: string): Promise<LateFeeSettings | null> {
+  const r = await getBaseClient().residence.findUnique({
+    where: { id: residenceId },
+    select: {
+      autoLateFee: true,
+      lateFeeFixedMinor: true,
+      lateFeePercentBps: true,
+      lateFeeCapMinor: true,
+    },
+  });
+  if (!r) return null;
+  return {
+    autoLateFee: r.autoLateFee,
+    fixedMinor: r.lateFeeFixedMinor,
+    percentBps: r.lateFeePercentBps,
+    capMinor: r.lateFeeCapMinor,
+  };
+}
+
 export interface ReminderRuleSettings {
   id: string;
   overdueThresholdDays: number;

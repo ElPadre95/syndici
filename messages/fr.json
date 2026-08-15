@@ -230,6 +230,30 @@
     "commonAreaLabel": "Partie commune",
     "error": "Le signalement n'a pas pu être envoyé. Réessayez."
   },
+  "lateFees": {
+    "title": "Frais de retard",
+    "legal": "Au Maroc, un syndic ne peut appliquer de pénalités que si le règlement de copropriété ou une assemblée générale l'a décidé. Désactivés par défaut, jamais appliqués automatiquement.",
+    "enable": "Activer les frais de retard",
+    "fixed": "Montant fixe (MAD)",
+    "percent": "Pourcentage du reste dû (%)",
+    "cap": "Plafond (MAD, optionnel)",
+    "thresholdNote": "Appliqués après le seuil de retard réglé dans la règle de relance.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré.",
+    "generate": "Générer les frais maintenant",
+    "generating": "Génération…",
+    "generatedN": "{n} frais de retard générés.",
+    "generatedNone": "Aucun nouveau frais à générer.",
+    "generateDisabled": "Activez d'abord les frais de retard.",
+    "reverseTitle": "Frais de retard du lot",
+    "none": "Aucun frais de retard.",
+    "reverse": "Annuler",
+    "reverseReason": "Motif de l'annulation",
+    "reverseConfirm": "Annuler ce frais",
+    "reversed": "Annulé",
+    "error": "L'opération a échoué. Réessayez."
+  },
   "receipts": {
     "succTitle": "Paiement réussi !",
     "succDl": "Télécharger le reçu",
@@ -890,7 +914,9 @@
     "label": {
       "charge": "Appel de charges — {period}",
       "payment": "Règlement — {method}",
-      "reversal": "Annulation de règlement — {method}"
+      "reversal": "Annulation de règlement — {method}",
+      "latefee": "Frais de retard",
+      "latefeeReversal": "Annulation de frais de retard"
     },
     "method": {
       "ESPECES": "Espèces",

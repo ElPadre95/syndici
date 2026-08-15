@@ -37,6 +37,7 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'PaymentAllocation',
   'NumberSequence',
   'Receipt',
+  'LateFee',
   'SettlementAccount',
   'ExpenseCategory',
   'Expense',

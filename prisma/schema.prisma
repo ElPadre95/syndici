@@ -388,6 +388,13 @@ model Residence {
   // Paiement en ligne SIMULÉ (G4) : drapeau par résidence, désactivé par défaut.
   // Activé pour la seule résidence de démo. La plateforme ne détient jamais de fonds.
   onlinePaymentEnabled    Boolean       @default(false)
+  // Frais de retard (H2) — CONFIGURABLE, désactivé par défaut. Au Maroc, un syndic ne peut
+  // appliquer de pénalités que si le règlement/AG l'a décidé : jamais activé automatiquement.
+  // `autoLateFee` garde la génération ; montant = fixe + pourcentage (en points de base),
+  // avec un plafond optionnel. Le seuil en jours vit sur la règle de relance.
+  lateFeeFixedMinor       Int           @default(0) // part fixe (centimes)
+  lateFeePercentBps       Int           @default(0) // part proportionnelle (points de base : 500 = 5%)
+  lateFeeCapMinor         Int? // plafond optionnel (centimes)
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
@@ -400,6 +407,7 @@ model Residence {
   payments           Payment[]
   allocations        PaymentAllocation[]
   receipts           Receipt[]
+  lateFees           LateFee[]
   numberSequences    NumberSequence[]
   incidents          Incident[]
   incidentUpdates    IncidentUpdate[]
@@ -459,6 +467,7 @@ model Lot {
   chargeCalls        ChargeCall[]
   payments           Payment[]
   receipts           Receipt[]
+  lateFees           LateFee[]
   incidents          Incident[]
   documents          Document[]
   ballots            Ballot[]
@@ -514,9 +523,35 @@ model ChargeCall {
   lot          Lot                 @relation(fields: [lotId], references: [id], onDelete: Cascade)
   allocations  PaymentAllocation[]
   reminders    Reminder[]
+  lateFees     LateFee[]
 
   @@unique([lotId, periodYear, periodMonth])
   @@index([residenceId])
+}
+
+/// Frais de retard (H2) — écriture au DÉBIT d'un lot, découlant d'un appel en retard.
+/// IMMUABLE, comme un paiement : une annulation se fait par une écriture INVERSE
+/// (`reversesLateFeeId`, montant négatif). Idempotence : au plus UN frais par appel
+/// (unicité partielle sur `chargeCallId` pour les originaux ; les inverses portent NULL).
+model LateFee {
+  id                String    @id @default(uuid())
+  residenceId       String
+  lotId             String
+  chargeCallId      String? // l'appel en retard qui l'a déclenché (NULL pour un inverse)
+  amountMinor       Int // centimes (négatif = écriture inverse)
+  reason            String?
+  reminderRuleId    String? // règle qui l'a produit (traçabilité)
+  reversesLateFeeId String? // renseigné si ce frais en annule un autre
+  appliedAt         DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  residence         Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot               Lot       @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  chargeCall        ChargeCall? @relation(fields: [chargeCallId], references: [id], onDelete: SetNull)
+  reverses          LateFee?  @relation("LateFeeReversal", fields: [reversesLateFeeId], references: [id], onDelete: SetNull)
+  reversedBy        LateFee[] @relation("LateFeeReversal")
+
+  @@index([residenceId])
+  @@index([lotId])
 }
 
 /// Règlement reçu (espèces, carte, virement). IMMUABLE : jamais modifié.

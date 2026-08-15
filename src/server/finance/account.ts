@@ -10,7 +10,7 @@ import { prismaExecutor } from '@/server/db/sql';
 import { listResidents } from '@/server/auth/person-access';
 import type { ActiveContext } from '@/server/auth/context';
 
-export type LedgerKind = 'charge' | 'payment' | 'reversal';
+export type LedgerKind = 'charge' | 'payment' | 'reversal' | 'latefee' | 'latefee_reversal';
 
 export interface LedgerEntry {
   date: string; // ISO
@@ -56,6 +56,11 @@ export interface LedgerReceiptRef {
   number: string;
   voided: boolean;
 }
+export interface LedgerLateFee {
+  appliedAt: Date;
+  amountMinor: number; // < 0 pour une annulation (écriture inverse)
+  reversesLateFeeId: string | null;
+}
 
 export interface Ledger {
   entries: LedgerEntry[];
@@ -73,6 +78,7 @@ export function buildLedger(
   calls: readonly LedgerCall[],
   payments: readonly LedgerPayment[],
   receiptByPayment: ReadonlyMap<string, LedgerReceiptRef>,
+  lateFees: readonly LedgerLateFee[] = [],
 ): Ledger {
   type Raw = Omit<LedgerEntry, 'balanceMinor'>;
   const raw: Raw[] = [];
@@ -108,7 +114,25 @@ export function buildLedger(
     });
   }
 
-  const order = (k: LedgerKind) => (k === 'charge' ? 0 : 1);
+  for (const lf of lateFees) {
+    const isReversal = lf.reversesLateFeeId != null;
+    raw.push({
+      date: lf.appliedAt.toISOString(),
+      kind: isReversal ? 'latefee_reversal' : 'latefee',
+      periodYear: null,
+      periodMonth: null,
+      method: null,
+      receiptId: null,
+      receiptNumber: null,
+      receiptVoided: false,
+      // Un frais (montant > 0) débite ; son annulation (montant < 0) re-crédite.
+      debitMinor: lf.amountMinor > 0 ? lf.amountMinor : 0,
+      creditMinor: lf.amountMinor < 0 ? -lf.amountMinor : 0,
+    });
+  }
+
+  // À date égale : débits d'abord (appel de charges, frais de retard), crédits ensuite.
+  const order = (k: LedgerKind) => (k === 'charge' || k === 'latefee' ? 0 : 1);
   raw.sort((a, b) => a.date.localeCompare(b.date) || order(a.kind) - order(b.kind));
 
   let balance = 0;
@@ -134,7 +158,7 @@ export async function getLotAccount(ctx: ActiveContext, lotId: string): Promise<
   const lot = await scoped.lot.findUnique({ where: { id: lotId }, select: { reference: true } });
   if (!lot) return null;
 
-  const [calls, payments, residence, mandate] = await Promise.all([
+  const [calls, payments, lateFees, residence, mandate] = await Promise.all([
     scoped.chargeCall.findMany({
       where: { lotId, voidedAt: null },
       select: { periodYear: true, periodMonth: true, dueDate: true, amountMinor: true },
@@ -148,6 +172,10 @@ export async function getLotAccount(ctx: ActiveContext, lotId: string): Promise<
         receivedAt: true,
         reversesPaymentId: true,
       },
+    }),
+    scoped.lateFee.findMany({
+      where: { lotId },
+      select: { appliedAt: true, amountMinor: true, reversesLateFeeId: true },
     }),
     getBaseClient().residence.findUnique({
       where: { id: ctx.residenceId },
@@ -180,7 +208,7 @@ export async function getLotAccount(ctx: ActiveContext, lotId: string): Promise<
     select: { personId: true },
   });
 
-  const ledger = buildLedger(calls, payments, receiptByPayment);
+  const ledger = buildLedger(calls, payments, receiptByPayment, lateFees);
   return {
     lotReference: lot.reference,
     ownerName: owner?.personId ? (nameById.get(owner.personId) ?? null) : null,

@@ -384,6 +384,25 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       intervention + facture + fil), syndic (liste triée, gestion : statut/fournisseur/lien dépense) ;
       fr + ar (RTL intégral). Gate complet vert (293 PGlite, 108 Postgres réel).
 
+- [x] **H2** — Les **frais de retard**. **Contrainte juridique (Maroc)** au cœur : un syndic n'applique de
+      pénalités que si le règlement/AG l'a décidé — donc **configurable par résidence, DÉSACTIVÉ par défaut
+      (`autoLateFee`), jamais activé automatiquement** (rappel juridique explicite dans les réglages). Règle
+      paramétrable : **montant fixe + pourcentage** (points de base) **avec plafond optionnel**, appliquée
+      **après N jours** de retard (seuil déjà porté par la règle de relance). **Génération IDEMPOTENTE** —
+      unicité sur `chargeCallId` (au plus un frais par appel) + `skipDuplicates` : repasser le job ne double
+      jamais les frais (garantie testée au niveau de la contrainte DB). Chaque frais **tracé au journal
+      d'audit** avec la config qui l'a produit. Un frais est une **écriture au DÉBIT du lot** (nouveau modèle
+      `LateFee`), **visible dans le relevé ET le compte du propriétaire** : `buildLedger` étendu (source
+      « latefee »/« latefee_reversal », param optionnel → aucune régression) et branché dans `getLotAccount`
+      + `getOwnerLotAccount`. **S'annule par écriture INVERSE** (frais négatif liant l'original, `chargeCallId`
+      NULL pour ne pas rebloquer l'unicité), exactement comme un paiement — gardes double-annulation testées.
+      Config + génération (syndic) dans les réglages ; annulation (staff) sur le compte du lot. Tests : pur
+      (`computeLateFeeMinor`, `buildLedger` avec frais), écriture inverse + gardes, idempotence DB (5). Seed :
+      frais activés sur Al Firdaous, **frais générés sur les impayés en retard** (dont 82,50 DH sur le lot du
+      propriétaire de démo — 50 fixes + 5 % de 650). Vérifié connecté : relevé propriétaire avec le frais au
+      débit (solde 732,50 DH), réglages (config + rappel juridique + génération) ; fr + ar (RTL intégral).
+      Gate complet vert (298 PGlite, 113 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

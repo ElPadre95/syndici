@@ -236,6 +236,12 @@ async function main() {
       // Paiement en ligne SIMULÉ activé pour la seule résidence de démo (désactivé par
       // défaut ailleurs). La plateforme ne détient jamais de fonds (cf. src/server/payments).
       onlinePaymentEnabled: true,
+      // Frais de retard (H2) — activés pour la démo (décidés « en AG »). 50 DH fixes + 5 %
+      // du reste dû, plafonnés à 200 DH. Le seuil en jours vit sur la règle de relance.
+      autoLateFee: true,
+      lateFeeFixedMinor: dh(50),
+      lateFeePercentBps: 500,
+      lateFeeCapMinor: dh(200),
     },
   });
   await prisma.mandate.create({
@@ -682,6 +688,47 @@ async function main() {
       },
     ],
   });
+
+  // Frais de retard (H2) — GÉNÉRÉS sur les impayés en retard (idempotent via l'unicité
+  // chargeCallId). Débit visible dans le relevé et le compte du propriétaire ; annulable
+  // par écriture inverse. Config : 50 DH fixes + 5 % du reste dû, plafond 200 DH, seuil 10 j.
+  {
+    const LATE_THRESHOLD_DAYS = 10;
+    const feeCfg = { fixedMinor: dh(50), percentBps: 500, capMinor: dh(200) };
+    const openCharges = await prisma.chargeCall.findMany({
+      where: { residenceId: residence.id, voidedAt: null },
+      select: { id: true, lotId: true, dueDate: true, amountMinor: true },
+    });
+    const feeAllocs = await prisma.paymentAllocation.findMany({
+      where: { residenceId: residence.id },
+      select: { chargeCallId: true, amountMinor: true },
+    });
+    const paidByCall = new Map<string, number>();
+    for (const a of feeAllocs)
+      paidByCall.set(a.chargeCallId, (paidByCall.get(a.chargeCallId) ?? 0) + a.amountMinor);
+    const lateFeeData = openCharges.flatMap((c) => {
+      const days = Math.floor((now.getTime() - c.dueDate.getTime()) / 86_400_000);
+      if (days < LATE_THRESHOLD_DAYS) return [];
+      const remaining = Math.max(0, c.amountMinor - Math.max(0, paidByCall.get(c.id) ?? 0));
+      if (remaining <= 0) return [];
+      const fee = Math.min(
+        feeCfg.fixedMinor + Math.round((remaining * feeCfg.percentBps) / 10000),
+        feeCfg.capMinor,
+      );
+      if (fee <= 0) return [];
+      return [
+        {
+          residenceId: residence.id,
+          lotId: c.lotId,
+          chargeCallId: c.id,
+          amountMinor: fee,
+          reason: 'Frais de retard automatique',
+        },
+      ];
+    });
+    if (lateFeeData.length)
+      await prisma.lateFee.createMany({ data: lateFeeData, skipDuplicates: true });
+  }
 
   // Incidents (H1) à des stades variés — dont un SUR LE LOT DU PROPRIÉTAIRE DE DÉMO, relié
   // à la dépense qui en découle : c'est la boucle de transparence (signalement →

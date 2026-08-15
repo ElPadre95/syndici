@@ -25,6 +25,8 @@ export async function LotAccountDocument({ account }: { account: LotAccount }) {
 
   const label = (e: LedgerEntry): string => {
     if (e.kind === 'charge') return t('label.charge', { period: period(e) });
+    if (e.kind === 'latefee') return t('label.latefee');
+    if (e.kind === 'latefee_reversal') return t('label.latefeeReversal');
     if (e.kind === 'reversal') return t('label.reversal', { method: t(`method.${e.method}`) });
     return t('label.payment', { method: t(`method.${e.method}`) });
   };
