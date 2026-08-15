@@ -53,6 +53,34 @@ export async function authenticatePassword(
   return { id: user.id, email: user.email };
 }
 
+export type ChangePasswordResult =
+  | { ok: true }
+  | { ok: false; reason: 'wrong_old' | 'weak' | 'no_account' };
+
+/**
+ * Change le mot de passe d'un compte APRÈS vérification de l'ancien (jamais sans). Ne
+ * touche que `User`. L'appelant fournit le `userId` de SA propre session — un propriétaire
+ * ne change jamais le mot de passe d'un autre.
+ */
+export async function changePassword(
+  exec: SqlExecutor,
+  userId: string,
+  oldPassword: string,
+  newPassword: string,
+): Promise<ChangePasswordResult> {
+  const rows = await exec.query<{ passwordHash: string | null }>(
+    `SELECT "passwordHash" FROM "User" WHERE id = $1 LIMIT 1`,
+    [userId],
+  );
+  const user = rows[0];
+  if (!user?.passwordHash) return { ok: false, reason: 'no_account' };
+  if (!(await bcrypt.compare(oldPassword, user.passwordHash))) return { ok: false, reason: 'wrong_old' };
+  if (newPassword.length < MIN_PASSWORD_LENGTH) return { ok: false, reason: 'weak' };
+  const hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+  await exec.query(`UPDATE "User" SET "passwordHash" = $1 WHERE id = $2`, [hash, userId]);
+  return { ok: true };
+}
+
 export class EmailTakenError extends Error {
   constructor() {
     super('Un compte existe déjà pour cet e-mail');

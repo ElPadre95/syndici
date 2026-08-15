@@ -453,6 +453,23 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       l'URL signée valide. Seed : le propriétaire de démo a déposé un **PARTAGÉ** (attestation) et un **PRIVÉ**
       (passeport). fr + ar (RTL intégral). Gate complet vert (305 PGlite, 117 Postgres réel).
 
+- [x] **H7** — Le **profil du propriétaire** (le syndic saisissait tout, le propriétaire ne corrigeait rien).
+      `/proprietaire/profil` : il consulte et modifie **SES** informations — **téléphone, langue préférée,
+      devise secondaire** — et **son mot de passe**. Tout passe par **person-access** avec SON PROPRE personId
+      (`getOwnProfile`, `updateOwnProfile`, `getAuthUserIdForSelf`) : **il n'édite jamais la fiche d'un autre**.
+      Ce qu'il **ne peut pas** changer — **nom, lot, rôle** — est en lecture seule, avec la mention « géré par le
+      syndic ». Le **changement de mot de passe EXIGE l'ancien** (`changePassword`, ne touche que `User`, vérif
+      bcrypt puis longueur mini). La **langue préférée se répercute sur `preferredLocale`**, donc sur la langue
+      des **relances WhatsApp**. **Tests écrits AVANT l'interface** (3, PGlite + Postgres réel) : `updateOwnProfile`
+      modifie A sans toucher B et **ne change pas le nom** ; `changePassword` refuse un mauvais ancien, refuse un
+      nouveau trop court, et n'affecte pas un autre compte. Vérifié connecté en propriétaire : édition du
+      téléphone persistée (nom inchangé), formulaire de mot de passe ; fr + ar (RTL intégral). Gate complet vert
+      (308 PGlite, 120 Postgres réel).
+
+**Tranche H complète** — l'espace propriétaire couvre désormais tout ce que faisait le prototype (votes
+exceptés) : incidents, frais de retard, bilan annuel, relevé mensuel, devise secondaire, dépôt de documents,
+profil.
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

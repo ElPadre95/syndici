@@ -22,6 +22,7 @@ import {
   TriangleAlert,
   FileBarChart2,
   Files,
+  UserCircle,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -66,6 +67,7 @@ const OWNER_NAV: readonly NavItem[] = [
   { href: '/proprietaire/incidents', key: 'incidents', Icon: TriangleAlert },
   { href: '/proprietaire/documents', key: 'ownerDocs', Icon: Files },
   { href: '/proprietaire/transparence', key: 'transparency', Icon: Eye },
+  { href: '/proprietaire/profil', key: 'profile', Icon: UserCircle },
 ];
 
 /** Variante de navigation selon le rôle effectif : staff, propriétaire, ou locataire (minimal). */

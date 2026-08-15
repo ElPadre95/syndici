@@ -323,6 +323,35 @@
       "AUTRE": "Autre"
     }
   },
+  "profile": {
+    "eyebrow": "Espace propriétaire",
+    "pageTitle": "Mon profil",
+    "forbidden": "Accès réservé au propriétaire.",
+    "infoTitle": "Mes informations",
+    "name": "Nom",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "language": "Langue préférée",
+    "langFr": "Français",
+    "langAr": "العربية",
+    "currency": "Devise secondaire",
+    "currencyNone": "Aucune (dirham seul)",
+    "readonlyNote": "Votre nom, votre lot et votre rôle sont gérés par le syndic.",
+    "languageNote": "La langue préférée détermine aussi la langue des relances que vous recevez.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré.",
+    "error": "L'opération a échoué. Réessayez.",
+    "pwTitle": "Changer mon mot de passe",
+    "pwOld": "Mot de passe actuel",
+    "pwNew": "Nouveau mot de passe",
+    "pwConfirm": "Confirmer le nouveau",
+    "pwSubmit": "Changer le mot de passe",
+    "pwChanged": "Mot de passe modifié.",
+    "pwWrongOld": "Mot de passe actuel incorrect.",
+    "pwWeak": "Le nouveau mot de passe doit faire au moins {n} caractères.",
+    "pwMismatch": "La confirmation ne correspond pas."
+  },
   "currency": {
     "title": "Devise secondaire",
     "indicative": "conversion indicative",
@@ -1163,7 +1192,8 @@
       "myCharges": "Mes charges",
       "monthly": "Relevé mensuel",
       "ownerDocs": "Mes documents",
-      "transparency": "Transparence"
+      "transparency": "Transparence",
+      "profile": "Mon profil"
     },
     "header": {
       "account": "Compte",

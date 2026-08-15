@@ -315,6 +315,62 @@ export async function searchPersons(
   );
 }
 
+/** Profil éditable par le propriétaire lui-même (H7) — jamais le nom, le lot ou le rôle. */
+export interface OwnProfile {
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phone: string | null;
+  preferredLocale: string;
+  secondaryCurrency: string | null;
+  hasAccount: boolean;
+}
+
+/** Lit SA propre fiche (à appeler avec son propre personId). */
+export async function getOwnProfile(
+  exec: SqlExecutor,
+  personId: string,
+): Promise<OwnProfile | null> {
+  const rows = await exec.query<OwnProfile>(
+    `SELECT "firstName", "lastName", email, phone, "preferredLocale", "secondaryCurrency",
+            ("authUserId" IS NOT NULL) AS "hasAccount"
+       FROM "Person" WHERE id = $1 LIMIT 1`,
+    [personId],
+  );
+  return rows[0] ?? null;
+}
+
+/**
+ * Met à jour SA propre fiche (H7) — téléphone, langue préférée, devise secondaire UNIQUEMENT.
+ * Le nom, le rattachement au lot et le rôle restent au syndic (jamais modifiés ici). À appeler
+ * avec SON PROPRE personId : un propriétaire ne modifie jamais la fiche d'un autre. La langue
+ * préférée se répercute sur les relances WhatsApp (elles lisent `preferredLocale`).
+ */
+export async function updateOwnProfile(
+  exec: SqlExecutor,
+  personId: string,
+  input: { phone: string | null; preferredLocale: string; secondaryCurrency: string | null },
+): Promise<void> {
+  await exec.query(
+    `UPDATE "Person"
+        SET phone = $2, "preferredLocale" = $3::"Locale", "secondaryCurrency" = $4, "updatedAt" = now()
+      WHERE id = $1`,
+    [personId, input.phone, input.preferredLocale, input.secondaryCurrency],
+  );
+}
+
+/** Id du compte d'authentification lié à SA fiche (H7, pour le changement de mot de passe). */
+export async function getAuthUserIdForSelf(
+  exec: SqlExecutor,
+  personId: string,
+): Promise<string | null> {
+  const rows = await exec.query<{ authUserId: string | null }>(
+    `SELECT "authUserId" FROM "Person" WHERE id = $1 LIMIT 1`,
+    [personId],
+  );
+  return rows[0]?.authUserId ?? null;
+}
+
 /** Devise secondaire choisie par une personne (H5) — lecture de SA propre préférence. */
 export async function getSecondaryCurrency(
   exec: SqlExecutor,
