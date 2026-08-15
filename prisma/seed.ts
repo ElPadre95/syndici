@@ -462,6 +462,24 @@ async function main() {
         startDate: monthStart(-12),
       },
     });
+    // A7 EN RETARD : le propriétaire de démo garde A1 soldé mais laisse A7 impayé (bien
+    // secondaire d'un MRE absent). Trois appels échus non réglés → reste dû + frais de
+    // retard générés plus bas. On démontre ainsi la bascule entre lots ET les frais côté
+    // propriétaire, sans faire de Sara une mauvaise payeuse partout.
+    for (const offset of [-2, -1, 0]) {
+      const due = monthStart(offset);
+      await prisma.chargeCall.create({
+        data: {
+          residenceId: residence.id,
+          lotId: vacantLotId,
+          periodYear: due.getUTCFullYear(),
+          periodMonth: due.getUTCMonth() + 1,
+          dueDate: due,
+          amountMinor: CHARGE_APPT,
+        },
+      });
+    }
+    lateCount++;
   }
 
   // Historique de relances (E1) pour la démo : certains impayés déjà relancés une ou deux
@@ -500,7 +518,14 @@ async function main() {
   // virement soldé et on l'annule (le lot redevient impayé par dérivation) — l'original
   // n'est jamais supprimé.
   const toCancel = await prisma.payment.findFirst({
-    where: { residenceId: residence.id, method: 'VIREMENT', amountMinor: { gt: 0 } },
+    where: {
+      residenceId: residence.id,
+      method: 'VIREMENT',
+      amountMinor: { gt: 0 },
+      // Jamais sur un lot du propriétaire de DÉMO : on garde A1 soldé (le reste dû de Sara
+      // vient de A7). L'annulation-démo (B2) atterrit ainsi sur un autre lot.
+      ...(mreOwnerLotId ? { lotId: { not: mreOwnerLotId } } : {}),
+    },
     orderBy: { receivedAt: 'desc' },
     include: { allocations: true },
   });

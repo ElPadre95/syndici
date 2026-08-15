@@ -403,6 +403,19 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       débit (solde 732,50 DH), réglages (config + rappel juridique + génération) ; fr + ar (RTL intégral).
       Gate complet vert (298 PGlite, 113 Postgres réel).
 
+- [x] **H3** — Le **bilan annuel** (le prototype avait le bouton, l'écran n'existait pas). `/bilan` (staff,
+      `charge.view.all`) : **état comptable d'exercice** imprimable fr/ar (comme le reçu) à distribuer en
+      assemblée — **total appelé, encaissé, dépensé, frais de retard, reste dû, trésorerie**, **dépenses par
+      catégorie**, **contrats en cours**, et **la situation lot par lot** (appelé / réglé / frais / reste dû,
+      solde cohérent avec le relevé). **Composition** de lectures existantes (`getTreasury`, `listExpenses` +
+      `aggregateByCategory`, `listContracts`, agrégats de charges/paiements/frais par lot) — aucune logique
+      nouvelle. Avertissement explicite : **sans valeur légale, ce n'est pas un procès-verbal**. Sélecteur
+      d'exercice (courant + deux précédents). **Ajustement du seed** : Sara garde **A1 soldé** et **A7 en
+      retard** (3 appels échus → 247,50 DH de frais) — on démontre la bascule entre lots ET les frais côté
+      propriétaire ; l'annulation-démo (B2) déplacée hors de ses lots. Vérifié connecté en syndic : bilan
+      2026 complet (appelé 48.650, reste dû 32.188,75, trésorerie 28.515), catégories, contrats, lot par lot ;
+      fr + ar (RTL intégral). Gate complet vert (298 PGlite, 113 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

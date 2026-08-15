@@ -254,6 +254,26 @@
     "reversed": "Annulé",
     "error": "L'opération a échoué. Réessayez."
   },
+  "annual": {
+    "title": "Bilan de l'exercice {year}",
+    "disclaimer": "État comptable — sans valeur légale (ce n'est pas un procès-verbal d'assemblée).",
+    "print": "Imprimer",
+    "forbidden": "Accès réservé au syndic.",
+    "called": "Total appelé",
+    "collected": "Total encaissé",
+    "spent": "Total dépensé",
+    "lateFees": "Frais de retard",
+    "outstanding": "Reste dû",
+    "treasury": "Trésorerie",
+    "byCategory": "Dépenses par catégorie",
+    "contracts": "Contrats en cours",
+    "byLot": "Situation lot par lot",
+    "lot": "Lot",
+    "paid": "Réglé",
+    "remaining": "Reste dû",
+    "uncategorized": "Sans catégorie",
+    "none": "—"
+  },
   "receipts": {
     "succTitle": "Paiement réussi !",
     "succDl": "Télécharger le reçu",
@@ -1075,6 +1095,7 @@
       "news": "Actualités",
       "messages": "Messagerie",
       "incidents": "Incidents",
+      "annual": "Bilan annuel",
       "myCharges": "Mes charges",
       "transparency": "Transparence"
     },
