@@ -21,6 +21,7 @@ import {
   MessageCircle,
   TriangleAlert,
   FileBarChart2,
+  Files,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -63,6 +64,7 @@ const OWNER_NAV: readonly NavItem[] = [
   { href: '/proprietaire/charges', key: 'myCharges', Icon: CreditCard },
   { href: '/proprietaire/releve', key: 'monthly', Icon: FileBarChart2 },
   { href: '/proprietaire/incidents', key: 'incidents', Icon: TriangleAlert },
+  { href: '/proprietaire/documents', key: 'ownerDocs', Icon: Files },
   { href: '/proprietaire/transparence', key: 'transparency', Icon: Eye },
 ];
 

@@ -59,6 +59,7 @@ export type Permission =
   | 'announcement.view'
   | 'announcement.manage'
   | 'document.view.own'
+  | 'document.deposit.own' // déposer/renommer/retirer SES propres documents (résident)
   | 'document.manage';
 
 /** Droits communs à tous les rôles connectés (aucun n'implique de PII tierce). */
@@ -67,6 +68,7 @@ const COMMON: readonly Permission[] = [
   'incident.report',
   'announcement.view',
   'document.view.own',
+  'document.deposit.own', // tout résident dépose SES propres documents (le locataire aussi, plus tard)
 ];
 
 /**

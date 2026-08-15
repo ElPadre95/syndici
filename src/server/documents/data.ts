@@ -5,6 +5,7 @@
  * `fileAssetId` servie par la route signée `/api/files/[id]`.
  */
 import { forResidence } from '@/server/db/tenant';
+import type { SqlExecutor } from '@/server/db/sql';
 import type { ActiveContext } from '@/server/auth/context';
 import { documentVisibleTo, type DocumentScope, type DocumentType } from './visibility';
 
@@ -89,6 +90,7 @@ export interface CreateDocumentInput {
   name: string;
   type: DocumentType;
   scope: DocumentScope;
+  origin?: 'GERANT' | 'RESIDENT';
   lotId?: string | null;
   personId?: string | null;
 }
@@ -105,11 +107,60 @@ export async function createDocument(
       name: input.name,
       type: input.type,
       scope: input.scope,
-      origin: 'GERANT',
+      origin: input.origin ?? 'GERANT',
       lotId: input.lotId ?? null,
       personId: input.personId ?? null,
     },
     select: { id: true },
   });
   return created.id;
+}
+
+/** Documents DÉPOSÉS PAR le contexte (ses propres fichiers) — pour l'écran de gestion H6. */
+export async function listOwnDocuments(ctx: ActiveContext): Promise<DocumentView[]> {
+  const rows = (await forResidence(ctx.residenceId).document.findMany({
+    where: { fileAsset: { is: { uploadedByPersonId: ctx.personId } } },
+    orderBy: { createdAt: 'desc' },
+    select: SELECT,
+  })) as Row[];
+  return rows.map(toView);
+}
+
+/**
+ * MUR DES DOCUMENTS (H6) au niveau du FICHIER : la route signée ne sert un fichier « documents »
+ * qu'à qui a le droit de voir le document correspondant (étanchéité `documentVisibleTo`). Le
+ * scope résidence ne suffit PAS — un document PRIVÉ ne doit jamais être servi à un autre, syndic
+ * compris. C'est la faille (déjà corrigée sur messagerie/incidents) fermée ici aussi.
+ */
+export async function canServeDocument(
+  exec: SqlExecutor,
+  ctx: ActiveContext,
+  fileId: string,
+): Promise<boolean> {
+  const rows = await exec.query<{ scope: DocumentScope; uploader: string | null }>(
+    `SELECT d.scope AS scope, fa."uploadedByPersonId" AS uploader
+       FROM "Document" d
+       JOIN "FileAsset" fa ON fa.id = d."fileAssetId"
+      WHERE d."fileAssetId" = $1 AND d."residenceId" = $2
+      LIMIT 1`,
+    [fileId, ctx.residenceId],
+  );
+  const row = rows[0];
+  if (!row) return false; // fichier du bucket « documents » sans Document → refus (fail-closed)
+  return documentVisibleTo(
+    { scope: row.scope, uploadedByPersonId: row.uploader },
+    { personId: ctx.personId, role: ctx.role },
+  );
+}
+
+/** Le document `id` a-t-il été déposé par cette personne ? (garde rename/remove). */
+export async function isOwnDocument(
+  ctx: ActiveContext,
+  documentId: string,
+): Promise<boolean> {
+  const doc = await forResidence(ctx.residenceId).document.findUnique({
+    where: { id: documentId },
+    select: { fileAsset: { select: { uploadedByPersonId: true } } },
+  });
+  return !!doc && doc.fileAsset.uploadedByPersonId === ctx.personId;
 }

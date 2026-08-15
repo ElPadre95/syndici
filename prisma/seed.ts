@@ -1024,6 +1024,28 @@ async function main() {
       personId: firstOwner,
     });
 
+  // Documents DÉPOSÉS PAR le propriétaire de démo (H6) : un PARTAGÉ avec le syndic et un
+  // PRIVÉ (invisible du syndic — la promesse faite au dépôt). Son écran « Mes documents »
+  // les liste et lui permet de les renommer / retirer.
+  if (mreOwnerId) {
+    await seedDoc({
+      name: 'Attestation de propriété',
+      type: 'ATTESTATION',
+      scope: 'PARTAGE',
+      uploadedByPersonId: mreOwnerId,
+      origin: 'RESIDENT',
+      personId: mreOwnerId,
+    });
+    await seedDoc({
+      name: 'Passeport (copie)',
+      type: 'AUTRE',
+      scope: 'PRIVE',
+      uploadedByPersonId: mreOwnerId,
+      origin: 'RESIDENT',
+      personId: mreOwnerId,
+    });
+  }
+
   // Une invitation en attente
   if (firstOwner) {
     const { createHash, randomBytes } = await import('node:crypto');

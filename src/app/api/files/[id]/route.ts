@@ -11,6 +11,7 @@ import { verifyFileToken } from '@/server/storage/sign';
 import { findAccessibleFile, readStoredFile } from '@/server/storage/files';
 import { canServeMessageAttachment } from '@/server/messaging/access';
 import { canServeIncidentPhoto } from '@/server/incidents/access';
+import { canServeDocument } from '@/server/documents/data';
 
 export async function GET(
   req: NextRequest,
@@ -40,6 +41,10 @@ export async function GET(
       return new Response('Fichier introuvable.', { status: 404 });
     }
     if (file.bucket === 'incidents' && !(await canServeIncidentPhoto(prismaExecutor(), actx, id))) {
+      return new Response('Fichier introuvable.', { status: 404 });
+    }
+    // MUR DES DOCUMENTS : un document PRIVÉ n'est jamais servi à un autre (syndic compris).
+    if (file.bucket === 'documents' && !(await canServeDocument(prismaExecutor(), actx, id))) {
       return new Response('Fichier introuvable.', { status: 404 });
     }
   }

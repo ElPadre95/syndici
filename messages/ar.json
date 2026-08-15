@@ -288,6 +288,41 @@
     "residenceExpenses": "مصاريف الإقامة خلال الشهر",
     "noExpenses": "لا توجد مصاريف ظاهرة هذا الشهر."
   },
+  "ownerDocs": {
+    "eyebrow": "مساحة المالك",
+    "pageTitle": "مستنداتي",
+    "subtitle": "أودِع مستنداً واختر من يمكنه رؤيته. أنت تدير مستنداتك الخاصة.",
+    "forbidden": "الوصول محصور على المالك.",
+    "depositTitle": "إيداع مستند",
+    "name": "العنوان",
+    "namePlaceholder": "شهادة الملكية…",
+    "type": "النوع",
+    "file": "الملف",
+    "deposit": "إيداع",
+    "depositing": "جارٍ الإيداع…",
+    "error": "فشل الإيداع. حاول مرة أخرى.",
+    "scopeLegend": "من يمكنه رؤية هذا المستند؟",
+    "scopeShared": "مرئي لمسيّري",
+    "scopeSharedSub": "أنت ومسيّرك.",
+    "scopePrivate": "خاص",
+    "scopePrivateSub": "أنت وحدك — حتى المسيّر لا يراه.",
+    "listTitle": "مستنداتي المودَعة",
+    "empty": "لم تودِع أي مستند.",
+    "badgePrivate": "خاص",
+    "badgeShared": "مشارَك مع المسيّر",
+    "rename": "إعادة تسمية",
+    "remove": "إزالة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirmRemove": "تأكيد الإزالة",
+    "docType": {
+      "REGLEMENT": "النظام الداخلي",
+      "PV_AG": "محضر الجمعية",
+      "ASSURANCE": "التأمين",
+      "ATTESTATION": "شهادة",
+      "AUTRE": "أخرى"
+    }
+  },
   "currency": {
     "title": "العملة الثانوية",
     "indicative": "تحويل إرشادي",
@@ -1124,6 +1159,7 @@
       "annual": "الحصيلة السنوية",
       "myCharges": "رسومي",
       "monthly": "الكشف الشهري",
+      "ownerDocs": "مستنداتي",
       "transparency": "الشفافية"
     },
     "header": {

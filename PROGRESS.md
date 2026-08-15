@@ -440,6 +440,19 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       Vérifié connecté en propriétaire : montant dû A7 « 1.950,00 MAD ≈ 181 € · conversion indicative », sélecteur
       de devise, réglages (taux + date) ; fr + ar (RTL intégral). Gate complet vert (301 PGlite, 113 Postgres réel).
 
+- [x] **H6** — Le **dépôt de documents par le propriétaire** (F3 n'avait construit le dépôt que côté syndic).
+      `/proprietaire/documents` : déposer un document en **choisissant la portée AU DÉPÔT**, présentée
+      clairement — « **visible par mon syndic** » (PARTAGE) ou « **privé, visible de moi seul** » (PRIVE, avec
+      « même le syndic ne le voit pas ») —, **consulter, renommer et retirer LES SIENS** (garde `isOwnDocument` :
+      jamais ceux d'un autre). Réutilise la **couche de stockage C0** et le **modèle de portées F3**
+      (`documentVisibleTo`, déjà pur/testé) ; nouvelle permission `document.deposit.own` (COMMON, prête pour le
+      locataire). **Étanchéité testée AVANT l'interface, au niveau du FICHIER** (`canServeDocument`, 4 tests
+      PGlite + Postgres réel) : un document **PRIVÉ n'est jamais servi à un autre, syndic compris** — la faille
+      (déjà fermée sur messagerie/incidents) est fermée sur le bucket « documents » de `/api/files`.
+      **Vérifié en vrai** : le propriétaire sert son fichier privé (200), le **syndic ne le sert pas (404)** avec
+      l'URL signée valide. Seed : le propriétaire de démo a déposé un **PARTAGÉ** (attestation) et un **PRIVÉ**
+      (passeport). fr + ar (RTL intégral). Gate complet vert (305 PGlite, 117 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

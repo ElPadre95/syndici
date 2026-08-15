@@ -288,6 +288,41 @@
     "residenceExpenses": "Dépenses de la résidence sur le mois",
     "noExpenses": "Aucune dépense visible ce mois-ci."
   },
+  "ownerDocs": {
+    "eyebrow": "Espace propriétaire",
+    "pageTitle": "Mes documents",
+    "subtitle": "Déposez un document et choisissez qui peut le voir. Vous gérez vos propres documents.",
+    "forbidden": "Accès réservé au propriétaire.",
+    "depositTitle": "Déposer un document",
+    "name": "Titre",
+    "namePlaceholder": "Attestation de propriété…",
+    "type": "Type",
+    "file": "Fichier",
+    "deposit": "Déposer",
+    "depositing": "Dépôt…",
+    "error": "Le dépôt a échoué. Réessayez.",
+    "scopeLegend": "Qui peut voir ce document ?",
+    "scopeShared": "Visible par mon syndic",
+    "scopeSharedSub": "Vous et votre syndic.",
+    "scopePrivate": "Privé",
+    "scopePrivateSub": "Vous seul — même le syndic ne le voit pas.",
+    "listTitle": "Mes documents déposés",
+    "empty": "Vous n'avez déposé aucun document.",
+    "badgePrivate": "Privé",
+    "badgeShared": "Partagé avec le syndic",
+    "rename": "Renommer",
+    "remove": "Retirer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirmRemove": "Confirmer le retrait",
+    "docType": {
+      "REGLEMENT": "Règlement",
+      "PV_AG": "PV d'assemblée",
+      "ASSURANCE": "Assurance",
+      "ATTESTATION": "Attestation",
+      "AUTRE": "Autre"
+    }
+  },
   "currency": {
     "title": "Devise secondaire",
     "indicative": "conversion indicative",
@@ -1127,6 +1162,7 @@
       "annual": "Bilan annuel",
       "myCharges": "Mes charges",
       "monthly": "Relevé mensuel",
+      "ownerDocs": "Mes documents",
       "transparency": "Transparence"
     },
     "header": {
