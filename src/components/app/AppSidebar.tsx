@@ -50,9 +50,11 @@ const STAFF_NAV: readonly NavItem[] = [
 const HOME_NAV: NavItem = { href: '/', key: 'dashboard', Icon: LayoutDashboard };
 
 // Navigation PROPRIÉTAIRE (tranche G) — peu d'entrées, pensée mobile. Elle grandit par
-// incrément (G2 : charges ; G3 : transparence ; G4 : messagerie). Vide pour l'instant :
-// l'accueil suffit à G1, et « jamais de lien mort » interdit d'exposer un écran non construit.
-const OWNER_NAV: readonly NavItem[] = [];
+// incrément (G2 : mes charges ; G3 : transparence ; G4 : messagerie). « Jamais de lien
+// mort » : on n'ajoute une entrée que quand son écran existe.
+const OWNER_NAV: readonly NavItem[] = [
+  { href: '/proprietaire/charges', key: 'myCharges', Icon: CreditCard },
+];
 
 /** Variante de navigation selon le rôle effectif : staff, propriétaire, ou locataire (minimal). */
 export type NavVariant = 'staff' | 'owner' | 'tenant';

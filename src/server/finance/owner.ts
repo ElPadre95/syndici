@@ -10,6 +10,7 @@
  * jamais l'identité de quiconque.
  */
 import { forResidence } from '@/server/db/tenant';
+import { getBaseClient } from '@/server/db/client';
 import type { ActiveContext } from '@/server/auth/context';
 import {
   deriveSettlementState,
@@ -19,6 +20,8 @@ import {
   type SettlementState,
   type TemporalState,
 } from './status';
+import { buildLedger, type LotAccount } from './account';
+import type { ReceiptView } from './receipts';
 
 export interface OwnerLot {
   lotId: string;
@@ -193,4 +196,199 @@ export async function getResidenceCollectionCounts(ctx: ActiveContext): Promise<
     calls.map((c) => ({ amountMinor: c.amountMinor, allocatedMinor: byCall.get(c.id) ?? 0 })),
   );
   return { ...counts, period: { year: latest.periodYear, month: latest.periodMonth } };
+}
+
+// ── G2 : paiements, reçus, relevé (vue propriétaire, sans accès Person) ───────
+
+export interface OwnerPayment {
+  id: string;
+  method: string;
+  amountMinor: number;
+  receivedAt: string;
+  isReversal: boolean;
+  reversed: boolean;
+  receiptId: string | null;
+  receiptNumber: string | null;
+  receiptVoided: boolean;
+}
+
+/**
+ * Paiements d'UN lot du propriétaire, plus récent d'abord, avec le n° de reçu (pour la
+ * réimpression). Détention vérifiée. Aucun nom d'enregistreur (couche staff) : le
+ * propriétaire n'en a pas besoin, et le résoudre lèverait pour un non-staff.
+ */
+export async function getOwnerLotPayments(
+  ctx: ActiveContext,
+  lotId: string,
+): Promise<OwnerPayment[]> {
+  if (!(await ownsLot(ctx, lotId))) return [];
+  const scoped = forResidence(ctx.residenceId);
+  const payments = await scoped.payment.findMany({
+    where: { lotId },
+    orderBy: { receivedAt: 'desc' },
+    select: {
+      id: true,
+      method: true,
+      amountMinor: true,
+      receivedAt: true,
+      reversesPaymentId: true,
+    },
+  });
+  const reversedSet = new Set(
+    payments.filter((p) => p.reversesPaymentId).map((p) => p.reversesPaymentId as string),
+  );
+  const receipts = payments.length
+    ? await scoped.receipt.findMany({
+        where: { paymentId: { in: payments.map((p) => p.id) } },
+        select: { id: true, number: true, paymentId: true, voidedAt: true },
+      })
+    : [];
+  const receiptByPayment = new Map(receipts.map((r) => [r.paymentId, r]));
+  return payments.map((p) => {
+    const rec = receiptByPayment.get(p.id);
+    return {
+      id: p.id,
+      method: p.method,
+      amountMinor: p.amountMinor,
+      receivedAt: p.receivedAt.toISOString(),
+      isReversal: p.reversesPaymentId != null,
+      reversed: reversedSet.has(p.id),
+      receiptId: rec?.id ?? null,
+      receiptNumber: rec?.number ?? null,
+      receiptVoided: rec ? rec.voidedAt != null : false,
+    };
+  });
+}
+
+/**
+ * Relevé de compte d'UN lot du propriétaire (B4), de SON point de vue. Réutilise le cœur
+ * pur `buildLedger`. Détention vérifiée ; aucun accès Person (le nom du propriétaire est
+ * ajouté côté page à partir de la session, pas résolu par la couche staff).
+ */
+export async function getOwnerLotAccount(
+  ctx: ActiveContext,
+  lotId: string,
+): Promise<LotAccount | null> {
+  if (!(await ownsLot(ctx, lotId))) return null;
+  const scoped = forResidence(ctx.residenceId);
+  const lot = await scoped.lot.findUnique({ where: { id: lotId }, select: { reference: true } });
+  if (!lot) return null;
+
+  const [calls, payments, residence, mandate] = await Promise.all([
+    scoped.chargeCall.findMany({
+      where: { lotId, voidedAt: null },
+      select: { periodYear: true, periodMonth: true, dueDate: true, amountMinor: true },
+    }),
+    scoped.payment.findMany({
+      where: { lotId },
+      select: {
+        id: true,
+        method: true,
+        amountMinor: true,
+        receivedAt: true,
+        reversesPaymentId: true,
+      },
+    }),
+    getBaseClient().residence.findUnique({
+      where: { id: ctx.residenceId },
+      select: { name: true },
+    }),
+    scoped.mandate.findFirst({
+      where: { status: 'ACTIVE' },
+      select: { organization: { select: { name: true } } },
+    }),
+  ]);
+  if (!residence) return null;
+
+  const receipts = payments.length
+    ? await scoped.receipt.findMany({
+        where: { paymentId: { in: payments.map((p) => p.id) } },
+        select: { id: true, number: true, paymentId: true, voidedAt: true },
+      })
+    : [];
+  const receiptByPayment = new Map(
+    receipts.map((r) => [r.paymentId, { id: r.id, number: r.number, voided: r.voidedAt != null }]),
+  );
+
+  const ledger = buildLedger(calls, payments, receiptByPayment);
+  return {
+    lotReference: lot.reference,
+    ownerName: null, // ajouté côté page depuis la session (jamais via la couche staff)
+    residence: { name: residence.name, orgName: mandate?.organization?.name ?? null },
+    ...ledger,
+  };
+}
+
+/**
+ * Reçu du propriétaire pour réimpression — VÉRIFIE que le reçu porte sur un lot qu'il
+ * détient (un propriétaire ne réimprime jamais le reçu d'un voisin). Aucun nom résolu
+ * via la couche staff (payeur/enregistreur laissés nuls ; le document dégrade proprement).
+ */
+export async function getOwnerReceipt(
+  ctx: ActiveContext,
+  receiptId: string,
+): Promise<ReceiptView | null> {
+  const scoped = forResidence(ctx.residenceId);
+  const receipt = await scoped.receipt.findUnique({
+    where: { id: receiptId },
+    select: {
+      id: true,
+      number: true,
+      issuedAt: true,
+      voidedAt: true,
+      amountMinor: true,
+      paymentId: true,
+      lotId: true,
+    },
+  });
+  if (!receipt) return null;
+  // Étanchéité : le reçu doit porter sur un lot DÉTENU par ce propriétaire.
+  if (!receipt.lotId || !(await ownsLot(ctx, receipt.lotId))) return null;
+
+  const [payment, allocations, lot, residence, mandate] = await Promise.all([
+    scoped.payment.findUnique({
+      where: { id: receipt.paymentId },
+      select: { method: true, receivedAt: true, reference: true, note: true },
+    }),
+    scoped.paymentAllocation.findMany({
+      where: { paymentId: receipt.paymentId },
+      select: { chargeCall: { select: { periodYear: true, periodMonth: true } } },
+    }),
+    scoped.lot.findUnique({ where: { id: receipt.lotId }, select: { reference: true } }),
+    getBaseClient().residence.findUnique({
+      where: { id: ctx.residenceId },
+      select: { name: true, address: true, city: true },
+    }),
+    scoped.mandate.findFirst({
+      where: { status: 'ACTIVE' },
+      select: { organization: { select: { name: true } } },
+    }),
+  ]);
+  if (!payment || !residence) return null;
+
+  const periods = allocations
+    .map((a) => ({ year: a.chargeCall.periodYear, month: a.chargeCall.periodMonth }))
+    .sort((a, b) => a.year - b.year || a.month - b.month);
+
+  return {
+    id: receipt.id,
+    number: receipt.number,
+    issuedAt: receipt.issuedAt.toISOString(),
+    voidedAt: receipt.voidedAt ? receipt.voidedAt.toISOString() : null,
+    amountMinor: receipt.amountMinor,
+    method: payment.method,
+    receivedAt: payment.receivedAt.toISOString(),
+    reference: payment.reference,
+    note: payment.note,
+    payerName: null,
+    lotReference: lot?.reference ?? null,
+    recordedByName: null,
+    periods,
+    residence: {
+      name: residence.name,
+      address: residence.address,
+      city: residence.city,
+      orgName: mandate?.organization?.name ?? null,
+    },
+  };
 }

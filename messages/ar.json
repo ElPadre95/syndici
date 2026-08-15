@@ -839,7 +839,24 @@
     "collectivePending": "{count} في الانتظار",
     "collectiveAll": "الجميع في وضع سليم",
     "newsTitle": "الأخبار",
-    "docsTitle": "وثائق الإقامة"
+    "docsTitle": "وثائق الإقامة",
+    "forbidden": "مساحة مخصّصة للملّاك.",
+    "myChargesEyebrow": "مساحة المالك",
+    "myChargesTitle": "رسومي",
+    "chargesHistory": "سجلّ المطالبات",
+    "paymentsHistory": "مدفوعاتي",
+    "statementLink": "عرض كشف حسابي",
+    "backToCharges": "رسومي",
+    "reprint": "وصل",
+    "colPeriod": "الفترة",
+    "colAmount": "المبلغ",
+    "colRemaining": "المتبقّي",
+    "colStatus": "الحالة",
+    "colDate": "التاريخ",
+    "colMethod": "الطريقة",
+    "colReceipt": "الوصل",
+    "noCharges": "لا توجد مطالبات لهذه الوحدة.",
+    "noPayments": "لا توجد مدفوعات مسجّلة."
   },
   "transparency": {
     "transpTitre": "رسوم الإقامة · يونيو",
@@ -919,7 +936,8 @@
       "invitations": "الدعوات",
       "contracts": "العقود",
       "reminders": "المطالبات",
-      "news": "الأخبار"
+      "news": "الأخبار",
+      "myCharges": "رسومي"
     },
     "header": {
       "account": "الحساب",

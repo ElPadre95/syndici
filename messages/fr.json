@@ -825,7 +825,24 @@
     "collectivePending": "{count} en attente",
     "collectiveAll": "Tout le monde est à jour",
     "newsTitle": "Actualités",
-    "docsTitle": "Documents de la résidence"
+    "docsTitle": "Documents de la résidence",
+    "forbidden": "Espace réservé aux propriétaires.",
+    "myChargesEyebrow": "Espace propriétaire",
+    "myChargesTitle": "Mes charges",
+    "chargesHistory": "Historique des appels",
+    "paymentsHistory": "Mes paiements",
+    "statementLink": "Voir mon relevé de compte",
+    "backToCharges": "Mes charges",
+    "reprint": "Reçu",
+    "colPeriod": "Période",
+    "colAmount": "Montant",
+    "colRemaining": "Reste dû",
+    "colStatus": "Statut",
+    "colDate": "Date",
+    "colMethod": "Mode",
+    "colReceipt": "Reçu",
+    "noCharges": "Aucun appel de charges pour ce lot.",
+    "noPayments": "Aucun paiement enregistré."
   },
   "transparency": {
     "transpTitre": "Charges de la résidence · Juin",
@@ -922,7 +939,8 @@
       "invitations": "Invitations",
       "contracts": "Contrats",
       "reminders": "Relances",
-      "news": "Actualités"
+      "news": "Actualités",
+      "myCharges": "Mes charges"
     },
     "header": {
       "account": "Compte",

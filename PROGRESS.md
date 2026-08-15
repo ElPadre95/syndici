@@ -292,6 +292,23 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       situation A1 (en retard 650 MAD, 14 j) vs A7 (à jour), indicateur collectif, actualités, bascule de
       lot ; fr + ar (RTL intégral), desktop + mobile. Gate complet vert (279 PGlite, 95 Postgres réel).
 
+- [x] **G2** — Mes charges, mes reçus, mon relevé. Écran `/proprietaire/charges` (nav propriétaire) :
+      l'**historique des appels** de son lot avec **statut dérivé** (soldé / partiel / non réglé + retard),
+      ses **paiements** avec le **numéro de reçu** et la **réimpression** du reçu existant, et l'accès à
+      son **relevé de compte** (B4) présenté de SON point de vue (son nom depuis la session, jamais résolu
+      par la couche staff). Un **MRE multi-lots** bascule entre ses lots (sélecteur par URL). Quand les
+      charges sont **déléguées au locataire**, c'est dit clairement (il reste concerné même s'il ne paie
+      pas). **Lectures sûres pour un non-staff** (`getOwnerLotPayments`, `getOwnerLotAccount`,
+      `getOwnerReceipt`) : elles réutilisent le cœur pur `buildLedger` et les composants imprimables
+      existants (`LotAccountDocument`, `ReceiptDocument`, `PrintButton`, réutilisés tels quels), **sans
+      jamais toucher au modèle Person** et en **vérifiant la détention du lot** — un propriétaire n'ouvre
+      jamais le relevé ni le reçu d'un voisin (le reçu d'un lot non détenu renvoie `null`). Accès réservé
+      au rôle PROPRIETAIRE (`charge.view.own` / `payment.view.own`) ; aucune permission ajoutée (le reçu
+      suit `payment.view.own`) → la matrice reste inchangée. Vérifié connecté en propriétaire : historique
+      A1 (2 soldés, 1 en retard), paiements avec 3 reçus réimprimables + une annulation, réimpression d'un
+      reçu, relevé B4 (solde de clôture 650 MAD, annulation re-débitée) ; fr + ar (RTL intégral). Gate
+      complet vert (279 PGlite, 95 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·
