@@ -118,6 +118,14 @@ enum Plan {
   ENTREPRISE
 }
 
+/// Mode de calcul des appels de charges (I1). FORFAIT : montant fixe par lot (défaut,
+/// courant sur les petits immeubles). TANTIEMES : répartition d'un budget mensuel aux
+/// quotes-parts (`Lot.quotePart`) — conforme à la répartition légale des charges communes.
+enum ChargeMode {
+  FORFAIT
+  TANTIEMES
+}
+
 enum PaymentMethod {
   ESPECES
   CARTE // hérité — plus proposé (aucun paiement par carte, cf. tranche B)
@@ -380,6 +388,10 @@ model Residence {
   defaultChargeApptMinor  Int           @default(0)
   defaultChargeVillaMinor Int           @default(0)
   dueDayOfMonth           Int           @default(1) // jour d'échéance mensuelle
+  // Mode de calcul des appels (I1). FORFAIT par défaut ; en TANTIEMES, `monthlyBudgetMinor`
+  // (total mensuel de la résidence) est réparti aux quotes-parts des lots.
+  chargeMode              ChargeMode    @default(FORFAIT)
+  monthlyBudgetMinor      Int           @default(0) // total mensuel à répartir (mode tantièmes)
   // Nombre d'unités saisi à la création (A2) : sert de valeur par défaut à la
   // création des lots (A3). NE crée aucun lot par lui-même.
   defaultUnitsCount       Int           @default(0)

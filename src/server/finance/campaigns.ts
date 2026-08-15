@@ -27,6 +27,8 @@ export interface Period {
   month: number; // 1..12
 }
 
+export type ChargeMode = 'FORFAIT' | 'TANTIEMES';
+
 /** Montant d'appel d'un lot : sa charge configurée si > 0, sinon le défaut résidence par type. */
 export function callAmountForLot(
   lot: { type: 'APPARTEMENT' | 'VILLA'; monthlyChargeMinor: number },
@@ -34,6 +36,40 @@ export function callAmountForLot(
 ): number {
   if (lot.monthlyChargeMinor > 0) return lot.monthlyChargeMinor;
   return lot.type === 'VILLA' ? defaults.villa : defaults.appt;
+}
+
+/**
+ * Répartit un total (centimes) aux quotes-parts (tantièmes). PURE. Méthode du plus fort
+ * reste : chaque lot reçoit sa part entière, puis les centimes restants vont aux lots dont
+ * la fraction est la plus grande — la somme des parts égale EXACTEMENT le total (aucun
+ * centime perdu ni créé). Un lot de quote-part nulle reçoit 0.
+ */
+export function distributeByTantiemes(
+  totalMinor: number,
+  lots: ReadonlyArray<{ id: string; quotePart: number }>,
+): Map<string, number> {
+  const result = new Map<string, number>(lots.map((l) => [l.id, 0]));
+  const totalQuote = lots.reduce((s, l) => s + Math.max(0, l.quotePart), 0);
+  if (totalMinor <= 0 || totalQuote <= 0) return result;
+
+  const withFrac = lots.map((l) => {
+    const exact = (totalMinor * Math.max(0, l.quotePart)) / totalQuote;
+    const base = Math.floor(exact);
+    return { id: l.id, quotePart: Math.max(0, l.quotePart), base, frac: exact - base };
+  });
+  const assigned = withFrac.reduce((s, l) => s + l.base, 0);
+  let remainder = totalMinor - assigned; // 0..lots.length centimes à distribuer
+  // Plus grande fraction d'abord ; à égalité, plus grande quote-part, puis id (déterministe).
+  const order = [...withFrac].sort(
+    (a, b) => b.frac - a.frac || b.quotePart - a.quotePart || a.id.localeCompare(b.id),
+  );
+  for (const l of withFrac) result.set(l.id, l.base);
+  for (const l of order) {
+    if (remainder <= 0) break;
+    result.set(l.id, (result.get(l.id) ?? 0) + 1);
+    remainder--;
+  }
+  return result;
 }
 
 /** Échéance d'une période : le jour d'échéance de la résidence, borné au dernier jour du mois. */
@@ -47,6 +83,7 @@ export interface CampaignLotLine {
   lotId: string;
   reference: string;
   type: 'APPARTEMENT' | 'VILLA';
+  quotePart: number; // tantièmes du lot (affiché pour expliquer le calcul en mode TANTIEMES)
   amountMinor: number;
   payerName: string | null; // redevable dérivé (staff) ; null si non identifiable
   alreadyCalled: boolean; // déjà appelé pour cette période (ignoré à la génération)
@@ -55,6 +92,8 @@ export interface CampaignLotLine {
 export interface CampaignPreview {
   period: Period;
   dueDate: string; // ISO
+  mode: ChargeMode; // FORFAIT ou TANTIEMES — pour expliquer d'où vient chaque montant
+  totalQuotePart: number; // somme des quotes-parts (mode tantièmes)
   lines: CampaignLotLine[];
   toCallCount: number;
   alreadyCalledCount: number;
@@ -83,11 +122,14 @@ export interface CampaignSummary {
 export interface PlanInput {
   period: Period;
   dueDate: Date;
+  mode: ChargeMode;
+  monthlyBudgetMinor: number; // total à répartir (mode tantièmes)
   lots: Array<{
     id: string;
     reference: string;
     type: 'APPARTEMENT' | 'VILLA';
     monthlyChargeMinor: number;
+    quotePart: number;
   }>;
   existingLotIds: ReadonlySet<string>;
   payerNameByLot: ReadonlyMap<string, string | null>;
@@ -96,11 +138,20 @@ export interface PlanInput {
 
 /** Construit l'aperçu d'une campagne à partir de données déjà chargées. PUR. */
 export function computeCampaignPlan(input: PlanInput): CampaignPreview {
+  // Le montant vient soit du forfait par lot, soit de la répartition du budget mensuel aux
+  // quotes-parts (sur TOUS les lots non archivés — le partage reste cohérent même si certains
+  // lots sont déjà appelés).
+  const byTantiemes =
+    input.mode === 'TANTIEMES'
+      ? distributeByTantiemes(input.monthlyBudgetMinor, input.lots)
+      : null;
+
   const lines: CampaignLotLine[] = input.lots.map((lot) => ({
     lotId: lot.id,
     reference: lot.reference,
     type: lot.type,
-    amountMinor: callAmountForLot(lot, input.defaults),
+    quotePart: lot.quotePart,
+    amountMinor: byTantiemes ? (byTantiemes.get(lot.id) ?? 0) : callAmountForLot(lot, input.defaults),
     payerName: input.payerNameByLot.get(lot.id) ?? null,
     alreadyCalled: input.existingLotIds.has(lot.id),
   }));
@@ -108,6 +159,8 @@ export function computeCampaignPlan(input: PlanInput): CampaignPreview {
   return {
     period: input.period,
     dueDate: input.dueDate.toISOString(),
+    mode: input.mode,
+    totalQuotePart: input.lots.reduce((s, l) => s + Math.max(0, l.quotePart), 0),
     lines,
     toCallCount: toCall.length,
     alreadyCalledCount: lines.length - toCall.length,
@@ -243,7 +296,7 @@ export async function previewCampaign(
     scoped.lot.findMany({
       where: { archivedAt: null },
       orderBy: { reference: 'asc' },
-      select: { id: true, reference: true, type: true, monthlyChargeMinor: true },
+      select: { id: true, reference: true, type: true, monthlyChargeMinor: true, quotePart: true },
     }),
     scoped.chargeCall.findMany({
       where: { periodYear: period.year, periodMonth: period.month },
@@ -269,6 +322,8 @@ export async function previewCampaign(
   return computeCampaignPlan({
     period,
     dueDate,
+    mode: config.chargeMode,
+    monthlyBudgetMinor: config.monthlyBudgetMinor,
     lots: lots.map((l) => ({ ...l, type: l.type as 'APPARTEMENT' | 'VILLA' })),
     existingLotIds: new Set(existing.map((e) => e.lotId)),
     payerNameByLot,

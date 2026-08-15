@@ -181,7 +181,12 @@ function PreviewTable({
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold text-label">{t('preview.title')}</h2>
+            <h2 className="flex items-center gap-2 text-base font-bold text-label">
+              {t('preview.title')}
+              <span className="rounded-full bg-indigo-soft px-2 py-0.5 text-xs font-bold text-indigo">
+                {t(preview.mode === 'TANTIEMES' ? 'preview.modeTantiemes' : 'preview.modeForfait')}
+              </span>
+            </h2>
             <p className="mt-1 text-sm text-label-3">
               {t('preview.summary', {
                 toCall: preview.toCallCount,
@@ -189,6 +194,11 @@ function PreviewTable({
                 total: formatMoney(preview.totalToCallMinor, locale),
               })}
             </p>
+            {preview.mode === 'TANTIEMES' && (
+              <p className="mt-1 text-xs text-label-4">
+                {t('preview.tantiemesHint', { total: preview.totalQuotePart })}
+              </p>
+            )}
           </div>
           <Button
             variant="primary"
@@ -205,6 +215,9 @@ function PreviewTable({
               <tr className="border-b border-sep text-xs font-bold uppercase tracking-wide text-label-4">
                 <th className="px-3 py-2 text-start">{t('preview.colRef')}</th>
                 <th className="px-3 py-2 text-start">{t('preview.colPayer')}</th>
+                {preview.mode === 'TANTIEMES' && (
+                  <th className="px-3 py-2 text-end">{t('preview.colQuote')}</th>
+                )}
                 <th className="px-3 py-2 text-end">{t('preview.colAmount')}</th>
                 <th className="px-3 py-2 text-start">{t('preview.colStatus')}</th>
               </tr>
@@ -214,6 +227,11 @@ function PreviewTable({
                 <tr key={l.lotId} className="border-b border-sep last:border-0">
                   <td className="px-3 py-2 font-semibold text-label">{l.reference}</td>
                   <td className="px-3 py-2 text-label-3">{l.payerName ?? '—'}</td>
+                  {preview.mode === 'TANTIEMES' && (
+                    <td className="px-3 py-2 text-end tabular-nums text-label-3">
+                      {l.quotePart}/{preview.totalQuotePart}
+                    </td>
+                  )}
                   <td className="px-3 py-2 text-end tabular-nums text-label">
                     {formatMoney(l.amountMinor, locale)}
                   </td>

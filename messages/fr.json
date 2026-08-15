@@ -154,6 +154,8 @@
   },
   "pay": {
     "cta": "Payer",
+    "simTag": "simulation",
+    "simNotice": "Le paiement en ligne est une simulation — aucun règlement réel n'a lieu.",
     "title": "Payer en ligne",
     "simBanner": "Mode démonstration — paiement simulé, aucune somme n'est réellement prélevée.",
     "summary": "Récapitulatif",
@@ -351,6 +353,20 @@
     "pwWrongOld": "Mot de passe actuel incorrect.",
     "pwWeak": "Le nouveau mot de passe doit faire au moins {n} caractères.",
     "pwMismatch": "La confirmation ne correspond pas."
+  },
+  "chargeMode": {
+    "title": "Calcul des appels de charges",
+    "hint": "Forfait : un montant fixe par lot (défaut). Tantièmes : un budget mensuel réparti aux quotes-parts des lots.",
+    "mode": "Mode de calcul",
+    "forfait": "Forfait (montant par lot)",
+    "tantiemes": "Tantièmes (aux quotes-parts)",
+    "monthlyBudget": "Budget mensuel de la résidence (MAD)",
+    "budgetUsed": "Réparti aux quotes-parts en mode tantièmes.",
+    "budgetUnused": "Utilisé seulement en mode tantièmes.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré.",
+    "error": "L'opération a échoué."
   },
   "currency": {
     "title": "Devise secondaire",
@@ -1349,10 +1365,14 @@
         "summary": "{toCall} à appeler · {already} déjà appelés · total {total}",
         "colRef": "Lot",
         "colPayer": "Redevable",
+        "colQuote": "Quote-part",
         "colAmount": "Montant",
         "colStatus": "État",
         "statusToCall": "À appeler",
         "statusAlready": "Déjà appelé",
+        "modeForfait": "Forfait",
+        "modeTantiemes": "Tantièmes",
+        "tantiemesHint": "Budget mensuel réparti aux quotes-parts (total {total} tantièmes).",
         "confirm": "Générer les {count} appels"
       },
       "report": {

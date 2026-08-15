@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   ArrowRight,
   CreditCard,
+  ShieldAlert,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { getSessionContext } from '@/server/session';
@@ -103,6 +104,14 @@ export default async function OwnerChargesPage({
         </div>
       )}
 
+      {/* Paiement en ligne : rappel PERMANENT que c'est une simulation, là où il est proposé. */}
+      {onlinePay && (
+        <p className="flex items-center gap-2 rounded-md bg-orange-soft px-3 py-2 text-note font-semibold text-orange">
+          <ShieldAlert className="size-4 shrink-0" aria-hidden />
+          {tOnline('simNotice')}
+        </p>
+      )}
+
       {/* Charges déléguées au locataire : dit clairement */}
       {!activeLot.isChargePayer && (
         <p className="flex items-center gap-2 rounded-md bg-orange-soft px-3 py-2 text-note font-semibold text-orange">
@@ -160,10 +169,14 @@ export default async function OwnerChargesPage({
                       {c.remainingMinor > 0 && (
                         <Link
                           href={`/proprietaire/payer/${c.id}`}
+                          title={tOnline('simTag')}
                           className="inline-flex items-center gap-1 rounded-md bg-indigo px-2.5 py-1.5 text-note font-bold text-white transition-opacity hover:opacity-90"
                         >
                           <CreditCard className="size-3.5" aria-hidden />
                           {tOnline('cta')}
+                          <span className="ms-0.5 rounded bg-white/20 px-1 text-eyebrow font-bold uppercase">
+                            {tOnline('simTag')}
+                          </span>
                         </Link>
                       )}
                     </Td>

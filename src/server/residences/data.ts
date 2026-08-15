@@ -103,10 +103,18 @@ export async function getResidenceChargeConfig(residenceId: string): Promise<{
   defaultChargeApptMinor: number;
   defaultChargeVillaMinor: number;
   dueDayOfMonth: number;
+  chargeMode: 'FORFAIT' | 'TANTIEMES';
+  monthlyBudgetMinor: number;
 } | null> {
   const r = await getBaseClient().residence.findUnique({
     where: { id: residenceId },
-    select: { defaultChargeApptMinor: true, defaultChargeVillaMinor: true, dueDayOfMonth: true },
+    select: {
+      defaultChargeApptMinor: true,
+      defaultChargeVillaMinor: true,
+      dueDayOfMonth: true,
+      chargeMode: true,
+      monthlyBudgetMinor: true,
+    },
   });
   return r ?? null;
 }

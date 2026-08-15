@@ -17,7 +17,7 @@ import { writeExpense } from '../src/server/finance/expenses';
 import { defaultExpenseCategories, type ResidenceKind } from '../src/server/finance/categories';
 import { storeFile } from '../src/server/storage/files';
 import { prismaTxRunner } from '../src/server/db/sql';
-import { distributeQuoteParts } from '../src/server/lots/quote-part';
+import { distributeByTantiemes } from '../src/server/finance/campaigns';
 import { disconnectBase } from '../src/server/db/client';
 import { hashPassword } from '../src/server/auth/password';
 
@@ -242,6 +242,10 @@ async function main() {
       lateFeeFixedMinor: dh(50),
       lateFeePercentBps: 500,
       lateFeeCapMinor: dh(200),
+      // Mode de calcul (I1) : la démo reste au FORFAIT (défaut), mais un budget mensuel est
+      // renseigné pour qu'on puisse basculer en tantièmes dans les réglages et voir la
+      // répartition aux quotes-parts dans l'aperçu de génération.
+      monthlyBudgetMinor: dh(15000),
     },
   });
   await prisma.mandate.create({
@@ -289,7 +293,13 @@ async function main() {
 
   // Lots + rattachements historisés + charges + paiements + reçus
   const specs = buildLotSpecs();
-  const quotas = distributeQuoteParts(specs.length); // total = 1000 millièmes
+  // Quotes-parts pondérées par le type (une villa pèse plus qu'un appartement) pour que la
+  // répartition aux tantièmes (I1) soit démonstrative — total = 1000 millièmes exactement.
+  const quotaMap = distributeByTantiemes(
+    1000,
+    specs.map((s, i) => ({ id: String(i), quotePart: s.villa ? 2 : 1 })),
+  );
+  const quotas = specs.map((_, i) => quotaMap.get(String(i)) ?? 1);
   let paidCount = 0;
   let partialCount = 0;
   let lateCount = 0;

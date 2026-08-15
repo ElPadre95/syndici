@@ -470,6 +470,26 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
 exceptés) : incidents, frais de retard, bilan annuel, relevé mensuel, devise secondaire, dépôt de documents,
 profil.
 
+## Tranche I — Métier de la copropriété
+
+- [x] **I1** — **Tantièmes** + **honnêteté du paiement simulé**. Le **calcul des appels devient configurable par
+      résidence** (`Residence.chargeMode` FORFAIT | TANTIEMES, **FORFAIT par défaut** — beaucoup de petits
+      immeubles marocains fonctionnent au forfait). En mode **tantièmes**, un **budget mensuel**
+      (`monthlyBudgetMinor`) est **réparti aux quotes-parts** (`Lot.quotePart`, déjà renseigné) par une fonction
+      **pure** `distributeByTantiemes` (méthode du **plus fort reste** : la somme des parts égale EXACTEMENT le
+      total, aucun centime perdu — testé). L'**aperçu de génération** affiche le **mode**, la **quote-part** de
+      chaque lot (`33/1000`) et le **montant** qui en découle, plus le total des tantièmes — le syndic voit d'où
+      vient chaque montant. Config dans les réglages (`updateChargeModeAction`, tracée à l'audit). Seed :
+      quotes-parts **pondérées par type** (une villa pèse plus qu'un appartement) pour une répartition
+      démonstrative ; budget mensuel renseigné sur Al Firdaous (reste au forfait par défaut, bascule en tantièmes
+      en un clic). **Honnêteté du paiement simulé** : au-delà du bandeau du tunnel, un **rappel PERMANENT**
+      partout où le paiement en ligne est proposé — bandeau sur « Mes charges » (« le paiement en ligne est une
+      simulation — aucun règlement réel ») + **étiquette « SIMULATION »** sur chaque bouton « Payer ». On ne
+      laisse jamais croire qu'un vrai règlement a lieu. Vérifié connecté : aperçu tantièmes (A1 33/1000 → 495 DH,
+      villa 65/1000 → 975 DH, total 15.000 DH exact), bandeau + étiquette de simulation ; fr + ar (RTL intégral).
+      Migration `ChargeMode` + `Residence.chargeMode`/`monthlyBudgetMinor`. Gate complet vert (312 PGlite, 120
+      Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

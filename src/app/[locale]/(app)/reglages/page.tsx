@@ -12,6 +12,8 @@ import {
 import { LateFeeSettings } from '@/components/settings/LateFeeSettings';
 import { CurrencyRatesForm } from '@/components/settings/CurrencyRatesForm';
 import { listCurrencyRates } from '@/server/finance/currency';
+import { ChargeModeSettings } from '@/components/settings/ChargeModeSettings';
+import { getResidenceChargeConfig } from '@/server/residences/data';
 import { prismaExecutor } from '@/server/db/sql';
 import { listMembers } from '@/server/org/data';
 import { isLastActiveAdmin } from '@/server/org/members';
@@ -53,16 +55,19 @@ export default async function ReglagesPage({ params }: { params: Promise<{ local
   }
   const scopedCtx = { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role };
 
-  const [residence, rule, lateFee, currencyRates, categories, subscription] = await Promise.all([
-    getResidenceSettings(ctx.activeId),
-    getActiveReminderRule(ctx.activeId),
-    getLateFeeSettings(ctx.activeId),
-    listCurrencyRates(scopedCtx),
-    listCategoriesForSettings(scopedCtx),
-    getSubscription(scopedCtx),
-  ]);
+  const [residence, rule, lateFee, currencyRates, chargeConfig, categories, subscription] =
+    await Promise.all([
+      getResidenceSettings(ctx.activeId),
+      getActiveReminderRule(ctx.activeId),
+      getLateFeeSettings(ctx.activeId),
+      listCurrencyRates(scopedCtx),
+      getResidenceChargeConfig(ctx.activeId),
+      listCategoriesForSettings(scopedCtx),
+      getSubscription(scopedCtx),
+    ]);
   const tLate = await getTranslations('lateFees');
   const tCur = await getTranslations('currency');
+  const tMode = await getTranslations('chargeMode');
   if (!residence) {
     // Résidence active introuvable (supprimée en cours de session) : message explicite,
     // jamais une page blanche silencieuse.
@@ -104,6 +109,16 @@ export default async function ReglagesPage({ params }: { params: Promise<{ local
       <ResidenceSettingsForm current={residence} />
 
       {rule && <ReminderRuleForm current={rule} />}
+
+      {chargeConfig && (
+        <Card className="flex flex-col gap-4">
+          <h2 className="text-base font-bold text-label">{tMode('title')}</h2>
+          <ChargeModeSettings
+            chargeMode={chargeConfig.chargeMode}
+            monthlyBudgetMinor={chargeConfig.monthlyBudgetMinor}
+          />
+        </Card>
+      )}
 
       {lateFee && (
         <Card className="flex flex-col gap-4">
