@@ -13,6 +13,7 @@ import { listResidencePayments } from '@/server/finance/payments';
 import { listExpenses } from '@/server/finance/expenses';
 import { listContracts } from '@/server/finance/contracts';
 import { ResidentHome } from '@/components/app/ResidentHome';
+import { OwnerHome } from '@/components/app/OwnerHome';
 import { StaffDashboard } from '@/components/app/StaffDashboard';
 
 /**
@@ -39,15 +40,37 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
         ctx.activeId && ctx.role
           ? { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role }
           : null;
-      const announcements = rctx ? await listAnnouncementsForResident(rctx) : [];
       const tDoc = await getTranslations('documents.f3');
-      const docs = rctx ? await listResidenceDocuments(rctx) : [];
+      const [announcements, docs] = await Promise.all([
+        rctx ? listAnnouncementsForResident(rctx) : Promise.resolve([]),
+        rctx ? listResidenceDocuments(rctx) : Promise.resolve([]),
+      ]);
       const documents = docs.map((d) => ({
         id: d.id,
         name: d.name,
         typeLabel: tDoc(`type.${d.type}`),
         href: signedFilePath(d.fileAssetId, 3600),
       }));
+
+      // PROPRIÉTAIRE → espace propriétaire (G1). LOCATAIRE (ou rôle indéterminé) → accueil
+      // sobre inchangé. La différenciation est par le RÔLE : un locataire n'atteint jamais
+      // l'espace propriétaire.
+      if (rctx && rctx.role === 'PROPRIETAIRE') {
+        const residenceName =
+          ctx.residences.find((r) => r.id === ctx.activeId)?.name ??
+          attachments[0]?.residence ??
+          '';
+        return (
+          <OwnerHome
+            ctx={rctx}
+            name={name}
+            residenceName={residenceName}
+            announcements={announcements}
+            documents={documents}
+          />
+        );
+      }
+
       return (
         <ResidentHome
           name={name}

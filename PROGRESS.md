@@ -256,8 +256,7 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       couleur décorative) ; **espacement/densité** (cartes aérées, listes compactes) ; **bibliothèque
       `ui/`** (Button variantes+états, Field, Select, Table, Card, Badge, EmptyState, Alert, Spinner).
       Deux éléments de chrome : **sélecteur de langue en MENU compact** prêt pour 4 langues (fr, en, ar,
-      nl — seuls fr/ar câblés ; ajouter en/nl est un travail d'i18n) et **bulle de messagerie** (FAB indigo
-      + compteur + tiroir glissant, défini visuellement, non branché). **Nav responsive** : barre latérale
+      nl — seuls fr/ar câblés ; ajouter en/nl est un travail d'i18n) et **bulle de messagerie** (FAB indigo + compteur + tiroir glissant, défini visuellement, non branché). **Nav responsive** : barre latérale
       fixe en grand écran, repliée en tiroir sur mobile (le sidebar ne mange plus l'écran). Tableau de bord
       **recomposé et enrichi** avec la hiérarchie du prototype : d'abord ce qui appelle une action (impayés,
       contrats qui expirent), puis **l'argent en bloc indigo dominant** (trésorerie disponible + encaissé/
@@ -269,6 +268,29 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       complet vert. Deux manques signalés (non bricolés) : le détail soldés/partiels/en retard + retard
       moyen exigerait une agrégation nouvelle ; « Encaisser » pointe vers `/paiements` faute de route
       d'enregistrement autonome.
+
+## Tranche G — Espace propriétaire
+
+- [x] **G1** — La coquille et l'accueil. Navigation **propre au propriétaire** (peu d'entrées, pensée
+      mobile), distincte du syndic : la barre latérale prend une **variante de rôle** (`staff` / `owner` /
+      `tenant`) — ajouter le locataire plus tard sera une différenciation par les droits, pas une refonte.
+      **Gating par le rôle** `PROPRIETAIRE` (jamais `isStaff` : un propriétaire est `isStaff=false`) ; un
+      **locataire garde son accueil sobre** et n'atteint aucun écran propriétaire (mur d'étanchéité intact,
+      `security.leak.test` + `permissions.test` verts). L'accueil répond à « où j'en suis » : **situation
+      de paiement par lot** (montant dû + échéance, **bandeau rouge en retard** avec le nombre de jours),
+      **indicateur collectif** de la résidence (**des NOMBRES seulement** — X à jour · Y en attente, jamais
+      d'identité), **actualités et documents** visibles (réutilisation E3/F3). Un propriétaire **MRE
+      multi-lots** bascule entre ses lots (sélecteur de lot) et, via l'en-tête, entre ses **résidences**
+      (le sélecteur montre désormais aussi les résidences où l'on n'est que résident). Lectures
+      **sûres pour un non-staff** (`src/server/finance/owner.ts`) : `getLotFinance` (vue syndic) LÈVE pour
+      un propriétaire (il résout des noms via la couche staff) — ici on lit les appels de charges + statut
+      dérivé **sans jamais toucher au modèle Person** et en **vérifiant la détention du lot** (un
+      propriétaire ne voit jamais les charges d'un voisin). Cœurs purs testés (`summarizeCharges`,
+      `countSettledLots`). Seed : le **propriétaire MRE de démo** (Sara, 2 lots) reçoit un **id STABLE** et
+      un **compte de démonstration** (`proprietaire@syndici.ma`, même mot de passe que le syndic) ; en
+      local, `npm run dev:owner` (`owner@dev.local`). Vérifié au navigateur connecté en propriétaire :
+      situation A1 (en retard 650 MAD, 14 j) vs A7 (à jour), indicateur collectif, actualités, bascule de
+      lot ; fr + ar (RTL intégral), desktop + mobile. Gate complet vert (279 PGlite, 95 Postgres réel).
 
 ## Règles permanentes
 

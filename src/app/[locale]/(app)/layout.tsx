@@ -30,9 +30,13 @@ export default async function AppLayout({
   }
 
   const ctx = state.context;
+  // Coquille selon le rôle : staff (syndic), propriétaire (espace G), sinon locataire
+  // (vue réduite). Ajouter le locataire plus tard = différenciation par les droits, pas
+  // une refonte de la coquille.
+  const variant = ctx.isStaff ? 'staff' : ctx.role === 'PROPRIETAIRE' ? 'owner' : 'tenant';
   return (
     <div className="min-h-screen bg-bg lg:flex">
-      <AppSidebar staff={ctx.isStaff} />
+      <AppSidebar variant={variant} />
       <div className="flex min-h-screen flex-1 flex-col">
         <AppHeader
           userLabel={ctx.userLabel}

@@ -24,6 +24,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "dev:account": "tsx scripts/dev-account.ts",
+    "dev:owner": "tsx scripts/dev-owner.ts",
     "db:reset": "prisma migrate reset --force"
   },
   "prisma": {

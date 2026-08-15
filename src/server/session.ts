@@ -16,7 +16,11 @@ import { auth } from '@/auth';
 import { prismaExecutor } from '@/server/db/sql';
 import { resolveIdentity } from '@/server/auth/identity';
 import { resolveActiveResidenceId } from '@/server/auth/active-residence';
-import { listResidencesForPerson, type ResidenceListItem } from '@/server/residences/data';
+import {
+  listResidencesForPerson,
+  listNamedResidences,
+  type ResidenceListItem,
+} from '@/server/residences/data';
 import type { AppRole } from '@/server/auth/permissions';
 
 export const ACTIVE_RESIDENCE_COOKIE = 'syndici.activeResidence';
@@ -65,12 +69,19 @@ export const getAuthState = cache(async (): Promise<AuthState> => {
   if (id.status === 'stale') return { status: 'stale' };
 
   const personId = session.user.personId!;
-  // Liste d'affichage (staff) restreinte aux résidences réellement accessibles.
+  // Résidences gérées (staff) — riches (lotCount, statut de mandat), restreintes aux accessibles.
   const managed = await listResidencesForPerson(personId);
-  const residences = managed.filter((r) => id.accessibleIds.includes(r.id));
-  const userLabel = session.user.name ?? session.user.email ?? null;
+  const staffAccessible = managed.filter((r) => id.accessibleIds.includes(r.id));
   // Staff = au moins une résidence gérée (mandat actif). Sinon, résident : vue réduite (A7 §1).
-  const isStaff = residences.length > 0;
+  const isStaff = staffAccessible.length > 0;
+  // Le sélecteur d'en-tête montre TOUTES les résidences accessibles : on ajoute celles où la
+  // personne n'est que résident (rattachement de lot) — le cas MRE multi-résidences.
+  const managedIds = new Set(managed.map((r) => r.id));
+  const residentResidences = await listNamedResidences(
+    id.accessibleIds.filter((rid) => !managedIds.has(rid)),
+  );
+  const residences = [...staffAccessible, ...residentResidences];
+  const userLabel = session.user.name ?? session.user.email ?? null;
 
   return {
     status: 'active',

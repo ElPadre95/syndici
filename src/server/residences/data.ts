@@ -62,6 +62,29 @@ export async function listResidencesForPerson(personId: string): Promise<Residen
   return items;
 }
 
+/**
+ * Résidences par id, nommées (pour le sélecteur d'en-tête). Sert à faire apparaître les
+ * résidences d'un PROPRIÉTAIRE (accessibles via rattachement, pas via mandat) dans le
+ * sélecteur — le cas MRE multi-résidences. `lotCount`/`mandateStatus` ne concernent que le
+ * staff : neutres ici (le sélecteur n'utilise que `id`/`name`).
+ */
+export async function listNamedResidences(ids: readonly string[]): Promise<ResidenceListItem[]> {
+  if (ids.length === 0) return [];
+  const base = getBaseClient();
+  const residences = await base.residence.findMany({
+    where: { id: { in: [...ids] } },
+    orderBy: { name: 'asc' },
+  });
+  return residences.map((r) => ({
+    id: r.id,
+    name: r.name,
+    city: r.city,
+    type: r.type as ResidenceType,
+    lotCount: 0,
+    mandateStatus: null,
+  }));
+}
+
 /** Métadonnées d'une résidence utiles à la génération de lots (A3). */
 export async function getResidenceBasics(
   residenceId: string,

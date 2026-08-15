@@ -822,6 +822,25 @@
     "appBonjour": "مرحباً، سارة",
     "appResSub": "الإثنين 8 يونيو 2026 · إقامة الفردوس"
   },
+  "owner": {
+    "welcome": "مرحبًا، {name}",
+    "welcomeGeneric": "مرحبًا",
+    "situationTitle": "أين وصلت",
+    "upToDate": "أنت في وضع سليم",
+    "upToDateSub": "لا توجد رسوم معلّقة لهذه الوحدة.",
+    "amountDue": "المبلغ المستحق",
+    "nextDue": "الأجل",
+    "lateBanner": "متأخّر بـ {days} يوم",
+    "delegated": "الرسوم مفوّضة لمستأجرك — تبقى معنيًّا.",
+    "lots": "وحداتك",
+    "lot": "الوحدة {ref}",
+    "collectiveTitle": "رسوم الإقامة",
+    "collectivePaid": "{count} في وضع سليم",
+    "collectivePending": "{count} في الانتظار",
+    "collectiveAll": "الجميع في وضع سليم",
+    "newsTitle": "الأخبار",
+    "docsTitle": "وثائق الإقامة"
+  },
   "transparency": {
     "transpTitre": "رسوم الإقامة · يونيو",
     "transpAPaye": "دفع",

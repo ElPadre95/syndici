@@ -808,6 +808,25 @@
     "appBonjour": "Bonjour, Sara",
     "appResSub": "Lundi 8 juin 2026 · Résidence Al Firdaous"
   },
+  "owner": {
+    "welcome": "Bonjour, {name}",
+    "welcomeGeneric": "Bonjour",
+    "situationTitle": "Où j'en suis",
+    "upToDate": "Vous êtes à jour",
+    "upToDateSub": "Aucune charge en attente pour ce lot.",
+    "amountDue": "Montant dû",
+    "nextDue": "Échéance",
+    "lateBanner": "En retard de {days} jour(s)",
+    "delegated": "Charges déléguées à votre locataire — vous restez concerné.",
+    "lots": "Vos lots",
+    "lot": "Lot {ref}",
+    "collectiveTitle": "Charges de la résidence",
+    "collectivePaid": "{count} à jour",
+    "collectivePending": "{count} en attente",
+    "collectiveAll": "Tout le monde est à jour",
+    "newsTitle": "Actualités",
+    "docsTitle": "Documents de la résidence"
+  },
   "transparency": {
     "transpTitre": "Charges de la résidence · Juin",
     "transpAPaye": "a payé",

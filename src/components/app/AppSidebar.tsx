@@ -49,6 +49,14 @@ const STAFF_NAV: readonly NavItem[] = [
 // L'accueil est neutre (pas une fonction de gestion) : commun à tous les rôles.
 const HOME_NAV: NavItem = { href: '/', key: 'dashboard', Icon: LayoutDashboard };
 
+// Navigation PROPRIÉTAIRE (tranche G) — peu d'entrées, pensée mobile. Elle grandit par
+// incrément (G2 : charges ; G3 : transparence ; G4 : messagerie). Vide pour l'instant :
+// l'accueil suffit à G1, et « jamais de lien mort » interdit d'exposer un écran non construit.
+const OWNER_NAV: readonly NavItem[] = [];
+
+/** Variante de navigation selon le rôle effectif : staff, propriétaire, ou locataire (minimal). */
+export type NavVariant = 'staff' | 'owner' | 'tenant';
+
 /** Détermine l'entrée active : correspondance exacte pour l'accueil, préfixe sinon. */
 function isActive(pathname: string, href: string): boolean {
   if (href === '/') return pathname === '/';
@@ -71,14 +79,19 @@ function Brand({ appName }: { appName: string }) {
  * une barre compacte (marque + menu) qui ouvre un tiroir — le contenu reste utilisable
  * en petite largeur. Positionnement logique partout (le tiroir s'ouvre du côté du texte).
  */
-export function AppSidebar({ staff }: { staff: boolean }) {
+export function AppSidebar({ variant }: { variant: NavVariant }) {
   const t = useTranslations('app.nav');
   const tCommon = useTranslations('common');
   const tHeader = useTranslations('app.header');
   const tBtn = useTranslations('buttons');
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const items = staff ? [HOME_NAV, ...STAFF_NAV] : [HOME_NAV];
+  const items =
+    variant === 'staff'
+      ? [HOME_NAV, ...STAFF_NAV]
+      : variant === 'owner'
+        ? [HOME_NAV, ...OWNER_NAV]
+        : [HOME_NAV];
 
   const navLinks = (onNavigate?: () => void): ReactNode => (
     <nav className="flex flex-col gap-1">

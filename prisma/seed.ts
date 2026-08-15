@@ -10,6 +10,7 @@
  *
  * Toute la logique (statut, reçus) reste dérivée/allouée par la couche serveur.
  */
+import { randomUUID } from 'node:crypto';
 import { PrismaClient } from '@prisma/client';
 import { createReceipt } from '../src/server/finance/numbering';
 import { writeExpense } from '../src/server/finance/expenses';
@@ -277,6 +278,10 @@ async function main() {
   // Cas MRE : un propriétaire à l'étranger qui détient DEUX lots (une résidence
   // secondaire vide en plus de son bien principal). L'annuaire (F2) doit le montrer
   // une seule fois, avec ses deux lots — jamais en doublon.
+  // Id STABLE du propriétaire MRE de démo (comme le syndic de démo) : sa Person garde le
+  // MÊME id à chaque reseed, donc le jeton de session d'un propriétaire connecté survit au
+  // rechargement des données (voir DECISIONS.md D33).
+  const MRE_OWNER_ID = '5eed0000-0000-4000-8000-000000000003';
   let mreOwnerId: string | null = null;
   let vacantLotId: string | null = null;
 
@@ -298,8 +303,13 @@ async function main() {
       continue;
     }
 
+    // Le premier propriétaire à l'étranger sera le MRE multi-lots de démo → id STABLE
+    // (les autres reçoivent un uuid explicite, équivalent au défaut Prisma).
+    const isMreOwner: boolean = spec.owner.abroad && mreOwnerId === null;
+    const ownerId: string = isMreOwner ? MRE_OWNER_ID : randomUUID();
     const owner = await prisma.person.create({
       data: {
+        id: ownerId,
         firstName: spec.owner.first,
         lastName: spec.owner.last,
         nationality: spec.owner.nationality,
@@ -321,7 +331,7 @@ async function main() {
       },
     });
     // Premier propriétaire à l'étranger rencontré : ce sera notre MRE multi-lots.
-    if (spec.owner.abroad && mreOwnerId === null) mreOwnerId = owner.id;
+    if (isMreOwner) mreOwnerId = owner.id;
 
     let payerPersonId = owner.id;
     if (spec.tenant) {
@@ -928,6 +938,20 @@ async function main() {
     console.log(
       `✔ Compte de démonstration créé pour ${demoEmail} (mot de passe fourni par l'environnement).`,
     );
+
+    // Compte de démonstration PROPRIÉTAIRE (MRE, 2 lots) — même mécanisme, même mot de
+    // passe. Aucune adhésion : son rôle PROPRIETAIRE dérive de ses rattachements de lot.
+    // Son id est stable (MRE_OWNER_ID) → sa session survit aux reseeds.
+    if (mreOwnerId) {
+      const ownerEmail = process.env.DEMO_OWNER_EMAIL ?? 'proprietaire@syndici.ma';
+      const ownerUser = await prisma.user.upsert({
+        where: { email: ownerEmail },
+        update: { passwordHash: await hashPassword(demoPassword) },
+        create: { email: ownerEmail, passwordHash: await hashPassword(demoPassword) },
+      });
+      await prisma.person.update({ where: { id: mreOwnerId }, data: { authUserId: ownerUser.id } });
+      console.log(`✔ Compte de démonstration propriétaire créé pour ${ownerEmail}.`);
+    }
   }
 
   const counts = {
