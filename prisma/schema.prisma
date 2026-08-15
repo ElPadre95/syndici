@@ -659,6 +659,7 @@ model Expense {
   voucherSequence   Int?
   voucherNumber     String? // ex. "DEP-2026-0001"
   justificatifId    String? // FileAsset
+  incidentId        String? // dépense DÉCOULANT d'un incident (boucle de transparence H1)
   // Annulation par ÉCRITURE INVERSE (comme les paiements) : une dépense négative liant
   // l'originale. L'originale n'est jamais supprimée ni modifiée.
   reversesExpenseId String?
@@ -667,12 +668,14 @@ model Expense {
   residence         Residence         @relation(fields: [residenceId], references: [id], onDelete: Cascade)
   category          ExpenseCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   justificatif      FileAsset?        @relation(fields: [justificatifId], references: [id], onDelete: SetNull)
+  incident          Incident?         @relation(fields: [incidentId], references: [id], onDelete: SetNull)
   reverses          Expense?          @relation("ExpenseReversal", fields: [reversesExpenseId], references: [id], onDelete: SetNull)
   reversedBy        Expense[]         @relation("ExpenseReversal")
 
   @@unique([residenceId, voucherNumber])
   @@index([residenceId])
   @@index([categoryId])
+  @@index([incidentId])
   @@index([reversesExpenseId])
 }
 
@@ -715,6 +718,7 @@ model Incident {
   lot                Lot?             @relation(fields: [lotId], references: [id], onDelete: SetNull)
   photo              FileAsset?       @relation(fields: [photoId], references: [id], onDelete: SetNull)
   updates            IncidentUpdate[]
+  expenses           Expense[] // dépenses découlant de cet incident (H1)
 
   @@index([residenceId])
   @@index([lotId])

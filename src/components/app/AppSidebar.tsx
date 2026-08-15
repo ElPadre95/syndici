@@ -19,6 +19,7 @@ import {
   X,
   Eye,
   MessageCircle,
+  TriangleAlert,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -44,6 +45,7 @@ const STAFF_NAV: readonly NavItem[] = [
   { href: '/relances', key: 'reminders', Icon: BellRing },
   { href: '/depenses', key: 'expenses', Icon: Receipt },
   { href: '/contrats', key: 'contracts', Icon: FileSignature },
+  { href: '/incidents', key: 'incidents', Icon: TriangleAlert },
   { href: '/actualites', key: 'news', Icon: Newspaper },
   { href: '/documents', key: 'documents', Icon: FileText },
   { href: '/messagerie', key: 'messages', Icon: MessageCircle },
@@ -57,6 +59,7 @@ const HOME_NAV: NavItem = { href: '/', key: 'dashboard', Icon: LayoutDashboard }
 // mort » : on n'ajoute une entrée que quand son écran existe.
 const OWNER_NAV: readonly NavItem[] = [
   { href: '/proprietaire/charges', key: 'myCharges', Icon: CreditCard },
+  { href: '/proprietaire/incidents', key: 'incidents', Icon: TriangleAlert },
   { href: '/proprietaire/transparence', key: 'transparency', Icon: Eye },
 ];
 

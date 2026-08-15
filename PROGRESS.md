@@ -361,6 +361,29 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       bouton « Payer » sur l'appel dû, tunnel, succès + reçu numéroté ouvrable ; fr + ar (RTL intégral). Gate
       complet vert (288 PGlite, 103 Postgres réel).
 
+## Tranche H — Fonctions manquantes
+
+- [x] **H1** — Les **incidents** (modèles `Incident`/`IncidentUpdate` jusque-là sans logique ni écran).
+      **Côté propriétaire** : signaler (catégorie, description, localisation, **son lot ou une partie
+      commune**, urgence, **photo**) et **suivre l'avancement**. **Côté syndic** : la **liste** de la
+      résidence **triée par urgence puis ancienneté**, l'ouverture d'un incident, son **fil de suivi**
+      horodaté (commentaires), le **changement de statut** (trace un STATUS_CHANGE) et l'**affectation à
+      un fournisseur** (trace un CONTACT). **La boucle de transparence** (le point qui fait la valeur) :
+      un incident se **relie à la dépense** qui en découle (`Expense.incidentId`, migration) ; le
+      propriétaire voit alors **l'incident signalé, l'intervention et la facture** en un écran.
+      **Étanchéité** — point de contrôle **unique** (`incidents/access.ts`, `canAccessIncident`) traversé
+      par lectures, fil ET service de la **photo** : un propriétaire ne voit que **ses lots + les parties
+      communes** de sa résidence, **jamais un autre lot** ni une autre résidence. **Tests d'étanchéité
+      écrits AVANT l'interface** (5, PGlite + Postgres réel) : propriétaire voit son lot + partie commune,
+      ⊥ un autre lot, ⊥ une autre résidence ; la photo suit le même accès ; le staff voit sa résidence,
+      aucune autre. Le **fil est visible du déclarant** ; le modèle porte déjà `reportedByPersonId` +
+      `lotId` nul (partie commune) pour qu'un **locataire** puisse signaler plus tard sans refonte.
+      Chaque écriture significative **tracée au journal d'audit**. Seed : incidents à **stades variés**
+      (NOUVEAU/EN_COURS/RESOLU, urgences variées) dont **un sur le lot du propriétaire de démo relié à une
+      dépense visible avec facture**. Vérifié connecté : propriétaire (signalement, détail avec
+      intervention + facture + fil), syndic (liste triée, gestion : statut/fournisseur/lien dépense) ;
+      fr + ar (RTL intégral). Gate complet vert (293 PGlite, 108 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

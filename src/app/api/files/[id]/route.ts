@@ -10,6 +10,7 @@ import { prismaExecutor } from '@/server/db/sql';
 import { verifyFileToken } from '@/server/storage/sign';
 import { findAccessibleFile, readStoredFile } from '@/server/storage/files';
 import { canServeMessageAttachment } from '@/server/messaging/access';
+import { canServeIncidentPhoto } from '@/server/incidents/access';
 
 export async function GET(
   req: NextRequest,
@@ -30,12 +31,15 @@ export async function GET(
   const file = await findAccessibleFile(prismaExecutor(), ctx.activeId, id);
   if (!file) return new Response('Fichier introuvable.', { status: 404 });
 
-  // MUR DE LA MESSAGERIE : une pièce jointe de fil n'est servie qu'à qui a accès au fil.
-  // Le scope résidence ne suffit pas (propriétaire et locataire d'un lot partagent la
-  // résidence mais pas leurs fils). On re-garde au niveau du fil (cf. messaging/access).
-  if (file.bucket === 'messages' && ctx.role) {
+  // MURS PAR FIL / PAR INCIDENT : le scope résidence ne suffit pas (propriétaire et
+  // locataire d'un lot la partagent). On re-garde au niveau du fil (messagerie) ou de
+  // l'incident : une pièce jointe / photo n'est jamais servie à qui n'y a pas accès.
+  if (ctx.role) {
     const actx = { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role };
-    if (!(await canServeMessageAttachment(prismaExecutor(), actx, id))) {
+    if (file.bucket === 'messages' && !(await canServeMessageAttachment(prismaExecutor(), actx, id))) {
+      return new Response('Fichier introuvable.', { status: 404 });
+    }
+    if (file.bucket === 'incidents' && !(await canServeIncidentPhoto(prismaExecutor(), actx, id))) {
       return new Response('Fichier introuvable.', { status: 404 });
     }
   }

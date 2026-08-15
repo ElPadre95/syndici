@@ -683,30 +683,111 @@ async function main() {
     ],
   });
 
-  // Un incident avec fil de suivi
+  // Incidents (H1) à des stades variés — dont un SUR LE LOT DU PROPRIÉTAIRE DE DÉMO, relié
+  // à la dépense qui en découle : c'est la boucle de transparence (signalement →
+  // intervention → facture) que le propriétaire voit de bout en bout.
   const lotB2 = await prisma.lot.findFirst({
     where: { residenceId: residence.id, reference: 'B2' },
   });
-  const incident = await prisma.incident.create({
+
+  // 1) Partie commune, NOUVEAU + URGENTE (signalé par le propriétaire de démo).
+  await prisma.incident.create({
+    data: {
+      residenceId: residence.id,
+      lotId: null,
+      reportedByPersonId: mreOwnerId,
+      category: 'Panne d’éclairage',
+      location: 'Parking sous-sol',
+      description: 'Plusieurs néons hors service depuis deux jours.',
+      urgency: 'URGENTE',
+      status: 'NOUVEAU',
+    },
+  });
+
+  // 2) Lot A1 (propriétaire de démo), EN_COURS : fil de suivi + fournisseur + FACTURE reliée.
+  if (mreOwnerLotId) {
+    const incidentA1 = await prisma.incident.create({
+      data: {
+        residenceId: residence.id,
+        lotId: mreOwnerLotId,
+        reportedByPersonId: mreOwnerId,
+        category: 'Fuite d’eau',
+        location: 'Salle de bain — colonne',
+        description: 'Fuite au plafond depuis hier soir, tache qui s’agrandit.',
+        urgency: 'IMPORTANTE',
+        status: 'EN_COURS',
+      },
+    });
+    await prisma.incidentUpdate.createMany({
+      data: [
+        {
+          residenceId: residence.id,
+          incidentId: incidentA1.id,
+          authorPersonId: gerant.id,
+          kind: 'STATUS_CHANGE',
+          oldStatus: 'NOUVEAU',
+          newStatus: 'EN_COURS',
+        },
+        {
+          residenceId: residence.id,
+          incidentId: incidentA1.id,
+          authorPersonId: gerant.id,
+          kind: 'CONTACT',
+          message: 'PlombiPro Casablanca',
+        },
+      ],
+    });
+    // La dépense qui découle de l'incident : intervention plomberie, VISIBLE, avec facture.
+    const facturePdf = makeInvoicePdf([
+      'Facture — intervention plomberie',
+      'Réparation fuite colonne, lot A1',
+      'PlombiPro Casablanca',
+    ]);
+    const storedFacture = await storeFile(
+      { residenceId: residence.id },
+      {
+        bucket: 'justificatifs',
+        body: facturePdf,
+        mimeType: 'application/pdf',
+        originalName: 'facture-plombipro-A1.pdf',
+        uploadedByPersonId: gerant.id,
+      },
+    );
+    await prisma.expense.create({
+      data: {
+        residenceId: residence.id,
+        description: 'Réparation fuite — colonne salle de bain',
+        amountMinor: dh(1450),
+        spentOn: monthStart(0),
+        supplierName: 'PlombiPro Casablanca',
+        visibility: 'PARTAGE', // visible du propriétaire
+        justificatifId: storedFacture.ok ? storedFacture.id : null,
+        incidentId: incidentA1.id, // ← la boucle de transparence
+      },
+    });
+  }
+
+  // 3) Lot B2, RESOLU : un incident clos, pour montrer les trois états.
+  const incidentB2 = await prisma.incident.create({
     data: {
       residenceId: residence.id,
       lotId: lotB2?.id ?? null,
-      category: 'Fuite d’eau',
-      location: 'Couloir 3ème étage',
-      description: 'Fuite au plafond depuis hier soir.',
+      category: 'Ascenseur',
+      location: 'Cage B',
+      description: 'Ascenseur bloqué au 2ème.',
       urgency: 'IMPORTANTE',
-      status: 'EN_COURS',
+      status: 'RESOLU',
+      resolvedAt: monthStart(0),
     },
   });
   await prisma.incidentUpdate.create({
     data: {
       residenceId: residence.id,
-      incidentId: incident.id,
+      incidentId: incidentB2.id,
       authorPersonId: gerant.id,
       kind: 'STATUS_CHANGE',
-      oldStatus: 'NOUVEAU',
-      newStatus: 'EN_COURS',
-      message: 'Technicien contacté, intervention prévue.',
+      oldStatus: 'EN_COURS',
+      newStatus: 'RESOLU',
     },
   });
 
