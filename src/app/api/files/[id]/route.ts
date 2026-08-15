@@ -9,6 +9,7 @@ import { getSessionContext } from '@/server/session';
 import { prismaExecutor } from '@/server/db/sql';
 import { verifyFileToken } from '@/server/storage/sign';
 import { findAccessibleFile, readStoredFile } from '@/server/storage/files';
+import { canServeMessageAttachment } from '@/server/messaging/access';
 
 export async function GET(
   req: NextRequest,
@@ -28,6 +29,16 @@ export async function GET(
   // Isolation : ne résout que dans la résidence active de la session.
   const file = await findAccessibleFile(prismaExecutor(), ctx.activeId, id);
   if (!file) return new Response('Fichier introuvable.', { status: 404 });
+
+  // MUR DE LA MESSAGERIE : une pièce jointe de fil n'est servie qu'à qui a accès au fil.
+  // Le scope résidence ne suffit pas (propriétaire et locataire d'un lot partagent la
+  // résidence mais pas leurs fils). On re-garde au niveau du fil (cf. messaging/access).
+  if (file.bucket === 'messages' && ctx.role) {
+    const actx = { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role };
+    if (!(await canServeMessageAttachment(prismaExecutor(), actx, id))) {
+      return new Response('Fichier introuvable.', { status: 404 });
+    }
+  }
 
   const bytes = await readStoredFile(file.storageKey);
   if (!bytes) return new Response('Contenu du fichier absent.', { status: 404 });

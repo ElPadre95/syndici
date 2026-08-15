@@ -135,7 +135,22 @@
     "msgNotifLabel": "Notifications messages",
     "msgNotifSub": "Alerte quand un résident écrit",
     "msgSearch": "Rechercher un résident pour écrire...",
-    "msgNew": "Nouveau"
+    "msgNew": "Nouveau",
+    "msgTitle": "Messagerie",
+    "msgSend": "Envoyer",
+    "msgSending": "Envoi…",
+    "msgAttach": "Joindre un fichier",
+    "msgAttachment": "Pièce jointe",
+    "msgYou": "Vous",
+    "msgFromSyndic": "Syndic",
+    "msgLot": "Lot {ref}",
+    "msgRoleOwner": "Propriétaire",
+    "msgRoleTenant": "Locataire",
+    "msgThreadWithSyndic": "Conversation avec votre syndic",
+    "msgOpen": "Ouvrir la messagerie",
+    "msgBack": "Retour",
+    "msgLoading": "Chargement…",
+    "msgUnreadHint": "{n} non lus"
   },
   "receipts": {
     "succTitle": "Paiement réussi !",
@@ -951,6 +966,7 @@
       "contracts": "Contrats",
       "reminders": "Relances",
       "news": "Actualités",
+      "messages": "Messagerie",
       "myCharges": "Mes charges",
       "transparency": "Transparence"
     },

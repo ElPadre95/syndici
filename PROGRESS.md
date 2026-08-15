@@ -323,6 +323,25 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       catégories, dépenses avec justificatif ouvrable, contrats ; fr + ar (RTL intégral — barres remplies
       depuis la droite). Gate complet vert (279 PGlite, 95 Postgres réel).
 
+- [x] **G4a** — La messagerie (**le mur d'abord**). Un lot porte jusqu'à **DEUX fils distincts**,
+      discriminés par `Conversation.counterpartyRole` (**OWNER / TENANT**, contrainte d'unicité
+      `(residence, lot, rôle)`) : le propriétaire n'atteint QUE le fil OWNER de SON lot, le locataire QUE
+      le fil TENANT du SIEN, le syndic voit **les deux**. Point de contrôle **unique** (`messaging/access.ts`,
+      `canAccessConversation`) traversé par toutes les lectures, l'envoi et **le service des pièces jointes**
+      (une pièce jointe de fil n'est jamais servie hors de son fil — garde ajoutée à `/api/files`, bucket
+      « messages »). **Tests d'étanchéité écrits AVANT l'interface** (8, PGlite + Postgres réel) : locataire
+      ⊥ fil propriétaire (contenu ET existence) et ⊥ sa pièce jointe ; propriétaire ⊥ fil locataire ;
+      propriétaire ⊥ fil d'un autre lot ; syndic voit les deux fils de SA résidence, aucun d'une autre.
+      Messagerie : fil, messages horodatés, **pièces jointes** via la couche de stockage existante (`storeFile`,
+      lien signé C0), **compteur de non-lus**. Côté propriétaire : la **bulle flottante branchée** (pastille +
+      panneau qui s'ouvre → liste des fils par lot → fil → composeur). Côté syndic : écran **`/messagerie`**
+      (fils **groupés par lot** avec le **rôle de l'interlocuteur** visible). Le **locataire n'a pas encore
+      d'espace**, mais son fil existe déjà dans le modèle (l'ajouter = une branche de droits). Modèle : migration
+      `Conversation.counterpartyRole` + `Message.fileAssetId` (+ `Residence.onlinePaymentEnabled` pour G4b).
+      Vérifié connecté : propriétaire (fil A1 avec pièce jointe PDF réellement servie 200, envoi d'un message),
+      syndic (les deux fils A1·propriétaire + A4·locataire, non-lus) ; fr + ar (RTL intégral). Gate complet vert
+      (287 PGlite, 103 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

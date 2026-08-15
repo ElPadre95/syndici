@@ -283,6 +283,9 @@ async function main() {
   // rechargement des données (voir DECISIONS.md D33).
   const MRE_OWNER_ID = '5eed0000-0000-4000-8000-000000000003';
   let mreOwnerId: string | null = null;
+  let mreOwnerLotId: string | null = null; // 1er lot du MRE → fil OWNER de démo
+  let delegatedLotId: string | null = null; // lot dont les charges sont déléguées au locataire
+  let delegatedTenantId: string | null = null; // son locataire → fil TENANT de démo
   let vacantLotId: string | null = null;
 
   for (const [lotIndex, spec] of specs.entries()) {
@@ -331,7 +334,10 @@ async function main() {
       },
     });
     // Premier propriétaire à l'étranger rencontré : ce sera notre MRE multi-lots.
-    if (isMreOwner) mreOwnerId = owner.id;
+    if (isMreOwner) {
+      mreOwnerId = owner.id;
+      mreOwnerLotId = lot.id;
+    }
 
     let payerPersonId = owner.id;
     if (spec.tenant) {
@@ -353,7 +359,11 @@ async function main() {
           startDate: monthStart(-6),
         },
       });
-      if (spec.tenantPaysCharges) payerPersonId = tenant.id;
+      if (spec.tenantPaysCharges) {
+        payerPersonId = tenant.id;
+        delegatedLotId = lot.id;
+        delegatedTenantId = tenant.id;
+      }
     }
 
     if (spec.profile === 'PARTIAL_OVERDUE' || spec.profile === 'UNSETTLED_OVERDUE') {
@@ -859,27 +869,74 @@ async function main() {
     });
   }
 
-  // Une conversation persistée
-  const conv = await prisma.conversation.create({
-    data: { residenceId: residence.id, lotId: lotB2?.id ?? null },
-  });
-  await prisma.message.createMany({
-    data: [
+  // Messagerie (G4) — LE MUR en action : un fil PROPRIÉTAIRE (sur le 1er lot du MRE) et un
+  // fil LOCATAIRE (sur le lot dont les charges sont déléguées) sont DISTINCTS. Le
+  // propriétaire n'atteint jamais le second, le locataire jamais le premier ; le syndic voit
+  // les deux. Chaque fil a des messages des DEUX côtés ; le fil propriétaire porte une pièce
+  // jointe RÉELLEMENT stockée (consultable via la route signée, re-gardée au niveau du fil).
+  if (mreOwnerLotId && mreOwnerId) {
+    const ownerConv = await prisma.conversation.create({
+      data: { residenceId: residence.id, lotId: mreOwnerLotId, counterpartyRole: 'OWNER' },
+    });
+    const relevePdf = makeInvoicePdf([
+      'Relevé de charges — appartement A1',
+      'Exercice en cours — copropriété Al Firdaous',
+      'Document de démonstration transmis via la messagerie.',
+    ]);
+    const storedReleve = await storeFile(
+      { residenceId: residence.id },
       {
-        residenceId: residence.id,
-        conversationId: conv.id,
-        senderSide: 'RESIDENT',
-        body: 'Quand l’ascenseur sera-t-il réparé ?',
+        bucket: 'messages',
+        body: relevePdf,
+        mimeType: 'application/pdf',
+        originalName: 'releve-charges-A1.pdf',
+        uploadedByPersonId: gerant.id,
       },
-      {
+    );
+    await prisma.message.create({
+      data: {
         residenceId: residence.id,
-        conversationId: conv.id,
+        conversationId: ownerConv.id,
+        senderSide: 'RESIDENT',
+        senderPersonId: mreOwnerId,
+        body: 'Bonjour, pouvez-vous me transmettre le relevé de mes charges ?',
+      },
+    });
+    await prisma.message.create({
+      data: {
+        residenceId: residence.id,
+        conversationId: ownerConv.id,
         senderSide: 'GERANT',
         senderPersonId: gerant.id,
-        body: 'Intervention prévue demain matin.',
+        body: 'Bonjour, bien sûr — vous le trouverez ci-joint.',
+        fileAssetId: storedReleve.ok ? storedReleve.id : null,
       },
-    ],
-  });
+    });
+  }
+
+  if (delegatedLotId && delegatedTenantId) {
+    const tenantConv = await prisma.conversation.create({
+      data: { residenceId: residence.id, lotId: delegatedLotId, counterpartyRole: 'TENANT' },
+    });
+    await prisma.message.createMany({
+      data: [
+        {
+          residenceId: residence.id,
+          conversationId: tenantConv.id,
+          senderSide: 'RESIDENT',
+          senderPersonId: delegatedTenantId,
+          body: 'Quand l’ascenseur sera-t-il réparé ?',
+        },
+        {
+          residenceId: residence.id,
+          conversationId: tenantConv.id,
+          senderSide: 'GERANT',
+          senderPersonId: gerant.id,
+          body: 'Intervention prévue demain matin.',
+        },
+      ],
+    });
+  }
 
   // Journal d'audit (exemple)
   await prisma.auditLog.create({

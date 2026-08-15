@@ -384,6 +384,9 @@ model Residence {
   autoLateFee             Boolean       @default(false)
   autoSmsReminder         Boolean       @default(false)
   autoMonthlyReport       Boolean       @default(false)
+  // Paiement en ligne SIMULÉ (G4) : drapeau par résidence, désactivé par défaut.
+  // Activé pour la seule résidence de démo. La plateforme ne détient jamais de fonds.
+  onlinePaymentEnabled    Boolean       @default(false)
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
 
@@ -829,6 +832,7 @@ model FileAsset {
   documents          Document[]
   expenses           Expense[]
   incidents          Incident[]
+  messages           Message[]
 
   @@index([residenceId])
 }
@@ -857,15 +861,22 @@ model Document {
 // ──────────────────────────────── Messagerie ──────────────────────────────
 
 /// Conversation persistée entre le syndic et un résident (fil par lot/résident).
+/// LE MUR : un lot porte jusqu'à DEUX fils distincts, discriminés par
+/// `counterpartyRole` (le rôle de l'interlocuteur résident, OWNER ou TENANT).
+/// Le propriétaire n'atteint que le fil OWNER de SON lot, le locataire que le fil
+/// TENANT du SIEN ; le syndic voit les deux. L'unicité (résidence, lot, rôle)
+/// garantit au plus un fil par partie et par lot.
 model Conversation {
-  id          String    @id @default(uuid())
-  residenceId String
-  lotId       String?
-  createdAt   DateTime  @default(now())
-  residence   Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
-  lot         Lot?      @relation(fields: [lotId], references: [id], onDelete: SetNull)
-  messages    Message[]
+  id              String         @id @default(uuid())
+  residenceId     String
+  lotId           String?
+  counterpartyRole AttachmentRole
+  createdAt       DateTime       @default(now())
+  residence       Residence      @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot             Lot?           @relation(fields: [lotId], references: [id], onDelete: SetNull)
+  messages        Message[]
 
+  @@unique([residenceId, lotId, counterpartyRole])
   @@index([residenceId])
 }
 
@@ -876,13 +887,16 @@ model Message {
   senderPersonId String?
   senderSide     MessageSide
   body           String
+  fileAssetId    String? // pièce jointe optionnelle (via la couche de stockage)
   sentAt         DateTime     @default(now())
   readAt         DateTime?
   residence      Residence    @relation(fields: [residenceId], references: [id], onDelete: Cascade)
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  attachment     FileAsset?   @relation(fields: [fileAssetId], references: [id], onDelete: SetNull)
 
   @@index([residenceId])
   @@index([conversationId])
+  @@index([fileAssetId])
 }
 
 // ─────────────────────────── Relances (règle + trace) ─────────────────────

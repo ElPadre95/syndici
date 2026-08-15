@@ -3,6 +3,7 @@ import { AppSidebar } from '@/components/app/AppSidebar';
 import { AppHeader } from '@/components/app/AppHeader';
 import { MessagingBubble } from '@/components/app/MessagingBubble';
 import { getAuthState } from '@/server/session';
+import { unreadCount } from '@/server/messaging/data';
 
 /**
  * Coquille de l'application connectée (A1/A2). Layout serveur : il est l'AUTORITÉ sur la
@@ -34,6 +35,12 @@ export default async function AppLayout({
   // (vue réduite). Ajouter le locataire plus tard = différenciation par les droits, pas
   // une refonte de la coquille.
   const variant = ctx.isStaff ? 'staff' : ctx.role === 'PROPRIETAIRE' ? 'owner' : 'tenant';
+  // Compteur de non-lus pour la bulle : uniquement quand il y a une résidence active et un
+  // rôle (le locataire n'a pas de bulle, mais on évite tout appel inutile).
+  const unread =
+    ctx.activeId && ctx.role && variant !== 'tenant'
+      ? await unreadCount({ personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role })
+      : 0;
   return (
     <div className="min-h-screen bg-bg lg:flex">
       <AppSidebar variant={variant} />
@@ -45,7 +52,7 @@ export default async function AppLayout({
         />
         <main className="flex-1 px-6 py-6">{children}</main>
       </div>
-      <MessagingBubble />
+      <MessagingBubble variant={variant} unread={unread} />
     </div>
   );
 }

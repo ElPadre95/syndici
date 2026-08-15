@@ -28,7 +28,7 @@
 
   /* Surfaces & encre (neutres bleu-nuit) */
   --bg: #f4f5f8; /* fond application */
-  --card: #ffffff; /* surface carte */
+  --card: #fff; /* surface carte */
   --label: #0e1a2b; /* encre principale (label-1) — l'identité */
   --label-2: #33415a; /* texte fort secondaire */
   --label-3: #64748b; /* texte secondaire / notes */

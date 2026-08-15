@@ -135,7 +135,22 @@
     "msgNotifLabel": "إشعارات الرسائل",
     "msgNotifSub": "تنبيه عند كتابة ساكن",
     "msgSearch": "ابحث عن ساكن للمراسلة...",
-    "msgNew": "جديد"
+    "msgNew": "جديد",
+    "msgTitle": "المراسلة",
+    "msgSend": "إرسال",
+    "msgSending": "جارٍ الإرسال…",
+    "msgAttach": "إرفاق ملف",
+    "msgAttachment": "مرفق",
+    "msgYou": "أنت",
+    "msgFromSyndic": "المسيّر",
+    "msgLot": "الشقة {ref}",
+    "msgRoleOwner": "المالك",
+    "msgRoleTenant": "المستأجر",
+    "msgThreadWithSyndic": "محادثة مع مسيّرك",
+    "msgOpen": "فتح المراسلة",
+    "msgBack": "رجوع",
+    "msgLoading": "جارٍ التحميل…",
+    "msgUnreadHint": "{n} غير مقروءة"
   },
   "receipts": {
     "succTitle": "تم الدفع بنجاح!",
@@ -948,6 +963,7 @@
       "contracts": "العقود",
       "reminders": "المطالبات",
       "news": "الأخبار",
+      "messages": "المراسلة",
       "myCharges": "رسومي",
       "transparency": "الشفافية"
     },
