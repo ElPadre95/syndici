@@ -416,6 +416,17 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       2026 complet (appelé 48.650, reste dû 32.188,75, trésorerie 28.515), catégories, contrats, lot par lot ;
       fr + ar (RTL intégral). Gate complet vert (298 PGlite, 113 Postgres réel).
 
+- [x] **H4** — Le **relevé mensuel du propriétaire** — l'artefact qu'un propriétaire absent attend.
+      `/proprietaire/releve` (rôle PROPRIETAIRE) : un document **téléchargeable** (impression PDF, comme le
+      reçu / le relevé) récapitulant **sa situation du mois** — appels, paiements, **frais de retard** —, son
+      **solde à ce jour**, et les **dépenses VISIBLES de la résidence** sur la période. **Composition owner-safe**
+      (`getOwnerMonthlyStatement`) : `getOwnerLotAccount` (vérifie la détention, ne touche jamais Person) filtré
+      au mois + `listExpenses` avec `includeInternal: false`. Sélecteurs de **lot** (cas MRE) et de **mois**
+      (trois derniers). **Téléchargement seulement** ; la composition est séparée de la page pour qu'un **envoi
+      auto** (e-mail/WhatsApp) la réutilise plus tard côté serveur, sans refonte. Vérifié connecté en
+      propriétaire : A1 (soldé, solde 0) et A7 (appel + 3 frais de retard, solde 2.197,50 DH), dépenses de la
+      résidence du mois ; fr + ar (RTL intégral). Gate complet vert (298 PGlite, 113 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

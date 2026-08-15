@@ -20,7 +20,8 @@ import {
   type SettlementState,
   type TemporalState,
 } from './status';
-import { buildLedger, type LotAccount } from './account';
+import { buildLedger, type LotAccount, type LedgerEntry } from './account';
+import { listExpenses } from './expenses';
 import type { ReceiptView } from './receipts';
 
 export interface OwnerLot {
@@ -423,4 +424,70 @@ export async function getOwnerReceiptIdForCharge(
     select: { id: true },
   });
   return receipt?.id ?? null;
+}
+
+export interface OwnerMonthlyExpense {
+  description: string;
+  amountMinor: number;
+  spentOn: string;
+  categoryLabel: string | null;
+}
+
+export interface OwnerMonthlyStatement {
+  period: { year: number; month: number };
+  lotReference: string;
+  residence: { name: string; orgName: string | null };
+  ownerName: string | null; // ajouté côté page depuis la session
+  entries: LedgerEntry[]; // activité du lot SUR LE MOIS (appels, paiements, frais)
+  monthDebitMinor: number;
+  monthCreditMinor: number;
+  closingBalanceMinor: number; // reste dû à ce jour (solde du relevé complet)
+  expenses: OwnerMonthlyExpense[]; // dépenses VISIBLES de la résidence, sur le mois
+}
+
+/**
+ * Relevé MENSUEL du propriétaire (H4) — l'artefact qu'un propriétaire absent attend :
+ * sa situation du mois (appels, paiements, frais de retard), son solde à ce jour, et les
+ * dépenses visibles de la résidence sur la période. Composition owner-safe : `getOwnerLotAccount`
+ * (vérifie la détention, ne touche pas Person) filtré au mois + `listExpenses` (jamais l'INTERNE).
+ * Conçu pour le téléchargement (impression PDF) ; l'envoi auto (e-mail/WhatsApp) réutilisera
+ * cette même composition côté serveur, sans page.
+ */
+export async function getOwnerMonthlyStatement(
+  ctx: ActiveContext,
+  lotId: string,
+  year: number,
+  month: number,
+): Promise<OwnerMonthlyStatement | null> {
+  const account = await getOwnerLotAccount(ctx, lotId);
+  if (!account) return null;
+  const inMonth = (iso: string): boolean => {
+    const d = new Date(iso);
+    return d.getUTCFullYear() === year && d.getUTCMonth() + 1 === month;
+  };
+  const entries = account.entries.filter((e) => inMonth(e.date));
+  const monthDebitMinor = entries.reduce((s, e) => s + e.debitMinor, 0);
+  const monthCreditMinor = entries.reduce((s, e) => s + e.creditMinor, 0);
+
+  const exp = await listExpenses(ctx, { includeInternal: false });
+  const expenses = exp.rows
+    .filter((e) => !e.isReversal && !e.reversed && inMonth(e.spentOn))
+    .map((e) => ({
+      description: e.supplierName ?? e.description,
+      amountMinor: e.amountMinor,
+      spentOn: e.spentOn,
+      categoryLabel: e.categoryLabel,
+    }));
+
+  return {
+    period: { year, month },
+    lotReference: account.lotReference,
+    residence: account.residence,
+    ownerName: null,
+    entries,
+    monthDebitMinor,
+    monthCreditMinor,
+    closingBalanceMinor: account.balanceMinor,
+    expenses,
+  };
 }

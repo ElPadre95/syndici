@@ -61,6 +61,7 @@ const HOME_NAV: NavItem = { href: '/', key: 'dashboard', Icon: LayoutDashboard }
 // mort » : on n'ajoute une entrée que quand son écran existe.
 const OWNER_NAV: readonly NavItem[] = [
   { href: '/proprietaire/charges', key: 'myCharges', Icon: CreditCard },
+  { href: '/proprietaire/releve', key: 'monthly', Icon: FileBarChart2 },
   { href: '/proprietaire/incidents', key: 'incidents', Icon: TriangleAlert },
   { href: '/proprietaire/transparence', key: 'transparency', Icon: Eye },
 ];

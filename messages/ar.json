@@ -274,6 +274,20 @@
     "uncategorized": "بدون فئة",
     "none": "—"
   },
+  "monthly": {
+    "eyebrow": "مساحة المالك",
+    "pageTitle": "الكشف الشهري",
+    "title": "الكشف الشهري — {month}",
+    "lotLine": "الشقة {lot}",
+    "download": "تحميل",
+    "forbidden": "الوصول محصور على المالك.",
+    "noLots": "لا توجد شقق.",
+    "activity": "حركة الشهر",
+    "noActivity": "لا توجد عمليات هذا الشهر.",
+    "balance": "الرصيد إلى اليوم",
+    "residenceExpenses": "مصاريف الإقامة خلال الشهر",
+    "noExpenses": "لا توجد مصاريف ظاهرة هذا الشهر."
+  },
   "receipts": {
     "succTitle": "تم الدفع بنجاح!",
     "succDl": "تحميل الإيصال",
@@ -1094,6 +1108,7 @@
       "incidents": "الأعطال",
       "annual": "الحصيلة السنوية",
       "myCharges": "رسومي",
+      "monthly": "الكشف الشهري",
       "transparency": "الشفافية"
     },
     "header": {

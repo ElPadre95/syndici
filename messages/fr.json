@@ -274,6 +274,20 @@
     "uncategorized": "Sans catégorie",
     "none": "—"
   },
+  "monthly": {
+    "eyebrow": "Espace propriétaire",
+    "pageTitle": "Relevé mensuel",
+    "title": "Relevé mensuel — {month}",
+    "lotLine": "Lot {lot}",
+    "download": "Télécharger",
+    "forbidden": "Accès réservé au propriétaire.",
+    "noLots": "Aucun lot.",
+    "activity": "Activité du mois",
+    "noActivity": "Aucune écriture ce mois-ci.",
+    "balance": "Solde à ce jour",
+    "residenceExpenses": "Dépenses de la résidence sur le mois",
+    "noExpenses": "Aucune dépense visible ce mois-ci."
+  },
   "receipts": {
     "succTitle": "Paiement réussi !",
     "succDl": "Télécharger le reçu",
@@ -1097,6 +1111,7 @@
       "incidents": "Incidents",
       "annual": "Bilan annuel",
       "myCharges": "Mes charges",
+      "monthly": "Relevé mensuel",
       "transparency": "Transparence"
     },
     "header": {
