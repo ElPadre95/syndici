@@ -392,3 +392,31 @@ export async function getOwnerReceipt(
     },
   };
 }
+
+/**
+ * Reçu (non annulé) du paiement le plus récent alloué à un appel de charges D'UN lot du
+ * propriétaire — pour lui offrir un lien direct vers son reçu après paiement. Vérifie la
+ * détention du lot (sinon `null`). Aucun accès au modèle Person.
+ */
+export async function getOwnerReceiptIdForCharge(
+  ctx: ActiveContext,
+  chargeCallId: string,
+): Promise<string | null> {
+  const scoped = forResidence(ctx.residenceId);
+  const call = await scoped.chargeCall.findUnique({
+    where: { id: chargeCallId },
+    select: { lotId: true },
+  });
+  if (!call || !(await ownsLot(ctx, call.lotId))) return null;
+  const alloc = await scoped.paymentAllocation.findFirst({
+    where: { chargeCallId },
+    orderBy: { createdAt: 'desc' },
+    select: { paymentId: true },
+  });
+  if (!alloc) return null;
+  const receipt = await scoped.receipt.findFirst({
+    where: { paymentId: alloc.paymentId, voidedAt: null },
+    select: { id: true },
+  });
+  return receipt?.id ?? null;
+}

@@ -55,6 +55,13 @@ describe('permissions matrix (§3) — single source of truth', () => {
     expect(can('PROPRIETAIRE', 'expense.manage')).toBe(false);
   });
 
+  it('payment.pay.own (régler ses charges en ligne) est réservé au PROPRIETAIRE — jamais le staff', () => {
+    const roles: AppRole[] = ['SYNDIC', 'GESTIONNAIRE', 'PROPRIETAIRE', 'LOCATAIRE'];
+    expect(roles.filter((r) => can(r, 'payment.pay.own'))).toEqual(['PROPRIETAIRE']);
+    // Le staff ENREGISTRE (payment.record) mais ne « paie » jamais à la place d'un proprio.
+    expect(can('PROPRIETAIRE', 'payment.record')).toBe(false);
+  });
+
   it('LOCATAIRE: own lot, incidents, news — NOT expenses, NOT votes, NOT owner identity', () => {
     expect(can('LOCATAIRE', 'lot.view.own')).toBe(true);
     expect(can('LOCATAIRE', 'incident.report')).toBe(true);

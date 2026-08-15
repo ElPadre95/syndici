@@ -24,6 +24,8 @@ import type { ActiveContext } from '@/server/auth/context';
 
 export type ManualMethod = 'ESPECES' | 'CHEQUE' | 'VIREMENT';
 export const MANUAL_METHODS: readonly ManualMethod[] = ['ESPECES', 'CHEQUE', 'VIREMENT'];
+/** Modes acceptés par `writePayment` : les manuels + le paiement en ligne (simulé). */
+export type PaymentMethodValue = ManualMethod | 'EN_LIGNE';
 
 const INSERT_PAYMENT = `
   INSERT INTO "Payment"
@@ -57,7 +59,7 @@ export interface RecordPaymentInput {
   chargeCallId: string;
   payerPersonId: string | null;
   recordedByPersonId: string;
-  method: ManualMethod;
+  method: PaymentMethodValue;
   amountMinor: number;
   receivedAt: Date;
   reference: string | null;

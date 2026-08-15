@@ -342,6 +342,25 @@ de l'organisation qui détient le mandat actif sur la résidence du seed. Jamais
       syndic (les deux fils A1·propriétaire + A4·locataire, non-lus) ; fr + ar (RTL intégral). Gate complet vert
       (287 PGlite, 103 Postgres réel).
 
+- [x] **G4b** — Le **paiement en ligne SIMULÉ**. Abstraction **`PaymentProvider`**
+      (`src/server/payments/provider.ts`) avec une seule implémentation, le **`MockProvider`** :
+      `createCheckout` → `confirm`, **aucune vraie transaction, aucun fonds**. Un bouton **« Payer »**
+      sur les charges du propriétaire, **uniquement quand il reste quelque chose à régler**, mène à un
+      **tunnel** avec un **bandeau « simulation » permanent** à chaque étape, un récapitulatif et un bouton
+      « Simuler le paiement » — **AUCUN champ de carte, aucune donnée bancaire demandée ni collectée**. À la
+      confirmation, l'**action** (`simulatePaymentAction`) passe par **`writePayment`** (jamais un
+      contournement) : paiement immuable en mode **`EN_LIGNE`** + allocation + **reçu numéroté par la
+      séquence existante** (vérifié : `REC-2026-0025`, mode « Paiement en ligne », référence `SIMU-…`) + audit.
+      **Réservée au PROPRIÉTAIRE du lot concerné** (permission **`payment.pay.own`**, jamais le staff — testé :
+      `roles.filter(pay.own) === ['PROPRIETAIRE']`), qui **re-vérifie la détention du lot** (`getOwnerLotCharges`
+      renvoie [] sinon). **Drapeau par résidence** `Residence.onlinePaymentEnabled`, **désactivé par défaut**,
+      **activé sur la seule Al Firdaous** (seed). Le tunnel, quand l'appel est réglé, affiche une **confirmation
+      avec lien vers le reçu** (jamais un rebond). **README de la couche paiement** : ce qu'un adaptateur réel
+      devra fournir (checkout hébergé, webhook signé, idempotence) et la contrainte **NON NÉGOCIABLE — la
+      plateforme ne détient JAMAIS les fonds** (règlement direct au syndic). Vérifié connecté en propriétaire :
+      bouton « Payer » sur l'appel dû, tunnel, succès + reçu numéroté ouvrable ; fr + ar (RTL intégral). Gate
+      complet vert (288 PGlite, 103 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

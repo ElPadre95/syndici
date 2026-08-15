@@ -1,5 +1,12 @@
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
-import { Home, FileText, Receipt as ReceiptIcon, AlertTriangle, ArrowRight } from 'lucide-react';
+import {
+  Home,
+  FileText,
+  Receipt as ReceiptIcon,
+  AlertTriangle,
+  ArrowRight,
+  CreditCard,
+} from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { getSessionContext } from '@/server/session';
 import { can } from '@/server/auth/permissions';
@@ -9,6 +16,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
 import { Table, THead, TBody, Tr, Th, Td } from '@/components/ui/Table';
 import { listOwnerLots, getOwnerLotCharges, getOwnerLotPayments } from '@/server/finance/owner';
+import { isOnlinePaymentEnabled } from '@/server/payments/provider';
 
 /**
  * Mes charges (G2) — vue PROPRIÉTAIRE : l'historique des appels de son lot avec statut
@@ -29,6 +37,7 @@ export default async function OwnerChargesPage({
   const { lot: lotParam } = await searchParams;
   const t = await getTranslations('owner');
   const tPay = await getTranslations('payments');
+  const tOnline = await getTranslations('pay');
 
   const ctx = await getSessionContext();
   if (!ctx?.activeId || ctx.role !== 'PROPRIETAIRE' || !can(ctx.role, 'charge.view.own')) {
@@ -48,9 +57,10 @@ export default async function OwnerChargesPage({
   }
   const wanted = Array.isArray(lotParam) ? lotParam[0] : lotParam;
   const activeLot = lots.find((l) => l.lotId === wanted) ?? lots[0]!;
-  const [charges, payments] = await Promise.all([
+  const [charges, payments, onlinePay] = await Promise.all([
     getOwnerLotCharges(actx, activeLot.lotId),
     getOwnerLotPayments(actx, activeLot.lotId),
+    isOnlinePaymentEnabled(ctx.activeId),
   ]);
 
   const fmt = (m: number) => formatMoney(m, localeC);
@@ -126,6 +136,7 @@ export default async function OwnerChargesPage({
                 <Th className="text-end">{t('colAmount')}</Th>
                 <Th className="text-end">{t('colRemaining')}</Th>
                 <Th>{t('colStatus')}</Th>
+                {onlinePay && <Th className="text-end">{tOnline('cta')}</Th>}
               </Tr>
             </THead>
             <TBody>
@@ -144,6 +155,19 @@ export default async function OwnerChargesPage({
                       </Badge>
                     )}
                   </Td>
+                  {onlinePay && (
+                    <Td className="text-end">
+                      {c.remainingMinor > 0 && (
+                        <Link
+                          href={`/proprietaire/payer/${c.id}`}
+                          className="inline-flex items-center gap-1 rounded-md bg-indigo px-2.5 py-1.5 text-note font-bold text-white transition-opacity hover:opacity-90"
+                        >
+                          <CreditCard className="size-3.5" aria-hidden />
+                          {tOnline('cta')}
+                        </Link>
+                      )}
+                    </Td>
+                  )}
                 </Tr>
               ))}
             </TBody>

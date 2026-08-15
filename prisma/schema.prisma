@@ -123,6 +123,7 @@ enum PaymentMethod {
   CARTE // hérité — plus proposé (aucun paiement par carte, cf. tranche B)
   VIREMENT
   CHEQUE
+  EN_LIGNE // paiement en ligne (tunnel simulé G4 ; jamais de données de carte collectées)
 }
 
 // Statut d'un appel de charges — NON stocké, DÉRIVÉ sur DEUX AXES INDÉPENDANTS

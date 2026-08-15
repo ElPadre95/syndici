@@ -233,6 +233,9 @@ async function main() {
       defaultChargeApptMinor: CHARGE_APPT,
       defaultChargeVillaMinor: CHARGE_VILLA,
       dueDayOfMonth: 1,
+      // Paiement en ligne SIMULÉ activé pour la seule résidence de démo (désactivé par
+      // défaut ailleurs). La plateforme ne détient jamais de fonds (cf. src/server/payments).
+      onlinePaymentEnabled: true,
     },
   });
   await prisma.mandate.create({

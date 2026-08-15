@@ -43,6 +43,7 @@ export type Permission =
   | 'payment.record' // enregistrer un paiement (immuable)
   | 'payment.view.all' // vue globale des paiements de la résidence (staff)
   | 'payment.view.own'
+  | 'payment.pay.own' // régler soi-même ses charges (paiement en ligne) — propriétaire
   | 'receipt.issue'
   | 'expense.view' // dépenses & justificatifs de la copropriété
   | 'expense.manage'
@@ -129,6 +130,7 @@ const MATRIX: Record<AppRole, ReadonlySet<Permission>> = {
     'lot.view.own',
     'charge.view.own',
     'payment.view.own',
+    'payment.pay.own', // régler ses charges en ligne (jamais le staff)
     'expense.view', // le propriétaire voit les dépenses de la copropriété
     'vote.view',
     'vote.cast',

@@ -152,6 +152,23 @@
     "msgLoading": "Chargement…",
     "msgUnreadHint": "{n} non lus"
   },
+  "pay": {
+    "cta": "Payer",
+    "title": "Payer en ligne",
+    "simBanner": "Mode démonstration — paiement simulé, aucune somme n'est réellement prélevée.",
+    "summary": "Récapitulatif",
+    "period": "Période",
+    "amountDue": "Montant à régler",
+    "noCard": "Aucune donnée bancaire n'est demandée ni collectée. On simule le parcours de paiement.",
+    "button": "Simuler le paiement",
+    "processing": "Simulation en cours…",
+    "successTitle": "Paiement enregistré",
+    "successBody": "Votre reçu a été généré automatiquement.",
+    "viewReceipt": "Voir le reçu",
+    "backCharges": "Retour à mes charges",
+    "error": "Le paiement n'a pas pu être enregistré. Réessayez.",
+    "forbidden": "Ce paiement ne vous est pas accessible."
+  },
   "receipts": {
     "succTitle": "Paiement réussi !",
     "succDl": "Télécharger le reçu",
@@ -187,6 +204,7 @@
       "ESPECES": "Espèces",
       "CHEQUE": "Chèque",
       "VIREMENT": "Virement",
+      "EN_LIGNE": "Paiement en ligne",
       "CARTE": "Carte"
     }
   },
@@ -641,6 +659,7 @@
       "ESPECES": "Espèces",
       "CHEQUE": "Chèque",
       "VIREMENT": "Virement",
+      "EN_LIGNE": "Paiement en ligne",
       "CARTE": "Carte"
     },
     "form": {
@@ -816,6 +835,7 @@
       "ESPECES": "Espèces",
       "CHEQUE": "Chèque",
       "VIREMENT": "Virement",
+      "EN_LIGNE": "Paiement en ligne",
       "CARTE": "Carte"
     }
   },
@@ -1501,6 +1521,7 @@
       "ESPECES": "Espèces",
       "CHEQUE": "Chèque",
       "VIREMENT": "Virement",
+      "EN_LIGNE": "Paiement en ligne",
       "CARTE": "Carte"
     }
   },
