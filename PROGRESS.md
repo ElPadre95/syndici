@@ -542,6 +542,29 @@ profil.
       `ReminderChannel += COURRIER`, `ReminderRule.formalNoticeThresholdDays`). Gate complet vert (332 PGlite, 126
       Postgres réel).
 
+- [x] **I5** — **Envoi réel d'e-mails** (fournisseur **Resend**), canal **abstrait** comme le stockage et le
+      paiement (`src/server/mail/`). Interface `Mailer` + deux implémentations : `LogMailer` (dev : **journalise,
+      n'envoie rien**) et `ResendMailer` (prod : API HTTP). Le choix est piloté par l'**environnement** via une
+      fonction **pure** `resolveMailConfig` : on n'envoie qu'en **production ET** si `RESEND_API_KEY` est présente,
+      sinon on journalise — le développement n'écrit **jamais** à un vrai résident. Passer à un vrai domaine = changer
+      **`MAIL_FROM`** (variable), aucun code. Phase interne : **`MAIL_REDIRECT_TO`** force toutes les destinations
+      vers l'adresse vérifiée (rien ne part aux résidents ; le destinataire visé est rappelé en tête). **Trois flux
+      couverts** : lien magique (`sendVerificationRequest` → `sendEmail`), invitation d'un résident (additif au lien
+      WhatsApp, si e-mail présent), et notification d'un **nouveau document** (portée RESIDENCE) ou d'une **nouvelle
+      actualité** (audience ALL/OWNERS/TENANTS) — chaque résident reçoit l'e-mail **dans SA langue** (`normalizeLocale`
+      + catalogue `mail` fr/ar), énumération via `person-access` (dédoublonnée, e-mails nuls ignorés). Gabarits purs
+      (`renderEmail` : HTML inline + repli texte, échappement, RTL). Liens absolus dérivés des en-têtes de requête.
+      Documenté dans **DEPLOYMENT.md** (création du compte Resend, clé d'API à poser dans Vercel, variables, et le
+      jour du vrai domaine : enregistrements **DNS** SPF/DKIM/DMARC, vérification, bascule `MAIL_FROM` + retrait de
+      `MAIL_REDIRECT_TO`) + `.env.example`. Tests : `resolveMailConfig` (dev journalise / prod+clé envoie),
+      `ResendMailer` (fetch mocké : corps, en-tête, redirection, erreurs non bloquantes), `renderEmail`, gabarits
+      fr/ar. Vérifié en dev (journalisé, non envoyé) : lien magique + fan-out d'actualité à ~23 résidents chacun dans
+      sa langue (ar RTL / fr). **Aucune migration.** Gate complet vert (349 PGlite, 126 Postgres réel). ⚠ L'envoi
+      réel en production reste inactif tant que l'utilisateur n'a pas créé le compte Resend et posé `RESEND_API_KEY`
+      (+ `MAIL_FROM`, `MAIL_REDIRECT_TO`) dans Vercel — étapes détaillées dans DEPLOYMENT.md.
+
+  _(I6 — notifications paramétrables + relevé mensuel auto — **retiré du périmètre** à la demande de l'utilisateur.)_
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

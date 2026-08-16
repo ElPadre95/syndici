@@ -14,6 +14,11 @@ import {
   type AnnouncementType,
   type AnnouncementAudience,
 } from './data';
+import { getResidenceBasics } from '@/server/residences/data';
+import { requestOrigin } from '@/server/mail/links';
+import { notifyResidence } from '@/server/mail/notify';
+import { announcementEmail } from '@/server/mail/templates';
+import { normalizeLocale } from '@/server/mail/i18n';
 import type { AnnouncementActionResult } from './action-types';
 
 export async function publishAnnouncementAction(
@@ -33,10 +38,22 @@ export async function publishAnnouncementAction(
   if (!title) return { ok: false, error: 'title_required' };
   if (!body) return { ok: false, error: 'body_required' };
 
-  await createAnnouncement(
-    { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role },
-    { type, audience, title, body },
-  );
+  const actx = { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role };
+  await createAnnouncement(actx, { type, audience, title, body });
+
+  // Notification e-mail (I5) — aux résidents de l'audience visée, dans leur langue. En dev :
+  // journalisé, jamais envoyé.
+  const residence = await getResidenceBasics(ctx.activeId);
+  const origin = await requestOrigin();
+  await notifyResidence(actx, {
+    audience,
+    build: (locale) =>
+      announcementEmail(locale, {
+        residence: residence?.name ?? '',
+        title,
+        url: `${origin}/${normalizeLocale(locale)}`,
+      }),
+  });
   revalidatePath('/', 'layout');
   return { ok: true };
 }

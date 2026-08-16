@@ -1,11 +1,13 @@
 /**
- * Provider « lien magique » par e-mail (§1). En développement, le transport
- * journalise simplement l'URL (aucun SMTP requis). En production, remplacer le
- * corps de `sendVerificationRequest` par un envoi SMTP / API e-mail — sans changer
- * le reste de la configuration Auth.js. S'appuie sur l'adaptateur Prisma
- * (`VerificationToken`).
+ * Provider « lien magique » par e-mail (§1, I5). L'envoi passe par le canal e-mail abstrait
+ * (`sendEmail`) : en développement il est seulement JOURNALISÉ (le `LogMailer` n'envoie rien),
+ * en production il part via Resend — sans changer la configuration Auth.js. L'URL est fournie
+ * par Auth.js (adaptateur Prisma `VerificationToken`). La langue par défaut est le français
+ * (l'identité du destinataire n'est pas résolue ici) ; on ne lit jamais la table Person.
  */
 import type { Provider } from 'next-auth/providers';
+import { sendEmail } from '@/server/mail/mailer';
+import { magicLinkEmail } from '@/server/mail/templates';
 
 const DAY = 24 * 60 * 60;
 
@@ -17,8 +19,12 @@ export function magicLinkProvider(): Provider {
     from: 'no-reply@syndici.local',
     maxAge: DAY,
     async sendVerificationRequest({ identifier, url }) {
-      // Transport de développement : à remplacer par un envoi réel en production.
-      console.log(`[magic-link] destinataire=${identifier} url=${url}`);
+      const email = await magicLinkEmail('fr', url);
+      const res = await sendEmail({ to: identifier, ...email });
+      if (!res.ok) {
+        // On ne divulgue pas l'échec au visiteur (anti-énumération) ; on le trace côté serveur.
+        console.error(`[magic-link] échec d'envoi à ${identifier}: ${res.error}`);
+      }
     },
     // Renseigné par la configuration NextAuth via l'adaptateur.
     options: {},

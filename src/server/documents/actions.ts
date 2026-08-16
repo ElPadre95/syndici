@@ -9,6 +9,11 @@ import { revalidatePath } from 'next/cache';
 import { getSessionContext } from '@/server/session';
 import { can } from '@/server/auth/permissions';
 import { storeFile } from '@/server/storage/files';
+import { getResidenceBasics } from '@/server/residences/data';
+import { requestOrigin } from '@/server/mail/links';
+import { notifyResidence } from '@/server/mail/notify';
+import { documentEmail } from '@/server/mail/templates';
+import { normalizeLocale } from '@/server/mail/i18n';
 import { createDocument } from './data';
 import {
   DOCUMENT_TYPES,
@@ -46,10 +51,25 @@ export async function uploadDocumentAction(formData: FormData): Promise<Document
   );
   if (!stored.ok) return { ok: false, error: stored.error };
 
-  await createDocument(
-    { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role },
-    { fileAssetId: stored.id, name, type, scope },
-  );
+  const actx = { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role };
+  await createDocument(actx, { fileAssetId: stored.id, name, type, scope });
+
+  // Notification e-mail (I5) — seulement les documents visibles de TOUTE la résidence
+  // (RESIDENCE) déclenchent un e-mail aux résidents. Les portées PARTAGE/PRIVE ne concernent
+  // pas les autres résidents, donc aucun envoi. En dev : journalisé, jamais envoyé.
+  if (scope === 'RESIDENCE') {
+    const residence = await getResidenceBasics(ctx.activeId);
+    const origin = await requestOrigin();
+    await notifyResidence(actx, {
+      audience: 'ALL',
+      build: (locale) =>
+        documentEmail(locale, {
+          residence: residence?.name ?? '',
+          title: name,
+          url: `${origin}/${normalizeLocale(locale)}/proprietaire/documents`,
+        }),
+    });
+  }
   revalidatePath('/', 'layout');
   return { ok: true };
 }

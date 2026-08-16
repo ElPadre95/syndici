@@ -22,6 +22,8 @@ import { getLot } from '@/server/lots/data';
 import { getResidenceBasics } from '@/server/residences/data';
 import { activeAttachmentRole, revokeInvitation, revokePendingFor } from './data';
 import { whatsappHref } from './whatsapp';
+import { sendEmail } from '@/server/mail/mailer';
+import { invitationEmail } from '@/server/mail/templates';
 import type { EmitResult } from './types';
 
 function localePath(raw: FormDataEntryValue | null): string {
@@ -78,15 +80,30 @@ export async function emitInvitationAction(lotId: string, personId: string): Pro
     year: 'numeric',
   }).format(inv.expiresAt);
 
+  const displayName = `${person.firstName} ${person.lastName}`.trim();
   const twa = await getTranslations({ locale: personLocale, namespace: 'invitations.wa' });
   const message = twa('message', {
-    name: `${person.firstName} ${person.lastName}`.trim(),
+    name: displayName,
     residence: residence.name,
     lotRef: lot.reference,
     code: inv.code,
     url: activationUrl,
     expires: expiresLabel,
   });
+
+  // Canal e-mail (I5) — additif au lien WhatsApp : si la personne a une adresse, on lui envoie
+  // aussi l'invitation. En dev c'est seulement journalisé ; l'échec éventuel n'annule pas l'émission.
+  if (person.email) {
+    const em = await invitationEmail(personLocale, {
+      name: displayName,
+      residence: residence.name,
+      lot: lot.reference,
+      code: inv.code,
+      url: activationUrl,
+      expires: expiresLabel,
+    });
+    await sendEmail({ to: person.email, ...em });
+  }
 
   revalidatePath('/', 'layout');
   return {

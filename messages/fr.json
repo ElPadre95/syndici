@@ -2036,5 +2036,35 @@
     "body": "Je soussigné, syndic de la résidence {residence}, atteste par la présente que le lot {lot}, détenu par {owner}, est à jour de ses charges de copropriété à la date du {date} : aucun reste dû n'apparaît dans nos écritures.\n\nLa présente attestation est délivrée pour servir et valoir ce que de droit.",
     "ref": "Lot",
     "signature": "Le syndic"
+  },
+  "mail": {
+    "footer": "Syndici — gestion de copropriété",
+    "magicLink": {
+      "subject": "Votre lien de connexion Syndici",
+      "heading": "Connexion à Syndici",
+      "intro": "Cliquez sur le bouton ci-dessous pour vous connecter à votre espace. Ce lien est valable 24 heures et ne fonctionne qu'une seule fois.",
+      "cta": "Se connecter",
+      "ignore": "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail."
+    },
+    "invite": {
+      "subject": "Invitation à rejoindre {residence} sur Syndici",
+      "heading": "Vous êtes invité(e) sur Syndici",
+      "intro": "Bonjour {name}, le syndic de {residence} vous invite à accéder à votre espace en ligne (lot {lot}).",
+      "code": "Votre code d'activation : {code}",
+      "cta": "Activer mon compte",
+      "expires": "Ce code expire le {date}."
+    },
+    "document": {
+      "subject": "Nouveau document — {residence}",
+      "heading": "Un nouveau document est disponible",
+      "intro": "Le syndic de {residence} a publié un nouveau document : {title}.",
+      "cta": "Voir mes documents"
+    },
+    "announcement": {
+      "subject": "Nouvelle actualité — {residence}",
+      "heading": "Nouvelle actualité de {residence}",
+      "intro": "{title}",
+      "cta": "Ouvrir Syndici"
+    }
   }
 }

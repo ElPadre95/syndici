@@ -87,6 +87,9 @@ Dans Vercel → ton projet → **Settings → Environment Variables**, ajoute (s
 | `DIRECT_URL`   | la chaîne **directe** (étape 1)               |
 | `AUTH_SECRET`  | la valeur `openssl rand -base64 32` (étape 2) |
 
+Pour activer l'envoi d'e-mails (facultatif au départ), ajoute aussi les variables
+`RESEND_API_KEY`, `MAIL_FROM`, `MAIL_REDIRECT_TO` — voir la section **E-mails** ci-dessous.
+
 `DEMO_SYNDIC_*` n'a **pas** besoin d'être dans Vercel (le compte est déjà créé à
 l'étape 3). Ne mets jamais ces valeurs dans le dépôt.
 
@@ -115,6 +118,56 @@ est à faire **par toi** : l'assistant ne saisit aucun mot de passe. Checklist :
 4. Vérifie le **tableau des lots** : ~25 lots, propriétaires à l'étranger, locataires,
    impayés variés (soldé / partiel / en retard).
 5. Bascule en **arabe** (sélecteur d'en-tête) : la mise en page s'inverse (RTL).
+
+---
+
+## E-mails (Resend)
+
+L'application envoie trois e-mails : **lien magique** de connexion, **invitation** d'un
+résident, et **notification** d'un nouveau document (portée « résidence ») ou d'une nouvelle
+actualité. Le canal est abstrait (comme le stockage et le paiement) : `src/server/mail/`.
+
+**Règle de sécurité intégrée :** en dehors de la production, ou tant que `RESEND_API_KEY`
+est absente, **aucun e-mail ne part** — tout est seulement journalisé (`[mail:dev] (non
+envoyé) → …`). Le développement ne peut donc jamais écrire à un vrai résident.
+
+### Phase interne (sans domaine) — ce que tu dois faire, 🧑
+
+1. Crée un compte sur **[resend.com](https://resend.com)** (gratuit : 3 000 e-mails/mois).
+   Vérifie ton adresse e-mail personnelle à l'inscription — en mode test, Resend
+   n'accepte de livrer **qu'à cette adresse vérifiée**.
+2. Dans Resend → **API Keys** → *Create API Key* (permission « Sending »). **Copie-la
+   une seule fois.** (Je ne saisis aucun identifiant à ta place.)
+3. Dans Vercel → Settings → Environment Variables (scope **Production**), ajoute :
+
+   | Nom                | Valeur                                                          |
+   | ------------------ | -------------------------------------------------------------- |
+   | `RESEND_API_KEY`   | la clé copiée à l'étape 2                                       |
+   | `MAIL_FROM`        | `Syndici <onboarding@resend.dev>` (expéditeur de TEST, sans DNS) |
+   | `MAIL_REDIRECT_TO` | ton adresse vérifiée (toutes les destinations y sont redirigées) |
+
+4. Redéploie (ou *Redeploy* le dernier build) pour que les variables prennent effet.
+
+Résultat : la chaîne fonctionne de bout en bout, mais chaque e-mail — quelle que soit la
+personne visée — arrive **sur ton adresse vérifiée**, avec en tête `[destinataire visé : …]`.
+Rien ne part vers les résidents. C'est suffisant pour valider l'intégration.
+
+### Le jour où tu achètes un vrai domaine — 🧑
+
+Aucune modification de code. Uniquement des variables et des enregistrements DNS :
+
+1. Resend → **Domains** → *Add Domain* → saisis ton domaine (ex. `syndici.ma`).
+2. Resend affiche des enregistrements **DNS** à créer chez ton registraire : un **MX**
+   (bounces), des **TXT** de type **SPF** et **DKIM**, et un **CNAME/TXT** de vérification
+   (et, recommandé, un **TXT DMARC**). Ajoute-les, puis clique **Verify** dans Resend
+   (propagation : quelques minutes à quelques heures).
+3. Dans Vercel : change **`MAIL_FROM`** en `Syndici <no-reply@ton-domaine>` (une adresse de
+   ton domaine vérifié) et **SUPPRIME `MAIL_REDIRECT_TO`** pour livrer aux vrais destinataires.
+4. Redéploie. Les e-mails partent désormais depuis ton domaine, vers les vrais résidents.
+
+> Astuce : pour un test grandeur nature avant de retirer `MAIL_REDIRECT_TO`, garde-la
+> encore un jour — l'envoi utilisera déjà ton domaine (meilleure délivrabilité) tout en
+> restant confiné à ton adresse.
 
 ---
 
