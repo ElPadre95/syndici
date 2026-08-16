@@ -52,14 +52,35 @@ describe('writeReminder', () => {
       message: 'Bonjour, montant dû : 650,00 MAD',
       sentByPersonId: 'gerant',
     });
-    const rows = await exec.query<{ channel: string; message: string; sentByPersonId: string }>(
-      `SELECT channel, message, "sentByPersonId" FROM "Reminder" WHERE id = $1`,
-      [id],
-    );
+    const rows = await exec.query<{
+      channel: string;
+      kind: string;
+      message: string;
+      sentByPersonId: string;
+    }>(`SELECT channel, kind, message, "sentByPersonId" FROM "Reminder" WHERE id = $1`, [id]);
     expect(rows[0]).toEqual({
       channel: 'WHATSAPP',
+      kind: 'RAPPEL', // défaut : relance amiable
       message: 'Bonjour, montant dû : 650,00 MAD',
       sentByPersonId: 'gerant',
     });
+  });
+
+  it('trace une MISE EN DEMEURE par courrier (I4)', async () => {
+    const id = await writeReminder(runner, {
+      residenceId: RES,
+      lotId: 'lot-1',
+      recipientPersonId: null,
+      reminderRuleId: null,
+      message: 'Mise en demeure — 1 950,00 MAD',
+      sentByPersonId: 'gerant',
+      kind: 'MISE_EN_DEMEURE',
+      channel: 'COURRIER',
+    });
+    const rows = await exec.query<{ channel: string; kind: string }>(
+      `SELECT channel, kind FROM "Reminder" WHERE id = $1`,
+      [id],
+    );
+    expect(rows[0]).toEqual({ channel: 'COURRIER', kind: 'MISE_EN_DEMEURE' });
   });
 });

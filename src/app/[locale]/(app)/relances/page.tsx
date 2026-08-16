@@ -71,6 +71,7 @@ export default async function RelancesPage({ params }: { params: Promise<{ local
       phoneDigits: waPhoneDigits(it.recipientPhone),
       amountLabel: formatMoney(it.amountDueMinor, activeLocale),
       retardDays: it.retardDays,
+      stage: it.stage,
       remindersSent: it.remindersSent,
       lastSentLabel: it.lastReminderAt ? fmtDate.format(new Date(it.lastReminderAt)) : null,
       defaultMessage: tt('message.whatsapp', {

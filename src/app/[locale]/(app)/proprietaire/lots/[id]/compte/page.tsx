@@ -46,6 +46,7 @@ export default async function OwnerLotAccountPage({
   }
   // Son propre nom (depuis la session), jamais résolu via la couche staff.
   account.ownerName = ctx.userLabel;
+  const tAtt = await getTranslations('attestation');
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4">
@@ -56,7 +57,14 @@ export default async function OwnerLotAccountPage({
             {tOwner('backToCharges')}
           </Button>
         </Link>
-        <PrintButton label={t('print')} />
+        <div className="flex items-center gap-2">
+          {account.balanceMinor <= 0 && (
+            <Link href={`/proprietaire/lots/${id}/attestation`}>
+              <Button variant="secondary">{tAtt('attestationLink')}</Button>
+            </Link>
+          )}
+          <PrintButton label={t('print')} />
+        </div>
       </div>
       <LotAccountDocument account={account} />
     </div>

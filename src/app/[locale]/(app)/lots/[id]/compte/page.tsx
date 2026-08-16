@@ -24,6 +24,7 @@ export default async function LotAccountPage({
   setRequestLocale(locale);
   const t = await getTranslations('account');
   const tLate = await getT('lateFees');
+  const tAtt = await getT('attestation');
 
   const ctx = await getSessionContext();
   if (!ctx?.activeId || !ctx.role || !can(ctx.role, 'lot.view.all')) {
@@ -53,7 +54,14 @@ export default async function LotAccountPage({
             {t('back')}
           </Button>
         </Link>
-        <PrintButton label={t('print')} />
+        <div className="flex items-center gap-2">
+          {account.balanceMinor <= 0 && (
+            <Link href={`/lots/${id}/attestation`}>
+              <Button variant="secondary">{tAtt('attestationLink')}</Button>
+            </Link>
+          )}
+          <PrintButton label={t('print')} />
+        </div>
       </div>
       <LotAccountDocument account={account} />
       {can(ctx.role, 'charge.manage') && (

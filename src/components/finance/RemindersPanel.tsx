@@ -3,9 +3,11 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { AlertCircle, MessageCircle, Send } from 'lucide-react';
+import { AlertCircle, MessageCircle, Send, FileWarning } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Link } from '@/i18n/navigation';
 import { recordReminderAction } from '@/server/finance/reminder-actions';
 import { waLink } from '@/server/finance/reminders';
 
@@ -16,6 +18,7 @@ export interface ReminderRow {
   phoneDigits: string | null;
   amountLabel: string;
   retardDays: number;
+  stage: 'RAPPEL' | 'MISE_EN_DEMEURE';
   remindersSent: number;
   lastSentLabel: string | null;
   defaultMessage: string;
@@ -120,8 +123,13 @@ export function RemindersPanel({ items }: { items: ReminderRow[] }) {
                   {it.amountLabel}
                 </td>
                 <td className="px-4 py-3 text-end">
-                  <span className="rounded-full bg-red-soft px-2 py-0.5 text-xs font-bold text-red">
-                    {t('lateDays', { days: it.retardDays })}
+                  <span className="inline-flex items-center gap-2">
+                    <span className="rounded-full bg-red-soft px-2 py-0.5 text-xs font-bold text-red">
+                      {t('lateDays', { days: it.retardDays })}
+                    </span>
+                    <Badge tone={it.stage === 'MISE_EN_DEMEURE' ? 'danger' : 'warning'}>
+                      {t(`stage.${it.stage}`)}
+                    </Badge>
                   </span>
                 </td>
                 <td className="px-4 py-3 text-label-3">
@@ -130,10 +138,21 @@ export function RemindersPanel({ items }: { items: ReminderRow[] }) {
                     : t('history.sent', { count: it.remindersSent, date: it.lastSentLabel ?? '—' })}
                 </td>
                 <td className="px-4 py-3 text-end">
-                  <Button variant="secondary" onClick={() => openSingle(it)}>
-                    <MessageCircle className="size-4" aria-hidden />
-                    {t('remind')}
-                  </Button>
+                  <div className="flex items-center justify-end gap-2">
+                    {it.stage === 'MISE_EN_DEMEURE' && (
+                      <Link
+                        href={`/relances/mise-en-demeure/${it.lotId}`}
+                        className="inline-flex items-center gap-1 rounded-md bg-red-soft px-3 py-2 text-sm font-bold text-red hover:opacity-90"
+                      >
+                        <FileWarning className="size-4" aria-hidden />
+                        {t('formalNoticeAction')}
+                      </Link>
+                    )}
+                    <Button variant="secondary" onClick={() => openSingle(it)}>
+                      <MessageCircle className="size-4" aria-hidden />
+                      {t('remind')}
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}

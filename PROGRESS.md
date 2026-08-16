@@ -524,6 +524,24 @@ profil.
       crédit du compte du lot ; fr + ar (RTL intégral). Migration `regularisation` (`Regularisation` +
       `RegularisationLine`). Gate complet vert (329 PGlite, 125 Postgres réel).
 
+- [x] **I4** — **Escalade de recouvrement** (rappel → mise en demeure) + **attestation de non-dette**. Le moteur de
+      relances gagne une **étape** dérivée (`DunningItem.stage`) : en-deçà du seuil c'est un **RAPPEL** amiable
+      (WhatsApp, existant), au-delà une **MISE EN DEMEURE**. Le seuil `formalNoticeThresholdDays` est
+      **configurable par résidence** (`ReminderRule`, éditable dans les réglages, défaut 30 j ; validé ≥ seuil de
+      relance). L'écran Relances affiche l'étape (badge) et, pour les lots escaladés, un lien vers une **lettre de
+      mise en demeure imprimable** (fr/ar) : en-tête cabinet→résidence, destinataire, objet, corps formel (montant,
+      périodes, retard, délai de régularisation de 15 j, réserve de poursuite). Son émission est **tracée** (canal
+      `COURRIER`, `Reminder.kind = MISE_EN_DEMEURE`) — le texte affiché EST le texte persisté (preuve). Pas
+      d'anti-harcèlement pour la lettre (réimprimable). **Attestation de non-dette** : document imprimable (fr/ar)
+      délivré UNIQUEMENT quand le compte du lot est à jour (`balanceMinor ≤ 0`, source `getLotAccount`) ; refusée
+      avec le reste dû sinon. Accessible **côté syndic** (compte du lot) ET **côté propriétaire** (self-service sur
+      son propre lot, portée vérifiée). Cœurs testés : `evaluateDunning` (étape RAPPEL/MISE_EN_DEMEURE selon le
+      seuil), validation du seuil (≥ relance), écriture `writeReminder` par courrier. Vérifié connecté : Relances
+      (15 j → rappel, 46/76 j → mise en demeure), lettre A3 (1.950 DH, juin-août, 76 j), attestation A1 (Sara,
+      soldé) fr + ar (RTL intégral). Migration `recouvrement_escalade` (enum `ReminderKind`, `Reminder.kind`,
+      `ReminderChannel += COURRIER`, `ReminderRule.formalNoticeThresholdDays`). Gate complet vert (332 PGlite, 126
+      Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

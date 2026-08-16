@@ -9,10 +9,13 @@
  */
 import type { TxRunner } from '@/server/db/sql';
 
+export type ReminderKind = 'RAPPEL' | 'MISE_EN_DEMEURE';
+export type ReminderChannel = 'WHATSAPP' | 'EMAIL' | 'SMS' | 'COURRIER';
+
 const INSERT_REMINDER = `
   INSERT INTO "Reminder"
-    (id,"residenceId","lotId","recipientPersonId","reminderRuleId",channel,message,"sentAt","sentByPersonId")
-  VALUES (gen_random_uuid(),$1,$2,$3,$4,$5::"ReminderChannel",$6,now(),$7)
+    (id,"residenceId","lotId","recipientPersonId","reminderRuleId",channel,kind,message,"sentAt","sentByPersonId")
+  VALUES (gen_random_uuid(),$1,$2,$3,$4,$5::"ReminderChannel",$6::"ReminderKind",$7,now(),$8)
   RETURNING id`;
 
 export interface RecordReminderInput {
@@ -22,9 +25,11 @@ export interface RecordReminderInput {
   reminderRuleId: string | null;
   message: string;
   sentByPersonId: string;
+  kind?: ReminderKind; // défaut RAPPEL (relance amiable)
+  channel?: ReminderChannel; // défaut WHATSAPP
 }
 
-/** Trace une relance (intention d'envoi) : à qui, quand, quelle règle, quel canal, quel texte. */
+/** Trace une relance (intention d'envoi) : à qui, quand, quelle règle, quel canal, quelle étape, quel texte. */
 export async function writeReminder(runner: TxRunner, input: RecordReminderInput): Promise<string> {
   return runner.transaction(async (tx) => {
     const rows = await tx.query<{ id: string }>(INSERT_REMINDER, [
@@ -32,7 +37,8 @@ export async function writeReminder(runner: TxRunner, input: RecordReminderInput
       input.lotId,
       input.recipientPersonId,
       input.reminderRuleId,
-      'WHATSAPP',
+      input.channel ?? 'WHATSAPP',
+      input.kind ?? 'RAPPEL',
       input.message,
       input.sentByPersonId,
     ]);

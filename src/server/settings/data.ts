@@ -64,6 +64,7 @@ export interface ReminderRuleSettings {
   minDaysBetweenReminders: number;
   concernedSettlementStates: string[];
   lateFeeThresholdDays: number;
+  formalNoticeThresholdDays: number;
 }
 
 export async function getActiveReminderRule(
@@ -78,6 +79,7 @@ export async function getActiveReminderRule(
       minDaysBetweenReminders: true,
       concernedSettlementStates: true,
       lateFeeThresholdDays: true,
+      formalNoticeThresholdDays: true,
     },
   });
   return r;

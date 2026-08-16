@@ -12,6 +12,7 @@ const RULE: DunningRule = {
   minDaysBetweenReminders: 4,
   concernedSettlementStates: ['PARTIAL', 'UNSETTLED'],
   lateFeeThresholdDays: 10,
+  formalNoticeThresholdDays: 30,
 };
 const NOW = new Date('2026-08-14T12:00:00Z');
 
@@ -42,6 +43,18 @@ describe('evaluateDunning (§7.1)', () => {
     expect(item.amountDueMinor).toBe(65000);
     expect(item.retardDays).toBe(12);
     expect(item.lateFee).toBe(true); // 12 ≥ 10
+  });
+
+  it('escalade (I4) : RAPPEL sous le seuil de mise en demeure, MISE_EN_DEMEURE au-delà', () => {
+    // seuil de mise en demeure = 30 j. Retard 12 j → rappel amiable.
+    expect(evaluateDunning([lot()], RULE, NOW)[0]!.stage).toBe('RAPPEL');
+    // un impayé de 45 j → mise en demeure.
+    const deep = lot({
+      calls: [
+        { settlement: 'UNSETTLED', daysLate: 45, remainingMinor: 65000, periodYear: 2026, periodMonth: 6 },
+      ],
+    });
+    expect(evaluateDunning([deep], RULE, NOW)[0]!.stage).toBe('MISE_EN_DEMEURE');
   });
 
   it('exclut un lot soldé ou dont le retard est sous le seuil', () => {

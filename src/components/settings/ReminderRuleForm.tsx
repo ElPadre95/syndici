@@ -81,6 +81,23 @@ export function ReminderRuleForm({ current }: { current: ReminderRuleSettings })
               </span>
             )}
           </label>
+
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="font-semibold text-label-3">{t('reminder.formalNotice')}</span>
+            <input
+              name="formalNoticeThresholdDays"
+              type="number"
+              min={1}
+              defaultValue={current.formalNoticeThresholdDays}
+              className="w-full rounded-md border border-sep px-3 py-2 text-sm"
+            />
+            <span className="text-xs text-label-4">{t('reminder.formalNoticeHint')}</span>
+            {err('formalNoticeThresholdDays') && (
+              <span className="text-xs font-semibold text-orange">
+                {err('formalNoticeThresholdDays')}
+              </span>
+            )}
+          </label>
         </div>
 
         <div className="flex flex-col gap-2">

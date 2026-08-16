@@ -91,14 +91,19 @@ export interface ReminderRuleRaw {
   overdueThresholdDays: string;
   minDaysBetweenReminders: string;
   concernedSettlementStates: string[];
+  formalNoticeThresholdDays: string;
 }
 export interface ReminderRuleValue {
   overdueThresholdDays: number;
   minDaysBetweenReminders: number;
   concernedSettlementStates: SettlementState[];
+  formalNoticeThresholdDays: number;
 }
 export type ReminderRuleField =
-  'overdueThresholdDays' | 'minDaysBetweenReminders' | 'concernedSettlementStates';
+  | 'overdueThresholdDays'
+  | 'minDaysBetweenReminders'
+  | 'concernedSettlementStates'
+  | 'formalNoticeThresholdDays';
 export type ReminderRuleResult =
   | { ok: true; value: ReminderRuleValue }
   | { ok: false; errors: Partial<Record<ReminderRuleField, string>> };
@@ -113,6 +118,11 @@ export function validateReminderRule(raw: ReminderRuleRaw): ReminderRuleResult {
     CONCERNABLE_STATES.includes(s as SettlementState),
   );
   if (states.length === 0) errors.concernedSettlementStates = 'atLeastOne';
+  const formal = Number(String(raw.formalNoticeThresholdDays).trim());
+  // La mise en demeure doit venir APRÈS le seuil de relance amiable (jamais avant).
+  if (!Number.isInteger(formal) || formal < 1) errors.formalNoticeThresholdDays = 'min1';
+  else if (Number.isInteger(overdue) && formal < overdue)
+    errors.formalNoticeThresholdDays = 'afterOverdue';
 
   if (Object.keys(errors).length > 0) return { ok: false, errors };
   return {
@@ -121,6 +131,7 @@ export function validateReminderRule(raw: ReminderRuleRaw): ReminderRuleResult {
       overdueThresholdDays: overdue,
       minDaysBetweenReminders: cooldown,
       concernedSettlementStates: states,
+      formalNoticeThresholdDays: formal,
     },
   };
 }

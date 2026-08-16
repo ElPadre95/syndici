@@ -19,11 +19,15 @@ import type { ActiveContext } from '@/server/auth/context';
 
 const DAY_MS = 86_400_000;
 
+/** Étape d'escalade de recouvrement (I4) : relance amiable ou mise en demeure formelle. */
+export type ReminderStage = 'RAPPEL' | 'MISE_EN_DEMEURE';
+
 export interface DunningRule {
   overdueThresholdDays: number;
   minDaysBetweenReminders: number;
   concernedSettlementStates: SettlementState[];
   lateFeeThresholdDays: number;
+  formalNoticeThresholdDays: number; // retard (jours) à partir duquel on passe en mise en demeure
 }
 
 export interface DunningCall {
@@ -56,6 +60,7 @@ export interface DunningItem {
   amountDueMinor: number;
   retardDays: number;
   lateFee: boolean; // retard >= lateFeeThresholdDays (le message mentionnera les frais)
+  stage: ReminderStage; // RAPPEL amiable ou MISE_EN_DEMEURE (retard >= formalNoticeThresholdDays)
   periods: { year: number; month: number }[];
   remindersSent: number;
   lastReminderAt: string | null;
@@ -97,6 +102,7 @@ export function evaluateDunning(
       amountDueMinor: qualifying.reduce((s, c) => s + c.remainingMinor, 0),
       retardDays,
       lateFee: retardDays >= rule.lateFeeThresholdDays,
+      stage: retardDays >= rule.formalNoticeThresholdDays ? 'MISE_EN_DEMEURE' : 'RAPPEL',
       periods: qualifying
         .map((c) => ({ year: c.periodYear, month: c.periodMonth }))
         .sort((a, b) => a.year - b.year || a.month - b.month),
@@ -126,6 +132,7 @@ export async function listDunning(
       minDaysBetweenReminders: true,
       concernedSettlementStates: true,
       lateFeeThresholdDays: true,
+      formalNoticeThresholdDays: true,
     },
   });
   if (!ruleRow) return { items: [], hasRule: false };
@@ -134,6 +141,7 @@ export async function listDunning(
     minDaysBetweenReminders: ruleRow.minDaysBetweenReminders,
     concernedSettlementStates: ruleRow.concernedSettlementStates as SettlementState[],
     lateFeeThresholdDays: ruleRow.lateFeeThresholdDays,
+    formalNoticeThresholdDays: ruleRow.formalNoticeThresholdDays,
   };
 
   const [lots, calls, reminders, payers] = await Promise.all([

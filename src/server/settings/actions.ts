@@ -100,6 +100,7 @@ export async function updateReminderRuleAction(
     overdueThresholdDays: String(formData.get('overdueThresholdDays') ?? ''),
     minDaysBetweenReminders: String(formData.get('minDaysBetweenReminders') ?? ''),
     concernedSettlementStates: formData.getAll('concernedSettlementStates').map(String),
+    formalNoticeThresholdDays: String(formData.get('formalNoticeThresholdDays') ?? ''),
   };
   const v = validateReminderRule(raw);
   if (!v.ok) return { ok: false, errors: v.errors };
@@ -125,6 +126,7 @@ export async function updateReminderRuleAction(
         overdueThresholdDays: v.value.overdueThresholdDays,
         minDaysBetweenReminders: v.value.minDaysBetweenReminders,
         concernedSettlementStates: v.value.concernedSettlementStates,
+        formalNoticeThresholdDays: v.value.formalNoticeThresholdDays,
       },
     );
   });

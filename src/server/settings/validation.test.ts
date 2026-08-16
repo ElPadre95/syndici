@@ -44,11 +44,13 @@ describe('validateReminderRule', () => {
       overdueThresholdDays: '5',
       minDaysBetweenReminders: '7',
       concernedSettlementStates: ['PARTIAL', 'SETTLED', 'UNSETTLED'],
+      formalNoticeThresholdDays: '30',
     });
     expect(r.ok && r.value).toEqual({
       overdueThresholdDays: 5,
       minDaysBetweenReminders: 7,
       concernedSettlementStates: ['PARTIAL', 'UNSETTLED'], // SETTLED écarté
+      formalNoticeThresholdDays: 30,
     });
   });
   it('refuse un délai < 1 et une liste de statuts vide', () => {
@@ -56,6 +58,7 @@ describe('validateReminderRule', () => {
       overdueThresholdDays: '3',
       minDaysBetweenReminders: '0',
       concernedSettlementStates: [],
+      formalNoticeThresholdDays: '30',
     });
     expect(r.ok).toBe(false);
     if (!r.ok)
@@ -63,6 +66,16 @@ describe('validateReminderRule', () => {
         minDaysBetweenReminders: 'min1',
         concernedSettlementStates: 'atLeastOne',
       });
+  });
+  it('refuse une mise en demeure AVANT le seuil de relance amiable', () => {
+    const r = validateReminderRule({
+      overdueThresholdDays: '30',
+      minDaysBetweenReminders: '4',
+      concernedSettlementStates: ['UNSETTLED'],
+      formalNoticeThresholdDays: '10', // < overdue → incohérent
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.formalNoticeThresholdDays).toBe('afterOverdue');
   });
 });
 

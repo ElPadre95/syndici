@@ -745,7 +745,12 @@
       "no_active_residence": "Aucune résidence active.",
       "not_found": "Lot introuvable.",
       "empty_message": "Le message est vide."
-    }
+    },
+    "stage": {
+      "RAPPEL": "Rappel",
+      "MISE_EN_DEMEURE": "Mise en demeure"
+    },
+    "formalNoticeAction": "Mise en demeure"
   },
   "subscription": {
     "aboTitre": "Formules d'abonnement",
@@ -1885,8 +1890,11 @@
       "err": {
         "min0": "Doit être ≥ 0.",
         "min1": "Doit être ≥ 1.",
-        "atLeastOne": "Choisissez au moins un statut."
-      }
+        "atLeastOne": "Choisissez au moins un statut.",
+        "afterOverdue": "Doit être ≥ au seuil de relance."
+      },
+      "formalNotice": "Seuil de mise en demeure (jours)",
+      "formalNoticeHint": "Au-delà de ce retard, la relance devient une mise en demeure (lettre formelle)."
     },
     "categories": {
       "title": "Catégories de dépenses",
@@ -1995,5 +2003,38 @@
       "already_exists": "Une régularisation active existe déjà pour cet exercice.",
       "empty": "Aucun lot à régulariser."
     }
+  },
+  "miseEnDemeure": {
+    "forbidden": "Accès réservé au syndic.",
+    "back": "Retour aux relances",
+    "notFound": "Lot introuvable.",
+    "notEligible": "Le lot {lot} n'est pas en situation de mise en demeure (retard insuffisant ou compte à jour).",
+    "docTitle": "Mise en demeure",
+    "to": "Destinataire",
+    "subject": "Objet : charges de copropriété impayées",
+    "lot": "Lot",
+    "body": "Madame, Monsieur,\n\nSauf erreur ou règlement intervenu entre-temps, nos écritures font apparaître un solde impayé de {amount} au titre des charges de copropriété de la résidence {residence}, pour le(s) période(s) suivante(s) : {periods}. Ce retard atteint {days} jours.\n\nMalgré nos précédentes relances, cette somme demeure due. Nous vous mettons donc en demeure de régulariser l'intégralité de votre situation dans un délai de {deadline} jours à compter de la présente.\n\nÀ défaut de règlement dans ce délai, nous nous réservons le droit d'engager toute procédure de recouvrement, ainsi que l'application des frais de retard prévus par le règlement de copropriété.\n\nNous restons à votre disposition pour convenir, le cas échéant, d'un échéancier.\n\nVeuillez agréer, Madame, Monsieur, l'expression de nos salutations distinguées.",
+    "signature": "Le syndic",
+    "print": "Imprimer",
+    "markSent": "Marquer comme envoyée",
+    "sent": "Mise en demeure enregistrée",
+    "error": {
+      "forbidden": "Accès réservé au syndic.",
+      "no_active_residence": "Aucune résidence active.",
+      "not_found": "Lot introuvable.",
+      "empty_message": "Le texte de la lettre est vide."
+    }
+  },
+  "attestation": {
+    "forbidden": "Accès réservé au syndic.",
+    "notFound": "Lot introuvable.",
+    "back": "Retour au compte",
+    "print": "Imprimer",
+    "attestationLink": "Attestation de non-dette",
+    "hasDebt": "Attestation indisponible : un solde de {amount} reste dû sur ce lot.",
+    "docTitle": "Attestation de non-dette",
+    "body": "Je soussigné, syndic de la résidence {residence}, atteste par la présente que le lot {lot}, détenu par {owner}, est à jour de ses charges de copropriété à la date du {date} : aucun reste dû n'apparaît dans nos écritures.\n\nLa présente attestation est délivrée pour servir et valoir ce que de droit.",
+    "ref": "Lot",
+    "signature": "Le syndic"
   }
 }

@@ -226,6 +226,14 @@ enum ReminderChannel {
   WHATSAPP
   EMAIL
   SMS
+  COURRIER // mise en demeure remise/envoyée par écrit (lettre imprimée)
+}
+
+/// Étape de l'escalade de recouvrement (I4). RAPPEL : relance amiable (WhatsApp). MISE_EN_DEMEURE :
+/// lettre formelle imprimée, franchie au-delà de `ReminderRule.formalNoticeThresholdDays` jours de retard.
+enum ReminderKind {
+  RAPPEL
+  MISE_EN_DEMEURE
 }
 
 enum SettlementProvider {
@@ -1075,6 +1083,8 @@ model ReminderRule {
   // du seuil `overdueThresholdDays` sur l'axe temporalité.
   concernedSettlementStates SettlementState[] @default([PARTIAL, UNSETTLED])
   lateFeeThresholdDays      Int               @default(10)
+  // Escalade (I4) : au-delà de ce retard (jours), la relance passe en MISE EN DEMEURE (lettre formelle).
+  formalNoticeThresholdDays Int               @default(30)
   active                    Boolean           @default(true)
   createdAt                 DateTime          @default(now())
   residence                 Residence         @relation(fields: [residenceId], references: [id], onDelete: Cascade)
@@ -1093,6 +1103,7 @@ model Reminder {
   reminderRuleId    String?
   chargeCallId      String?
   channel           ReminderChannel @default(WHATSAPP)
+  kind              ReminderKind    @default(RAPPEL) // étape d'escalade (I4)
   message           String? // texte réellement préparé (preuve ; intention d'envoi)
   sentAt            DateTime        @default(now())
   sentByPersonId    String?
