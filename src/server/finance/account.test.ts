@@ -84,4 +84,26 @@ describe('buildLedger', () => {
     expect(l.entries).toEqual([]);
     expect(l.balanceMinor).toBe(0);
   });
+
+  it('une régularisation débite (supplément) ou crédite (avoir) le compte', () => {
+    const l = buildLedger(
+      [call(2026, 1, 1, 65000)],
+      [pay('p1', '2026-01-05T00:00:00Z', 65000)],
+      NO_RECEIPTS,
+      [],
+      [
+        { effectiveOn: new Date(Date.UTC(2026, 11, 31)), exercice: 2026, adjustmentMinor: 12000 },
+      ],
+    );
+    const reg = l.entries.find((e) => e.kind === 'regularisation')!;
+    expect([reg.debitMinor, reg.creditMinor, reg.periodYear]).toEqual([12000, 0, 2026]);
+    expect(l.balanceMinor).toBe(12000); // appel réglé, supplément reste dû
+
+    const credit = buildLedger([], [], NO_RECEIPTS, [], [
+      { effectiveOn: new Date(Date.UTC(2026, 11, 31)), exercice: 2026, adjustmentMinor: -5000 },
+    ]);
+    const avoir = credit.entries[0]!;
+    expect([avoir.debitMinor, avoir.creditMinor]).toEqual([0, 5000]);
+    expect(credit.balanceMinor).toBe(-5000); // avoir en faveur du lot
+  });
 });

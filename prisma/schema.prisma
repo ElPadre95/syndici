@@ -419,6 +419,8 @@ model Residence {
   expenses           Expense[]
   budgetLines        BudgetLine[]
   worksFundContributions WorksFundContribution[]
+  regularisations    Regularisation[]
+  regularisationLines RegularisationLine[]
   contracts          SupplierContract[]
   chargeCalls        ChargeCall[]
   payments           Payment[]
@@ -510,6 +512,7 @@ model Lot {
   conversations      Conversation[]
   reminders          Reminder[]
   invitations        InvitationCode[]
+  regularisationLines RegularisationLine[]
 
   @@unique([residenceId, reference])
   @@index([residenceId])
@@ -741,6 +744,48 @@ model WorksFundContribution {
   residence               Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
 
   @@index([residenceId])
+}
+
+/// Régularisation annuelle (I3) — en fin d'exercice, on compare les PROVISIONS appelées de
+/// l'année à la QUOTE-PART RÉELLE des dépenses courantes (réparties aux tantièmes). L'écart par
+/// lot (`RegularisationLine.adjustmentMinor` = quote-part − provisions) devient un supplément à
+/// appeler (positif, débit) ou un avoir (négatif, crédit) dans le compte du lot. IDEMPOTENT :
+/// au plus une régularisation ACTIVE par exercice (index partiel `WHERE voidedAt IS NULL`).
+/// RÉVERSIBLE par annulation douce (`voidedAt`, comme un appel de charges) — jamais mutée.
+model Regularisation {
+  id                    String              @id @default(uuid())
+  residenceId           String
+  exercice              Int
+  effectiveOn           DateTime            @db.Date // date d'imputation au compte (fin d'exercice)
+  totalExpensesMinor    Int // dépenses courantes réparties (base de la quote-part réelle)
+  totalProvisionsMinor  Int // total des appels de l'exercice (provisions)
+  voidedAt              DateTime?
+  voidedReason          String?
+  actorPersonId         String?
+  createdAt             DateTime            @default(now())
+  residence             Residence           @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lines                 RegularisationLine[]
+
+  @@index([residenceId])
+  // Idempotence : au plus une régularisation active par exercice — index partiel posé en SQL.
+}
+
+/// Une ligne de régularisation par lot : ce qu'il a provisionné, sa quote-part réelle, l'écart.
+model RegularisationLine {
+  id               String         @id @default(uuid())
+  regularisationId String
+  residenceId      String
+  lotId            String
+  provisionsMinor  Int // appels de l'exercice pour ce lot
+  quotePartMinor   Int // part réelle des dépenses (répartie aux tantièmes)
+  adjustmentMinor  Int // quote-part − provisions (positif = supplément, négatif = avoir)
+  regularisation   Regularisation @relation(fields: [regularisationId], references: [id], onDelete: Cascade)
+  residence        Residence      @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  lot              Lot            @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@index([residenceId])
+  @@index([regularisationId])
+  @@index([lotId])
 }
 
 /// Dépense de la résidence avec justificatif (référence de fichier, pas base64).

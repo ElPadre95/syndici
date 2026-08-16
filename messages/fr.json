@@ -1054,7 +1054,8 @@
       "payment": "Règlement — {method}",
       "reversal": "Annulation de règlement — {method}",
       "latefee": "Frais de retard",
-      "latefeeReversal": "Annulation de frais de retard"
+      "latefeeReversal": "Annulation de frais de retard",
+      "regularisation": "Régularisation — exercice {exercice}"
     },
     "method": {
       "ESPECES": "Espèces",
@@ -1219,7 +1220,8 @@
       "ownerDocs": "Mes documents",
       "transparency": "Transparence",
       "profile": "Mon profil",
-      "budget": "Budget & fonds"
+      "budget": "Budget & fonds",
+      "regularisation": "Régularisation"
     },
     "header": {
       "account": "Compte",
@@ -1961,6 +1963,37 @@
       "not_found": "Introuvable.",
       "already_reversed": "Déjà annulé.",
       "is_reversal": "Impossible d'annuler une écriture d'annulation."
+    }
+  },
+  "regularisation": {
+    "eyebrow": "Clôture d’exercice",
+    "title": "Régularisation annuelle",
+    "forbidden": "Accès réservé au syndic.",
+    "docTitle": "Régularisation de l’exercice {exercice}",
+    "previewHint": "Prévisualisation — rien n’est encore imputé aux comptes.",
+    "committedOn": "Régularisation validée le {date}",
+    "effectiveOn": "Imputée au {date}",
+    "commit": "Valider la régularisation",
+    "reverse": "Annuler",
+    "print": "Imprimer",
+    "confirmReverse": "Annuler cette régularisation ? Les écritures par lot seront retirées des comptes.",
+    "totalProvisions": "Provisions appelées",
+    "totalExpenses": "Dépenses réparties",
+    "totalAdjustment": "Écart global",
+    "lot": "Lot",
+    "quotePart": "Tantièmes",
+    "provisions": "Provisions appelées",
+    "realShare": "Quote-part réelle",
+    "balance": "Solde",
+    "supplement": "Supplément",
+    "credit": "Avoir",
+    "total": "Total",
+    "legend": "Solde positif = supplément à appeler au lot ; négatif = avoir en sa faveur. La quote-part réelle répartit les dépenses courantes de l’exercice aux tantièmes (le fonds travaux est exclu).",
+    "error": {
+      "forbidden": "Accès réservé au syndic.",
+      "invalid": "Exercice invalide.",
+      "already_exists": "Une régularisation active existe déjà pour cet exercice.",
+      "empty": "Aucun lot à régulariser."
     }
   }
 }

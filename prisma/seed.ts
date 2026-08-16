@@ -18,6 +18,7 @@ import { defaultExpenseCategories, type ResidenceKind } from '../src/server/fina
 import { storeFile } from '../src/server/storage/files';
 import { prismaTxRunner } from '../src/server/db/sql';
 import { distributeByTantiemes } from '../src/server/finance/campaigns';
+import { computeRegularisation } from '../src/server/finance/regularisation';
 import { disconnectBase } from '../src/server/db/client';
 import { hashPassword } from '../src/server/auth/password';
 
@@ -1282,6 +1283,67 @@ async function main() {
       });
       await prisma.person.update({ where: { id: mreOwnerId }, data: { authUserId: ownerUser.id } });
       console.log(`✔ Compte de démonstration propriétaire créé pour ${ownerEmail}.`);
+    }
+  }
+
+  // ── Régularisation annuelle (I3) — figée sur l'exercice courant pour la démonstration :
+  // provisions appelées vs quote-part réelle des dépenses courantes, écart par lot. Le
+  // propriétaire la voit dans son compte ; le syndic peut l'annuler et la revalider.
+  {
+    const exercice = now.getUTCFullYear();
+    const [regLots, regExpenses, regProvisions] = await Promise.all([
+      prisma.lot.findMany({
+        where: { residenceId: residence.id, archivedAt: null },
+        select: { id: true, reference: true, quotePart: true },
+      }),
+      prisma.expense.aggregate({
+        _sum: { amountMinor: true },
+        where: {
+          residenceId: residence.id,
+          onWorksFund: false,
+          spentOn: {
+            gte: new Date(Date.UTC(exercice, 0, 1)),
+            lte: new Date(Date.UTC(exercice, 11, 31, 23, 59, 59)),
+          },
+        },
+      }),
+      prisma.chargeCall.groupBy({
+        by: ['lotId'],
+        where: { residenceId: residence.id, periodYear: exercice, voidedAt: null },
+        _sum: { amountMinor: true },
+      }),
+    ]);
+    const provByLot = new Map(regProvisions.map((p) => [p.lotId, p._sum.amountMinor ?? 0]));
+    const plan = computeRegularisation(
+      exercice,
+      regExpenses._sum.amountMinor ?? 0,
+      regLots.map((l) => ({
+        lotId: l.id,
+        reference: l.reference,
+        quotePart: l.quotePart,
+        provisionsMinor: provByLot.get(l.id) ?? 0,
+      })),
+    );
+    if (plan.lines.length > 0) {
+      await prisma.regularisation.create({
+        data: {
+          residenceId: residence.id,
+          exercice,
+          effectiveOn: new Date(Date.UTC(exercice, 11, 31)),
+          totalExpensesMinor: plan.totalExpensesMinor,
+          totalProvisionsMinor: plan.totalProvisionsMinor,
+          actorPersonId: gerant.id,
+          lines: {
+            create: plan.lines.map((l) => ({
+              residenceId: residence.id,
+              lotId: l.lotId,
+              provisionsMinor: l.provisionsMinor,
+              quotePartMinor: l.quotePartMinor,
+              adjustmentMinor: l.adjustmentMinor,
+            })),
+          },
+        },
+      });
     }
   }
 

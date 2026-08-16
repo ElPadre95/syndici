@@ -21,6 +21,7 @@ import {
   type TemporalState,
 } from './status';
 import { buildLedger, type LotAccount, type LedgerEntry } from './account';
+import { fetchLotRegularisations } from './regularisation';
 import { listExpenses } from './expenses';
 import type { ReceiptView } from './receipts';
 
@@ -275,7 +276,7 @@ export async function getOwnerLotAccount(
   const lot = await scoped.lot.findUnique({ where: { id: lotId }, select: { reference: true } });
   if (!lot) return null;
 
-  const [calls, payments, lateFees, residence, mandate] = await Promise.all([
+  const [calls, payments, lateFees, residence, mandate, regularisations] = await Promise.all([
     scoped.chargeCall.findMany({
       where: { lotId, voidedAt: null },
       select: { periodYear: true, periodMonth: true, dueDate: true, amountMinor: true },
@@ -302,6 +303,7 @@ export async function getOwnerLotAccount(
       where: { status: 'ACTIVE' },
       select: { organization: { select: { name: true } } },
     }),
+    fetchLotRegularisations(scoped, lotId),
   ]);
   if (!residence) return null;
 
@@ -315,7 +317,7 @@ export async function getOwnerLotAccount(
     receipts.map((r) => [r.paymentId, { id: r.id, number: r.number, voided: r.voidedAt != null }]),
   );
 
-  const ledger = buildLedger(calls, payments, receiptByPayment, lateFees);
+  const ledger = buildLedger(calls, payments, receiptByPayment, lateFees, regularisations);
   return {
     lotReference: lot.reference,
     ownerName: null, // ajouté côté page depuis la session (jamais via la couche staff)

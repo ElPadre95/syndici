@@ -38,6 +38,8 @@ export async function OwnerMonthlyStatement({
       });
     if (e.kind === 'latefee') return tAcc('label.latefee');
     if (e.kind === 'latefee_reversal') return tAcc('label.latefeeReversal');
+    if (e.kind === 'regularisation')
+      return tAcc('label.regularisation', { exercice: e.periodYear ?? '' });
     if (e.kind === 'reversal') return tAcc('label.reversal', { method: tAcc(`method.${e.method}`) });
     return tAcc('label.payment', { method: tAcc(`method.${e.method}`) });
   };

@@ -507,6 +507,23 @@ profil.
       Migration `budget_works_fund` (`Expense.onWorksFund`, `BudgetLine`, `WorksFundContribution`). Gate complet
       vert (319 PGlite, 122 Postgres réel).
 
+- [x] **I3** — **Régularisation annuelle**. En fin d'exercice, on confronte les **provisions appelées** de l'année
+      (somme des appels de charges par lot) à la **quote-part RÉELLE des dépenses courantes** (le total réparti aux
+      **tantièmes** via `distributeByTantiemes`, au centime près — le fonds travaux est exclu). L'écart par lot
+      (`adjustmentMinor` = quote-part − provisions) devient un **supplément** (positif, débit) ou un **avoir**
+      (négatif, crédit) qui s'impute au **compte du lot** : nouvelle source du grand livre `buildLedger`
+      (kind `regularisation`), visible côté **syndic ET propriétaire** (même `getLotAccount`/relevé). Cœur **pur**
+      `computeRegularisation` (répartition exacte, écart signé, invariant écart global = dépenses − provisions —
+      testé). **Non obligatoire** : le syndic la déclenche depuis l'écran **Régularisation** (prévisualisation →
+      validation), **IDEMPOTENTE** (index partiel unique `(résidence, exercice) WHERE voidedAt IS NULL` — au plus une
+      active par exercice, rejouer ne double jamais, testé sur Postgres réel) et **réversible** par annulation douce
+      (comme un appel de charges — libère l'exercice). État **imprimable** (par lot : provisions, quote-part réelle,
+      solde supplément/avoir + synthèse). Seed : une régularisation figée sur l'exercice courant d'Al Firdaous
+      (dépenses réparties 15.710 DH vs provisions 48.650 DH → avoirs par lot). Vérifié connecté : écran syndic (écart
+      global −32.940 DH, somme des quotes-parts = 15.710 DH exact), ligne « Régularisation — exercice 2026 » au
+      crédit du compte du lot ; fr + ar (RTL intégral). Migration `regularisation` (`Regularisation` +
+      `RegularisationLine`). Gate complet vert (329 PGlite, 125 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

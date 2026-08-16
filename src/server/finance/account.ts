@@ -8,9 +8,16 @@ import { forResidence } from '@/server/db/tenant';
 import { getBaseClient } from '@/server/db/client';
 import { prismaExecutor } from '@/server/db/sql';
 import { listResidents } from '@/server/auth/person-access';
+import { fetchLotRegularisations } from './regularisation';
 import type { ActiveContext } from '@/server/auth/context';
 
-export type LedgerKind = 'charge' | 'payment' | 'reversal' | 'latefee' | 'latefee_reversal';
+export type LedgerKind =
+  | 'charge'
+  | 'payment'
+  | 'reversal'
+  | 'latefee'
+  | 'latefee_reversal'
+  | 'regularisation';
 
 export interface LedgerEntry {
   date: string; // ISO
@@ -61,6 +68,11 @@ export interface LedgerLateFee {
   amountMinor: number; // < 0 pour une annulation (écriture inverse)
   reversesLateFeeId: string | null;
 }
+export interface LedgerRegularisation {
+  effectiveOn: Date;
+  exercice: number;
+  adjustmentMinor: number; // > 0 supplément (débit) ; < 0 avoir (crédit)
+}
 
 export interface Ledger {
   entries: LedgerEntry[];
@@ -79,6 +91,7 @@ export function buildLedger(
   payments: readonly LedgerPayment[],
   receiptByPayment: ReadonlyMap<string, LedgerReceiptRef>,
   lateFees: readonly LedgerLateFee[] = [],
+  regularisations: readonly LedgerRegularisation[] = [],
 ): Ledger {
   type Raw = Omit<LedgerEntry, 'balanceMinor'>;
   const raw: Raw[] = [];
@@ -131,8 +144,26 @@ export function buildLedger(
     });
   }
 
-  // À date égale : débits d'abord (appel de charges, frais de retard), crédits ensuite.
-  const order = (k: LedgerKind) => (k === 'charge' || k === 'latefee' ? 0 : 1);
+  for (const r of regularisations) {
+    raw.push({
+      date: r.effectiveOn.toISOString(),
+      kind: 'regularisation',
+      periodYear: r.exercice,
+      periodMonth: null,
+      method: null,
+      receiptId: null,
+      receiptNumber: null,
+      receiptVoided: false,
+      // Un supplément (> 0) débite ; un avoir (< 0) crédite.
+      debitMinor: r.adjustmentMinor > 0 ? r.adjustmentMinor : 0,
+      creditMinor: r.adjustmentMinor < 0 ? -r.adjustmentMinor : 0,
+    });
+  }
+
+  // À date égale : débits d'abord (appel de charges, frais de retard, régularisation),
+  // crédits ensuite.
+  const order = (k: LedgerKind) =>
+    k === 'charge' || k === 'latefee' || k === 'regularisation' ? 0 : 1;
   raw.sort((a, b) => a.date.localeCompare(b.date) || order(a.kind) - order(b.kind));
 
   let balance = 0;
@@ -158,7 +189,7 @@ export async function getLotAccount(ctx: ActiveContext, lotId: string): Promise<
   const lot = await scoped.lot.findUnique({ where: { id: lotId }, select: { reference: true } });
   if (!lot) return null;
 
-  const [calls, payments, lateFees, residence, mandate] = await Promise.all([
+  const [calls, payments, lateFees, residence, mandate, regularisations] = await Promise.all([
     scoped.chargeCall.findMany({
       where: { lotId, voidedAt: null },
       select: { periodYear: true, periodMonth: true, dueDate: true, amountMinor: true },
@@ -185,6 +216,7 @@ export async function getLotAccount(ctx: ActiveContext, lotId: string): Promise<
       where: { status: 'ACTIVE' },
       select: { organization: { select: { name: true } } },
     }),
+    fetchLotRegularisations(scoped, lotId),
   ]);
   if (!residence) return null;
 
@@ -208,7 +240,7 @@ export async function getLotAccount(ctx: ActiveContext, lotId: string): Promise<
     select: { personId: true },
   });
 
-  const ledger = buildLedger(calls, payments, receiptByPayment, lateFees);
+  const ledger = buildLedger(calls, payments, receiptByPayment, lateFees, regularisations);
   return {
     lotReference: lot.reference,
     ownerName: owner?.personId ? (nameById.get(owner.personId) ?? null) : null,
