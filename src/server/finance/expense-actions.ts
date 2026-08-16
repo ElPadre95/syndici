@@ -57,6 +57,8 @@ export async function recordExpenseAction(formData: FormData): Promise<ExpenseAc
   const visibility: ExpenseVisibility = EXPENSE_VISIBILITIES.includes(rawVis as ExpenseVisibility)
     ? (rawVis as ExpenseVisibility)
     : 'PARTAGE';
+  // Imputation sur le fonds travaux (I2) — hors trésorerie courante.
+  const onWorksFund = formData.get('onWorksFund') === 'on';
 
   // Justificatif (optionnel) : photo ou scan. Stocké avant l'écriture de la dépense.
   let justificatifId: string | null = null;
@@ -86,6 +88,7 @@ export async function recordExpenseAction(formData: FormData): Promise<ExpenseAc
     supplierName,
     visibility,
     justificatifId,
+    onWorksFund,
     actorPersonId: rec.ctx.personId,
   });
   revalidatePath('/', 'layout');

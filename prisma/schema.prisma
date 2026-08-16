@@ -417,6 +417,8 @@ model Residence {
   lots               Lot[]
   expenseCategories  ExpenseCategory[]
   expenses           Expense[]
+  budgetLines        BudgetLine[]
+  worksFundContributions WorksFundContribution[]
   contracts          SupplierContract[]
   chargeCalls        ChargeCall[]
   payments           Payment[]
@@ -701,8 +703,43 @@ model ExpenseCategory {
   createdAt   DateTime  @default(now())
   residence   Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
   expenses    Expense[]
+  budgetLines BudgetLine[]
 
   @@unique([residenceId, label])
+  @@index([residenceId])
+}
+
+/// Ligne de budget PRÉVISIONNEL (I2) : montant voté pour une catégorie sur un exercice.
+/// Le suivi budget/réalisé compare ce montant au total RÉEL des dépenses courantes de la
+/// catégorie sur l'exercice (jamais les dépenses du fonds travaux).
+model BudgetLine {
+  id          String          @id @default(uuid())
+  residenceId String
+  exercice    Int
+  categoryId  String
+  amountMinor Int
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  residence   Residence       @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  category    ExpenseCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([residenceId, exercice, categoryId])
+  @@index([residenceId])
+}
+
+/// Contribution au FONDS DE PROVISIONS TRAVAUX (I2) — appel dédié, distinct de la trésorerie
+/// courante. Le solde du fonds = somme des contributions − dépenses imputées (`Expense.onWorksFund`).
+/// IMMUABLE : annulation par écriture inverse (`reversesContributionId`, montant négatif).
+model WorksFundContribution {
+  id                      String    @id @default(uuid())
+  residenceId             String
+  amountMinor             Int // centimes (négatif = écriture inverse)
+  label                   String
+  occurredOn              DateTime  @db.Date
+  reversesContributionId  String?
+  createdAt               DateTime  @default(now())
+  residence               Residence @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+
   @@index([residenceId])
 }
 
@@ -729,6 +766,9 @@ model Expense {
   voucherNumber     String? // ex. "DEP-2026-0001"
   justificatifId    String? // FileAsset
   incidentId        String? // dépense DÉCOULANT d'un incident (boucle de transparence H1)
+  // Fonds de provisions travaux (I2) : une dépense imputée sur le fonds ne se mélange JAMAIS
+  // à la trésorerie courante (exclue de getTreasury et des lectures courantes).
+  onWorksFund       Boolean           @default(false)
   // Annulation par ÉCRITURE INVERSE (comme les paiements) : une dépense négative liant
   // l'originale. L'originale n'est jamais supprimée ni modifiée.
   reversesExpenseId String?

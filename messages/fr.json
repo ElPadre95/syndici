@@ -504,7 +504,9 @@
       "justificatifHint": "Photographiez la facture ou joignez un PDF (max 10 Mo).",
       "chooseFile": "Photo / fichier",
       "save": "Enregistrer",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "onWorksFund": "Imputer sur le fonds travaux",
+      "onWorksFundHint": "Cette dépense sort de la trésorerie courante et s'impute sur le fonds de provisions travaux."
     },
     "error": {
       "forbidden": "Accès refusé.",
@@ -963,8 +965,15 @@
         "phone": "Téléphone",
         "account": "Compte"
       },
-      "role": { "all": "Tous les rôles", "OWNER": "Propriétaire", "TENANT": "Locataire" },
-      "roleShort": { "OWNER": "prop.", "TENANT": "loc." },
+      "role": {
+        "all": "Tous les rôles",
+        "OWNER": "Propriétaire",
+        "TENANT": "Locataire"
+      },
+      "roleShort": {
+        "OWNER": "prop.",
+        "TENANT": "loc."
+      },
       "status": {
         "all": "Tous les états",
         "ACTIVE": "Compte activé",
@@ -1209,7 +1218,8 @@
       "monthly": "Relevé mensuel",
       "ownerDocs": "Mes documents",
       "transparency": "Transparence",
-      "profile": "Mon profil"
+      "profile": "Mon profil",
+      "budget": "Budget & fonds"
     },
     "header": {
       "account": "Compte",
@@ -1798,12 +1808,20 @@
       "you": "(vous)",
       "noAccount": "compte non activé",
       "roleLabel": "Rôle",
-      "role": { "OWNER_ADMIN": "Administrateur", "MANAGER": "Gestionnaire", "STAFF": "Agent" },
+      "role": {
+        "OWNER_ADMIN": "Administrateur",
+        "MANAGER": "Gestionnaire",
+        "STAFF": "Agent"
+      },
       "lastAdmin": "Dernier administrateur",
       "lastAdminHint": "Impossible de retirer ou rétrograder le dernier administrateur du cabinet.",
       "remove": "Retirer",
       "endedTitle": "Accès retirés",
-      "status": { "ACTIVE": "Actif", "ENDED": "Retiré", "SUSPENDED": "Suspendu" },
+      "status": {
+        "ACTIVE": "Actif",
+        "ENDED": "Retiré",
+        "SUSPENDED": "Suspendu"
+      },
       "inviteTitle": "Inviter un membre",
       "firstName": "Prénom",
       "lastName": "Nom",
@@ -1892,6 +1910,57 @@
         "PRO": "Pro",
         "ENTREPRISE": "Entreprise"
       }
+    }
+  },
+  "budget": {
+    "eyebrow": "Comptabilité",
+    "title": "Budget & fonds travaux",
+    "forbidden": "Accès réservé au syndic.",
+    "exercice": "Exercice",
+    "uncategorized": "Sans catégorie",
+    "editorTitle": "Budget prévisionnel voté",
+    "editorHint": "Montant voté en assemblée, par catégorie, pour l'exercice.",
+    "category": "Catégorie",
+    "budgeted": "Budget",
+    "realized": "Réalisé",
+    "ecart": "Écart",
+    "save": "Enregistrer le budget",
+    "saved": "Budget enregistré.",
+    "vsActualTitle": "Budget contre réalisé",
+    "vsActualHint": "Le réalisé ne compte que les dépenses courantes — jamais le fonds travaux.",
+    "total": "Total",
+    "noBudget": "Aucun budget saisi pour cet exercice.",
+    "overBudget": "Dépassé",
+    "underBudget": "Sous le budget",
+    "genericError": "L'enregistrement a échoué."
+  },
+  "worksFund": {
+    "title": "Fonds de provisions travaux",
+    "hint": "Distinct de la trésorerie courante : appels dédiés et dépenses imputées, solde propre.",
+    "balance": "Solde du fonds",
+    "contributed": "Contributions",
+    "spent": "Dépenses imputées",
+    "addTitle": "Nouvel appel au fonds",
+    "label": "Libellé",
+    "labelHint": "ex. Appel travaux ravalement",
+    "amount": "Montant (MAD)",
+    "date": "Date",
+    "add": "Enregistrer l'appel",
+    "contributionsTitle": "Appels enregistrés",
+    "noContributions": "Aucun appel enregistré.",
+    "expensesTitle": "Dépenses du fonds",
+    "noExpenses": "Aucune dépense imputée au fonds.",
+    "reverse": "Annuler",
+    "reversed": "Annulé",
+    "reversalOf": "Annulation",
+    "justificatif": "Justificatif",
+    "confirmReverse": "Annuler cet appel par écriture inverse ?",
+    "error": {
+      "forbidden": "Accès réservé au syndic.",
+      "invalid": "Données invalides.",
+      "not_found": "Introuvable.",
+      "already_reversed": "Déjà annulé.",
+      "is_reversal": "Impossible d'annuler une écriture d'annulation."
     }
   }
 }

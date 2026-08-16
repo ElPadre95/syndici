@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/Badge';
 import { getTreasury } from '@/server/finance/treasury';
 import { listExpenses, aggregateByCategory } from '@/server/finance/expenses';
 import { listContracts } from '@/server/finance/contracts';
+import { getBudgetVsActual } from '@/server/finance/budget';
+import { getWorksFund } from '@/server/finance/works-fund';
 
 /**
  * Transparence (G3) — le cœur de la promesse. Le propriétaire voit les dépenses VISIBLES de
@@ -28,6 +30,8 @@ export default async function OwnerTransparencyPage({
   const localeC = await getLocale();
   const t = await getTranslations('owner');
   const tContract = await getTranslations('contracts');
+  const tBudget = await getTranslations('budget');
+  const tFund = await getTranslations('worksFund');
 
   const ctx = await getSessionContext();
   if (!ctx?.activeId || ctx.role !== 'PROPRIETAIRE' || !can(ctx.role, 'expense.view')) {
@@ -41,11 +45,15 @@ export default async function OwnerTransparencyPage({
   }
   const actx = { personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role };
 
-  const [treasury, expenses, contracts] = await Promise.all([
+  const currentYear = new Date().getUTCFullYear();
+  const [treasury, expenses, contracts, budget, fund] = await Promise.all([
     getTreasury(actx),
     listExpenses(actx, { includeInternal: false }), // VISIBLE uniquement (jamais l'interne)
     listContracts(actx),
+    getBudgetVsActual(actx, currentYear, t('uncategorized'), false), // réel VISIBLE seulement
+    getWorksFund(actx, false), // dépenses du fonds VISIBLES seulement
   ]);
+  const hasFund = fund.contributedMinor !== 0 || fund.spentMinor !== 0;
 
   const fmt = (m: number) => formatMoney(m, localeC);
   const day = (iso: string) =>
@@ -127,6 +135,120 @@ export default async function OwnerTransparencyPage({
               );
             })}
           </Card>
+        </section>
+      )}
+
+      {/* Budget prévisionnel contre réalisé — transparence de l'exercice */}
+      {budget.lines.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-section font-bold text-label">
+            {tBudget('vsActualTitle')} · {budget.exercice}
+          </h2>
+          <Card className="overflow-x-auto p-0">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-sep text-note uppercase text-label-4">
+                  <th className="px-4 py-2.5 text-start font-bold">{tBudget('category')}</th>
+                  <th className="px-4 py-2.5 text-end font-bold">{tBudget('budgeted')}</th>
+                  <th className="px-4 py-2.5 text-end font-bold">{tBudget('realized')}</th>
+                  <th className="px-4 py-2.5 text-end font-bold">{tBudget('ecart')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-sep">
+                {budget.lines.map((l) => (
+                  <tr key={l.categoryId ?? 'none'}>
+                    <td className="px-4 py-2.5 text-label">{l.label}</td>
+                    <td className="px-4 py-2.5 text-end tabular-nums text-label-2">
+                      {fmt(l.budgetedMinor)}
+                    </td>
+                    <td className="px-4 py-2.5 text-end tabular-nums text-label-2">
+                      {fmt(l.realizedMinor)}
+                    </td>
+                    <td className="px-4 py-2.5 text-end tabular-nums">
+                      <span className={l.ecartMinor < 0 ? 'font-bold text-orange' : 'text-green'}>
+                        {fmt(l.ecartMinor)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-sep font-bold text-label">
+                  <td className="px-4 py-2.5">{tBudget('total')}</td>
+                  <td className="px-4 py-2.5 text-end tabular-nums">
+                    {fmt(budget.totalBudgetedMinor)}
+                  </td>
+                  <td className="px-4 py-2.5 text-end tabular-nums">
+                    {fmt(budget.totalRealizedMinor)}
+                  </td>
+                  <td className="px-4 py-2.5 text-end tabular-nums">
+                    <span className={budget.totalEcartMinor < 0 ? 'text-orange' : 'text-green'}>
+                      {fmt(budget.totalEcartMinor)}
+                    </span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </Card>
+        </section>
+      )}
+
+      {/* Fonds de provisions travaux — solde distinct de la trésorerie courante */}
+      {hasFund && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-section font-bold text-label">{tFund('title')}</h2>
+          <Card className="flex flex-wrap items-center justify-between gap-4 bg-green p-6 text-white">
+            <div>
+              <p className="text-eyebrow font-bold uppercase text-white/70">{tFund('balance')}</p>
+              <p className="mt-1 text-stat font-extrabold tabular-nums">{fmt(fund.balanceMinor)}</p>
+            </div>
+            <div className="flex gap-6 text-body">
+              <div>
+                <p className="text-eyebrow font-semibold uppercase text-white/60">
+                  {tFund('contributed')}
+                </p>
+                <p className="font-bold tabular-nums">{fmt(fund.contributedMinor)}</p>
+              </div>
+              <div>
+                <p className="text-eyebrow font-semibold uppercase text-white/60">
+                  {tFund('spent')}
+                </p>
+                <p className="font-bold tabular-nums">−{fmt(fund.spentMinor)}</p>
+              </div>
+            </div>
+          </Card>
+          {fund.expenses.length > 0 && (
+            <ul className="flex flex-col gap-2">
+              {fund.expenses.map((e) => (
+                <li key={e.id}>
+                  <Card className="flex flex-wrap items-center gap-3 p-4">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-indigo-soft text-indigo">
+                      <Receipt className="size-4" aria-hidden />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold text-label">{e.description}</p>
+                      <p className="text-note text-label-4">
+                        {day(e.spentOn)}
+                        {e.categoryLabel ? ` · ${e.categoryLabel}` : ''}
+                      </p>
+                    </div>
+                    <span className="font-bold tabular-nums text-label-2">{fmt(e.amountMinor)}</span>
+                    {e.justificatifHref && (
+                      <a
+                        href={e.justificatifHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-md bg-indigo-soft px-2.5 py-1.5 text-note font-bold text-indigo hover:bg-indigo-mid"
+                      >
+                        <Paperclip className="size-3.5" aria-hidden />
+                        {t('justificatif')}
+                      </a>
+                    )}
+                  </Card>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       )}
 

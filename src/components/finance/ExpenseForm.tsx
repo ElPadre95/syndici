@@ -122,6 +122,14 @@ export function ExpenseForm({ categories }: { categories: ExpenseCategoryOption[
           <p className="text-xs text-label-4">{t('form.visibilityHint')}</p>
         </div>
 
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" name="onWorksFund" className="mt-0.5" />
+          <span className="flex flex-col gap-0.5">
+            <span className="font-semibold text-label-3">{t('form.onWorksFund')}</span>
+            <span className="text-xs text-label-4">{t('form.onWorksFundHint')}</span>
+          </span>
+        </label>
+
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-semibold text-label-3">{t('form.justificatif')}</span>
           <span className="flex items-center gap-3">

@@ -19,8 +19,8 @@ export const EXPENSE_VISIBILITIES: readonly ExpenseVisibility[] = ['PARTAGE', 'I
 const INSERT_EXPENSE = `
   INSERT INTO "Expense"
     (id,"residenceId","categoryId",description,"amountMinor","spentOn","supplierName",
-     visibility,exercice,"voucherSequence","voucherNumber","justificatifId","reversesExpenseId","createdAt")
-  VALUES (gen_random_uuid(),$1,$2,$3,$4,$5::date,$6,$7::"ExpenseVisibility",$8,$9,$10,$11,$12,now())
+     visibility,exercice,"voucherSequence","voucherNumber","justificatifId","reversesExpenseId","onWorksFund","createdAt")
+  VALUES (gen_random_uuid(),$1,$2,$3,$4,$5::date,$6,$7::"ExpenseVisibility",$8,$9,$10,$11,$12,$13,now())
   RETURNING id`;
 
 const INSERT_AUDIT = `
@@ -36,6 +36,7 @@ export interface RecordExpenseInput {
   supplierName: string | null;
   visibility: ExpenseVisibility;
   justificatifId: string | null;
+  onWorksFund: boolean; // imputée sur le fonds travaux (I2) → hors trésorerie courante
   actorPersonId: string;
 }
 
@@ -74,6 +75,7 @@ export async function writeExpense(
         voucherNumber,
         input.justificatifId,
         null, // reversesExpenseId
+        input.onWorksFund,
       ])
     )[0]!.id;
 
@@ -123,9 +125,10 @@ export async function reverseExpense(
         amountMinor: number;
         supplierName: string | null;
         visibility: string;
+        onWorksFund: boolean;
         reversesExpenseId: string | null;
       }>(
-        `SELECT id,"categoryId",description,"amountMinor","supplierName",visibility,"reversesExpenseId"
+        `SELECT id,"categoryId",description,"amountMinor","supplierName",visibility,"onWorksFund","reversesExpenseId"
            FROM "Expense" WHERE id = $1 AND "residenceId" = $2 FOR UPDATE`,
         [params.expenseId, params.residenceId],
       )
@@ -152,6 +155,7 @@ export async function reverseExpense(
         null, // voucherNumber
         null, // justificatifId
         orig.id, // reversesExpenseId
+        orig.onWorksFund, // l'inverse reste dans le même périmètre (fonds ou courant)
       ])
     )[0]!.id;
 
@@ -209,6 +213,9 @@ export interface ListExpensesOptions {
   includeInternal: boolean;
   from?: Date; // borne basse sur `spentOn` (incluse)
   to?: Date; // borne haute sur `spentOn` (incluse)
+  // Fonds travaux (I2). 'exclude' (défaut) : dépenses COURANTES seulement — le fonds ne se
+  // mélange jamais au courant. 'only' : dépenses du fonds. 'all' : les deux.
+  worksFund?: 'exclude' | 'only' | 'all';
 }
 
 /**
@@ -225,10 +232,12 @@ export async function listExpenses(
     opts.from || opts.to
       ? { ...(opts.from ? { gte: opts.from } : {}), ...(opts.to ? { lte: opts.to } : {}) }
       : undefined;
+  const worksFund = opts.worksFund ?? 'exclude';
   const expenses = await scoped.expense.findMany({
     where: {
       ...(opts.includeInternal ? {} : { visibility: 'PARTAGE' }),
       ...(spentOn ? { spentOn } : {}),
+      ...(worksFund === 'exclude' ? { onWorksFund: false } : worksFund === 'only' ? { onWorksFund: true } : {}),
     },
     orderBy: [{ spentOn: 'desc' }, { createdAt: 'desc' }],
     select: {

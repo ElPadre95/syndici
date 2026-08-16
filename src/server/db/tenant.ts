@@ -42,6 +42,8 @@ export const TENANT_MODELS: ReadonlySet<string> = new Set([
   'CurrencyRate',
   'ExpenseCategory',
   'Expense',
+  'BudgetLine',
+  'WorksFundContribution',
   'SupplierContract',
   'Incident',
   'IncidentUpdate',

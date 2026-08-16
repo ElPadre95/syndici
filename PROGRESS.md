@@ -490,6 +490,23 @@ profil.
       Migration `ChargeMode` + `Residence.chargeMode`/`monthlyBudgetMinor`. Gate complet vert (312 PGlite, 120
       Postgres réel).
 
+- [x] **I2** — **Budget prévisionnel** + **fonds de provisions travaux**. Un **budget voté par catégorie et par
+      exercice** (`BudgetLine`, unique `(résidence, exercice, catégorie)`), édité par le syndic (écran **Budget &
+      fonds**, `setBudgetLineAction`, tracé à l'audit). Le **suivi budget/réalisé** par catégorie et au global,
+      avec **écart** visible (budget − réalisé) — cœur **pur** `computeBudgetVsActual` (testé : fusion, signe de
+      l'écart, tri, totaux). Le **réalisé** ne compte QUE les dépenses **courantes** (le fonds travaux en est
+      toujours exclu). **Fonds de provisions travaux** STRICTEMENT distinct de la trésorerie courante : **appels
+      dédiés** (`WorksFundContribution`, signés, **immuables** — annulation par **écriture inverse** comme les
+      paiements/frais, gardes testées) et **dépenses imputées** (`Expense.onWorksFund`) ; **solde propre** =
+      contributions − dépenses du fonds. Ni les appels ni ces dépenses n'entrent dans `getTreasury` ni dans les
+      lectures courantes (`listExpenses` défaut `worksFund: 'exclude'`). Le **propriétaire** voit le budget/réalisé
+      et le solde du fonds dans sa **transparence** (`includeInternal: false` — l'interne reste invisible, vérifié :
+      réalisé propriétaire 12.610 vs syndic 15.710). Seed : budget voté par poste sur Al Firdaous (total 200.000
+      DH), deux appels au fonds (80.000 DH) et une dépense imputée (ravalement 28.000 DH → solde 52.000 DH).
+      Case **« Imputer sur le fonds travaux »** à la saisie de dépense. Vérifié connecté fr + ar (RTL intégral).
+      Migration `budget_works_fund` (`Expense.onWorksFund`, `BudgetLine`, `WorksFundContribution`). Gate complet
+      vert (319 PGlite, 122 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

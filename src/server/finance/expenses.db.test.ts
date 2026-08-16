@@ -37,6 +37,7 @@ const base = (over: Partial<RecordExpenseInput> = {}): RecordExpenseInput => ({
   supplierName: 'RADEEMA',
   visibility: 'PARTAGE',
   justificatifId: null,
+  onWorksFund: false,
   actorPersonId: 'actor',
   ...over,
 });

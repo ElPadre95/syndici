@@ -33,7 +33,8 @@ export async function getTreasury(
     }),
     scoped.expense.aggregate({
       _sum: { amountMinor: true },
-      where: spent ? { spentOn: spent } : {},
+      // Le fonds travaux (I2) ne se mélange JAMAIS à la trésorerie courante.
+      where: { onWorksFund: false, ...(spent ? { spentOn: spent } : {}) },
     }),
   ]);
   const collectedMinor = pay._sum.amountMinor ?? 0;

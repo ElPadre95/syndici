@@ -698,6 +698,75 @@ async function main() {
       supplierName: e.supplier,
       visibility: e.visibility,
       justificatifId: stored.ok ? stored.id : null,
+      onWorksFund: false,
+      actorPersonId: gerant.id,
+    });
+  }
+
+  // ── Budget prévisionnel voté (I2) — montants annuels par catégorie, exercice courant.
+  const exercice = now.getUTCFullYear();
+  const votedBudget: Array<{ cat: string; amount: number }> = [
+    { cat: 'Nettoyage', amount: dh(40000) },
+    { cat: 'Électricité', amount: dh(24000) },
+    { cat: 'Eau commune', amount: dh(12000) },
+    { cat: 'Piscine commune', amount: dh(30000) },
+    { cat: 'Jardins / espaces verts', amount: dh(22000) },
+    { cat: 'Assurance', amount: dh(12000) },
+    { cat: 'Gardiennage', amount: dh(60000) },
+  ];
+  for (const b of votedBudget) {
+    const categoryId = catByLabel.get(b.cat);
+    if (!categoryId) continue;
+    await prisma.budgetLine.create({
+      data: { residenceId: residence.id, exercice, categoryId, amountMinor: b.amount },
+    });
+  }
+
+  // ── Fonds de provisions travaux (I2) — appels dédiés (DISTINCTS de la trésorerie
+  // courante) et une dépense imputée dessus, pour démontrer un solde propre.
+  await prisma.worksFundContribution.createMany({
+    data: [
+      {
+        residenceId: residence.id,
+        amountMinor: dh(50000),
+        label: 'Appel travaux — ravalement de façade',
+        occurredOn: monthStart(-3),
+      },
+      {
+        residenceId: residence.id,
+        amountMinor: dh(30000),
+        label: "Appel travaux — réfection de l'étanchéité toiture",
+        occurredOn: monthStart(-1),
+      },
+    ],
+  });
+  {
+    const pdf = makeInvoicePdf([
+      'Justificatif de depense (fonds travaux)',
+      'Fournisseur : BTP Atlas',
+      `Montant : ${(dh(28000) / 100).toFixed(2)} MAD`,
+      'Objet : Ravalement de facade - acompte',
+    ]);
+    const stored = await storeFile(
+      { residenceId: residence.id },
+      {
+        bucket: 'justificatifs',
+        body: pdf,
+        mimeType: 'application/pdf',
+        originalName: 'facture-BTPAtlas-fonds.pdf',
+        uploadedByPersonId: gerant.id,
+      },
+    );
+    await writeExpense(prismaTxRunner(), {
+      residenceId: residence.id,
+      categoryId: catByLabel.get('Autre') ?? null,
+      description: 'Ravalement de façade — acompte (fonds travaux)',
+      amountMinor: dh(28000),
+      spentOn: monthStart(-1),
+      supplierName: 'BTP Atlas',
+      visibility: 'PARTAGE',
+      justificatifId: stored.ok ? stored.id : null,
+      onWorksFund: true,
       actorPersonId: gerant.id,
     });
   }

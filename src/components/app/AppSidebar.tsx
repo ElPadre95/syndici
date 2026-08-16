@@ -23,6 +23,7 @@ import {
   FileBarChart2,
   Files,
   UserCircle,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -49,6 +50,7 @@ const STAFF_NAV: readonly NavItem[] = [
   { href: '/depenses', key: 'expenses', Icon: Receipt },
   { href: '/contrats', key: 'contracts', Icon: FileSignature },
   { href: '/bilan', key: 'annual', Icon: FileBarChart2 },
+  { href: '/budget', key: 'budget', Icon: Wallet },
   { href: '/incidents', key: 'incidents', Icon: TriangleAlert },
   { href: '/actualites', key: 'news', Icon: Newspaper },
   { href: '/documents', key: 'documents', Icon: FileText },
