@@ -2194,6 +2194,39 @@
       "note": "Vos chiffres, pas les nôtres. On montre l'enjeu — pas une performance.",
       "currency": "MAD"
     },
-    "ruler": "Résidence Yasmine · 25 lots"
+    "ruler": "Résidence Yasmine · 25 lots",
+    "problem": {
+      "kicker": "Le problème",
+      "title": "Ce que vous affrontez chaque mois.",
+      "n1": "Les impayés s'accumulent.",
+      "t1": "La collecte n'atteint jamais 100 %, et chaque point manquant est une charge que les autres copropriétaires avancent.",
+      "n2": "L'opacité nourrit la défiance.",
+      "t2": "Sans preuve à montrer, chaque dépense devient un soupçon et chaque appel de charges, une négociation.",
+      "n3": "Le propriétaire à 2 000 km ne voit rien.",
+      "t3": "Le MRE réclame le plus et paie le plus mal — parce qu'il n'a aucune fenêtre sur sa copropriété."
+    },
+    "product": {
+      "kicker": "Ce que fait le produit",
+      "title": "Le cycle complet, d'un seul poste.",
+      "b1t": "Appeler et encaisser",
+      "b1x": "Appels de charges au forfait ou aux tantièmes, paiement enregistré, reçu numéroté sans trou par exercice.",
+      "b2t": "Relancer intelligemment",
+      "b2x": "Le logiciel détecte les retards et prépare la relance — rappel amiable, puis mise en demeure imprimable au-delà du seuil.",
+      "b3t": "Justifier chaque dépense",
+      "b3x": "Chaque dépense adossée à sa facture ; le copropriétaire consulte le justificatif d'un simple lien.",
+      "b4t": "Tenir les comptes",
+      "b4x": "Grand livre par lot, budget contre réalisé, régularisation annuelle aux tantièmes, bilan d'exercice imprimable."
+    },
+    "ownerT": {
+      "kicker": "La transparence, côté propriétaire",
+      "title": "Il ne réclame plus de comptes. Il les voit.",
+      "lead": "L'écran qui change la relation. Le propriétaire — où qu'il soit — voit la trésorerie, les dépenses avec leurs justificatifs, les devis mis en concurrence et les photos avant/après des travaux. En français comme en arabe.",
+      "p1t": "Devis mis en concurrence",
+      "p1x": "Trois entreprises, le moins-disant marqué, le devis retenu — la preuve que l'argent commun est bien dépensé.",
+      "p2t": "Photos avant / après",
+      "p2x": "Le travail payé est le travail fait, documenté.",
+      "capT": "Écran de transparence",
+      "capW": "Devis comparatifs et photos avant/après"
+    }
   }
 }

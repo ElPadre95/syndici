@@ -18,10 +18,20 @@ mkdirSync(OUT, { recursive: true });
 
 const HIDE_DEV = 'nextjs-portal,[data-nextjs-toast],#__next-dev-tools-indicator{display:none!important}';
 
-// Écrans à capturer : { fichier, compte, chemin }. Le tableau de bord est à la racine.
+// Écrans à capturer : { fichier, compte, chemin }. Le tableau de bord est à la racine. Les
+// écrans avec identifiant (compte de lot, chantier) ne sont capturés que si l'id est fourni.
 const SHOTS = [
   { file: 'dashboard', email: 'syndic@syndici.com', path: '' },
   { file: 'transparence', email: 'owner@syndici.com', path: '/proprietaire/transparence' },
+  { file: 'paiements', email: 'syndic@syndici.com', path: '/paiements' },
+  { file: 'relances', email: 'syndic@syndici.com', path: '/relances' },
+  { file: 'depenses', email: 'syndic@syndici.com', path: '/depenses' },
+  ...(process.env.OWNER_LOT_ID
+    ? [{ file: 'compte', email: 'owner@syndici.com', path: `/proprietaire/lots/${process.env.OWNER_LOT_ID}/compte` }]
+    : []),
+  ...(process.env.WORKS_ID
+    ? [{ file: 'travaux', email: 'syndic@syndici.com', path: `/travaux/${process.env.WORKS_ID}` }]
+    : []),
 ];
 
 async function login(page, locale, email) {
@@ -50,6 +60,24 @@ async function run() {
         const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 2 });
         const page = await ctx.newPage();
         await page.goto(`${BASE}/${locale}/vitrine`, { waitUntil: 'networkidle' });
+        // Parcourt la page pour déclencher le chargement paresseux (next/image) avant la capture.
+        await page.evaluate(
+          () =>
+            new Promise((res) => {
+              let y = 0;
+              const step = () => {
+                window.scrollBy(0, 700);
+                y += 700;
+                if (y < document.body.scrollHeight) setTimeout(step, 110);
+                else {
+                  window.scrollTo(0, 0);
+                  setTimeout(res, 500);
+                }
+              };
+              step();
+            }),
+        );
+        await page.waitForTimeout(1000);
         await shot(page, `vitrine-${locale}.png`, { fullPage: true });
         await ctx.close();
         continue;

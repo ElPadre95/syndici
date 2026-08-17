@@ -3,6 +3,9 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SiteHeader } from '@/components/vitrine/SiteHeader';
 import { Hero } from '@/components/vitrine/Hero';
 import { LotRuler } from '@/components/vitrine/LotRuler';
+import { Problem } from '@/components/vitrine/Problem';
+import { Product } from '@/components/vitrine/Product';
+import { OwnerTransparency } from '@/components/vitrine/OwnerTransparency';
 
 /**
  * Vitrine publique (J1). Servie à la RACINE pour un visiteur anonyme (réécriture middleware).
@@ -50,8 +53,11 @@ export default async function VitrinePage({ params }: { params: Promise<{ locale
         <Hero locale={locale} />
         {/* Réglette de lots — séparateur de signature entre les sections. */}
         <LotRuler label={t('ruler')} />
+        <Problem />
+        <Product locale={locale} />
+        <OwnerTransparency locale={locale} />
       </main>
-      {/* Cible de l'appel à l'action ; la section Contact complète arrivera avec les autres. */}
+      {/* Cible de l'appel à l'action ; la section Contact complète arrivera avec les tarifs/FAQ. */}
       <div id="contact" aria-hidden />
     </>
   );

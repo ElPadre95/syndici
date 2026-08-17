@@ -589,8 +589,12 @@ profil.
       `public/marketing/`, l'**arabe montrant l'app en RTL intégral**. **En-tête** : accès aux **deux espaces**
       (syndic / propriétaire) en menu déroulant + **sélecteur de langue globe** conçu pour 4 langues (fr, ar câblées ;
       en, nl « bientôt »). Vérifié : anonyme `/fr` et `/ar` → vitrine ; `/fr/lots` anonyme → sign-in (307) ; connecté
-      `/fr` → tableau de bord. Gate complet vert (361 PGlite, 129 Postgres réel). **Direction validée ; sections 2 à 8
-      en cours.**
+      `/fr` → tableau de bord. Gate complet vert (361 PGlite, 129 Postgres réel). **Direction validée.**
+      **Sections 1 à 4 posées** — ouverture (promesse + calculateur + tableau de bord) · **2. Le problème** (trois
+      constats en filets) · **3. Ce que fait le produit** (4 blocs alternés avec captures réelles : paiements,
+      relances, dépenses, compte) · **4. La transparence propriétaire** (écran de transparence + devis comparés &
+      photos avant/après). Réglette de lots en séparateur. **Restent : 5. preuves de sérieux · 6. tarifs · 7. FAQ ·
+      8. contact.**
 
 - [x] **I7** — **Travaux : devis comparatifs + photos avant/après**. Nouvelle entité **chantier** (`WorksProject`)
       qui regroupe des **devis comparatifs** (`WorksQuote` : fournisseur libre, montant, PDF du devis) et des
