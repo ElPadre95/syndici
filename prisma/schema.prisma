@@ -429,6 +429,9 @@ model Residence {
   worksFundContributions WorksFundContribution[]
   regularisations    Regularisation[]
   regularisationLines RegularisationLine[]
+  worksProjects      WorksProject[]
+  worksQuotes        WorksQuote[]
+  worksPhotos        WorksPhoto[]
   contracts          SupplierContract[]
   chargeCalls        ChargeCall[]
   payments           Payment[]
@@ -796,6 +799,79 @@ model RegularisationLine {
   @@index([lotId])
 }
 
+/// Étape d'un chantier (I7). Consultation (collecte des devis) → en cours (devis retenu) → terminé.
+enum WorksStatus {
+  CONSULTATION
+  EN_COURS
+  TERMINE
+}
+
+/// Phase d'une photo de chantier (I7) : avant / après intervention.
+enum WorksPhase {
+  AVANT
+  APRES
+}
+
+/// Chantier / projet de travaux (I7) — regroupe des DEVIS COMPARATIFS (mise en concurrence) et
+/// des PHOTOS AVANT/APRÈS. Transparence : un propriétaire voit les devis mis en concurrence, le
+/// devis retenu, et le travail réalisé. `visibility` PARTAGE = visible copropriétaires ; INTERNE
+/// = staff seul. `selectedQuoteId` = devis retenu (référence simple, sans relation circulaire).
+model WorksProject {
+  id             String            @id @default(uuid())
+  residenceId    String
+  title          String
+  description    String
+  status         WorksStatus       @default(CONSULTATION)
+  visibility     ExpenseVisibility @default(PARTAGE)
+  incidentId     String? // chantier découlant d'un incident (boucle de transparence, facultatif)
+  selectedQuoteId String? // devis retenu (id d'un WorksQuote ; pas de relation pour éviter le cycle)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  residence      Residence         @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  incident       Incident?         @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  quotes         WorksQuote[]
+  photos         WorksPhoto[]
+
+  @@index([residenceId])
+  @@index([incidentId])
+}
+
+/// Un devis reçu pour un chantier (I7) : fournisseur (texte libre), montant, et le PDF du devis.
+model WorksQuote {
+  id           String       @id @default(uuid())
+  residenceId  String
+  projectId    String
+  supplierName String
+  amountMinor  Int
+  description  String?
+  fileAssetId  String? // le devis (PDF)
+  receivedOn   DateTime     @db.Date
+  createdAt    DateTime     @default(now())
+  residence    Residence    @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  project      WorksProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  file         FileAsset?   @relation(fields: [fileAssetId], references: [id], onDelete: SetNull)
+
+  @@index([residenceId])
+  @@index([projectId])
+}
+
+/// Une photo de chantier (I7), avant ou après. Le fichier est obligatoire (raison d'être de la ligne).
+model WorksPhoto {
+  id          String       @id @default(uuid())
+  residenceId String
+  projectId   String
+  fileAssetId String
+  phase       WorksPhase
+  caption     String?
+  createdAt   DateTime     @default(now())
+  residence   Residence    @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  project     WorksProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  file        FileAsset    @relation(fields: [fileAssetId], references: [id], onDelete: Cascade)
+
+  @@index([residenceId])
+  @@index([projectId])
+}
+
 /// Dépense de la résidence avec justificatif (référence de fichier, pas base64).
 /// Numéro de justificatif = DEP-<exercice>-<sequence> (série JUSTIFICATIF).
 /// Visibilité d'une dépense (C1) : PARTAGE = visible des copropriétaires (transparence),
@@ -881,6 +957,7 @@ model Incident {
   photo              FileAsset?       @relation(fields: [photoId], references: [id], onDelete: SetNull)
   updates            IncidentUpdate[]
   expenses           Expense[] // dépenses découlant de cet incident (H1)
+  worksProjects      WorksProject[] // chantiers découlant de cet incident (I7)
 
   @@index([residenceId])
   @@index([lotId])
@@ -1000,6 +1077,8 @@ model FileAsset {
   expenses           Expense[]
   incidents          Incident[]
   messages           Message[]
+  worksQuotes        WorksQuote[]
+  worksPhotos        WorksPhoto[]
 
   @@index([residenceId])
 }

@@ -12,6 +12,7 @@ import { findAccessibleFile, readStoredFile } from '@/server/storage/files';
 import { canServeMessageAttachment } from '@/server/messaging/access';
 import { canServeIncidentPhoto } from '@/server/incidents/access';
 import { canServeDocument } from '@/server/documents/data';
+import { canServeWorksFile } from '@/server/works/access';
 
 export async function GET(
   req: NextRequest,
@@ -45,6 +46,10 @@ export async function GET(
     }
     // MUR DES DOCUMENTS : un document PRIVÉ n'est jamais servi à un autre (syndic compris).
     if (file.bucket === 'documents' && !(await canServeDocument(prismaExecutor(), actx, id))) {
+      return new Response('Fichier introuvable.', { status: 404 });
+    }
+    // MUR DES CHANTIERS : un chantier INTERNE ne sert jamais ses devis/photos à un résident.
+    if (file.bucket === 'travaux' && !(await canServeWorksFile(prismaExecutor(), actx, id))) {
       return new Response('Fichier introuvable.', { status: 404 });
     }
   }

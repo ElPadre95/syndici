@@ -11,6 +11,7 @@ import { listExpenses, aggregateByCategory } from '@/server/finance/expenses';
 import { listContracts } from '@/server/finance/contracts';
 import { getBudgetVsActual } from '@/server/finance/budget';
 import { getWorksFund } from '@/server/finance/works-fund';
+import { listOwnerWorksProjects } from '@/server/works/data';
 
 /**
  * Transparence (G3) — le cœur de la promesse. Le propriétaire voit les dépenses VISIBLES de
@@ -32,6 +33,7 @@ export default async function OwnerTransparencyPage({
   const tContract = await getTranslations('contracts');
   const tBudget = await getTranslations('budget');
   const tFund = await getTranslations('worksFund');
+  const tWorks = await getTranslations('travaux');
 
   const ctx = await getSessionContext();
   if (!ctx?.activeId || ctx.role !== 'PROPRIETAIRE' || !can(ctx.role, 'expense.view')) {
@@ -53,6 +55,7 @@ export default async function OwnerTransparencyPage({
     getBudgetVsActual(actx, currentYear, t('uncategorized'), false), // réel VISIBLE seulement
     getWorksFund(actx, false), // dépenses du fonds VISIBLES seulement
   ]);
+  const works = await listOwnerWorksProjects(actx); // chantiers PARTAGE seulement
   const hasFund = fund.contributedMinor !== 0 || fund.spentMinor !== 0;
 
   const fmt = (m: number) => formatMoney(m, localeC);
@@ -249,6 +252,89 @@ export default async function OwnerTransparencyPage({
               ))}
             </ul>
           )}
+        </section>
+      )}
+
+      {/* Travaux — devis comparatifs mis en concurrence + photos avant/après (chantiers PARTAGE) */}
+      {works.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-section font-bold text-label">{tWorks('title')}</h2>
+          <ul className="flex flex-col gap-3">
+            {works.map((w) => (
+              <li key={w.id}>
+                <Card className="flex flex-col gap-3 p-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-bold text-label">{w.title}</span>
+                    <Badge tone={w.status === 'TERMINE' ? 'success' : w.status === 'EN_COURS' ? 'warning' : 'neutral'}>
+                      {tWorks(`status.${w.status}`)}
+                    </Badge>
+                  </div>
+                  {w.description && <p className="text-note text-label-3">{w.description}</p>}
+
+                  {w.quotes.length > 0 && (
+                    <div className="flex flex-col gap-1">
+                      <p className="text-eyebrow font-bold uppercase text-label-4">
+                        {tWorks('quotesTitle')}
+                      </p>
+                      {w.quotes.map((q) => (
+                        <div
+                          key={q.id}
+                          className="flex flex-wrap items-center gap-2 border-b border-sep py-1.5 last:border-0"
+                        >
+                          <span className="font-semibold text-label">{q.supplierName}</span>
+                          {q.cheapest && <Badge tone="success">{tWorks('cheapest')}</Badge>}
+                          {q.selected && <Badge tone="info">{tWorks('selected')}</Badge>}
+                          <span className="ms-auto font-bold tabular-nums text-label-2">
+                            {fmt(q.amountMinor)}
+                          </span>
+                          {q.fileHref && (
+                            <a
+                              href={q.fileHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 rounded-md bg-indigo-soft px-2 py-1 text-note font-bold text-indigo hover:bg-indigo-mid"
+                            >
+                              <Paperclip className="size-3.5" aria-hidden />
+                              {tWorks('viewDevis')}
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {(w.photosBefore.length > 0 || w.photosAfter.length > 0) && (
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {(['photosBefore', 'photosAfter'] as const).map((k) => {
+                        const photos = w[k];
+                        const label = k === 'photosBefore' ? tWorks('phaseLabel.AVANT') : tWorks('phaseLabel.APRES');
+                        return (
+                          <div key={k} className="flex flex-col gap-1">
+                            <p className="text-eyebrow font-bold uppercase text-label-4">{label}</p>
+                            {photos.length === 0 ? (
+                              <p className="text-note text-label-4">—</p>
+                            ) : (
+                              <div className="grid grid-cols-3 gap-1.5">
+                                {photos.map((ph) => (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    key={ph.id}
+                                    src={ph.href}
+                                    alt={ph.caption ?? ''}
+                                    className="aspect-square w-full rounded-md border border-sep object-cover"
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </Card>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

@@ -119,7 +119,8 @@
     "sDocs": "Docs",
     "sBudget": "Budget",
     "sMessages": "Messages",
-    "sVotes": "Votes"
+    "sVotes": "Votes",
+    "works": "Travaux"
   },
   "messagerie": {
     "msgSubGerant": "Conversations avec les résidents",
@@ -1226,7 +1227,8 @@
       "transparency": "Transparence",
       "profile": "Mon profil",
       "budget": "Budget & fonds",
-      "regularisation": "Régularisation"
+      "regularisation": "Régularisation",
+      "works": "Travaux"
     },
     "header": {
       "account": "Compte",
@@ -2065,6 +2067,74 @@
       "heading": "Nouvelle actualité de {residence}",
       "intro": "{title}",
       "cta": "Ouvrir Syndici"
+    }
+  },
+  "travaux": {
+    "eyebrow": "Mise en concurrence",
+    "title": "Travaux",
+    "forbidden": "Accès réservé au syndic.",
+    "subtitle": "Chantiers avec devis comparatifs et photos avant/après.",
+    "newTitle": "Nouveau chantier",
+    "field": {
+      "title": "Intitulé",
+      "titleHint": "ex. Réfection de l’étanchéité de la toiture",
+      "description": "Description",
+      "visibility": "Visibilité",
+      "supplier": "Fournisseur",
+      "amount": "Montant (MAD)",
+      "date": "Date du devis",
+      "note": "Note (facultatif)",
+      "devis": "Devis (PDF, facultatif)",
+      "caption": "Légende (facultatif)",
+      "phase": "Phase",
+      "photo": "Photo"
+    },
+    "visibilityShared": "Visible copropriétaires",
+    "visibilityInternal": "Interne (syndic seul)",
+    "create": "Créer le chantier",
+    "empty": "Aucun chantier pour le moment.",
+    "status": {
+      "CONSULTATION": "Consultation",
+      "EN_COURS": "En cours",
+      "TERMINE": "Terminé"
+    },
+    "phaseLabel": {
+      "AVANT": "Avant",
+      "APRES": "Après"
+    },
+    "col": {
+      "project": "Chantier",
+      "status": "Statut",
+      "quotes": "Devis",
+      "amount": "Montant retenu",
+      "supplier": "Fournisseur",
+      "date": "Reçu le"
+    },
+    "quotesTitle": "Devis comparatifs",
+    "addQuote": "Ajouter un devis",
+    "cheapest": "Moins-disant",
+    "selected": "Retenu",
+    "select": "Retenir",
+    "viewDevis": "Voir le devis",
+    "noQuotes": "Aucun devis reçu.",
+    "photosTitle": "Photos avant / après",
+    "addPhoto": "Ajouter une photo",
+    "noPhotosBefore": "Aucune photo avant.",
+    "noPhotosAfter": "Aucune photo après.",
+    "statusTitle": "Statut du chantier",
+    "save": "Enregistrer",
+    "back": "Retour aux travaux",
+    "notFound": "Chantier introuvable.",
+    "savings": "Le devis retenu est le moins-disant.",
+    "quotesCount": "{count} devis",
+    "error": {
+      "forbidden": "Accès réservé au syndic.",
+      "no_active_residence": "Aucune résidence active.",
+      "invalid": "Données invalides.",
+      "not_found": "Introuvable.",
+      "empty": "Fichier vide.",
+      "too_large": "Fichier trop volumineux (max 10 Mo).",
+      "unsupported_type": "Type de fichier non pris en charge."
     }
   }
 }

@@ -119,7 +119,8 @@
     "sDocs": "وثائق",
     "sBudget": "الميزانية",
     "sMessages": "الرسائل",
-    "sVotes": "التصويت"
+    "sVotes": "التصويت",
+    "works": "الأشغال"
   },
   "messagerie": {
     "msgSubGerant": "محادثات مع السكان",
@@ -1223,7 +1224,8 @@
       "transparency": "الشفافية",
       "profile": "ملفي الشخصي",
       "budget": "الميزانية والصندوق",
-      "regularisation": "التسوية السنوية"
+      "regularisation": "التسوية السنوية",
+      "works": "الأشغال"
     },
     "header": {
       "account": "الحساب",
@@ -2062,6 +2064,74 @@
       "heading": "خبر جديد من {residence}",
       "intro": "{title}",
       "cta": "فتح سينديسي"
+    }
+  },
+  "travaux": {
+    "eyebrow": "طلب العروض",
+    "title": "الأشغال",
+    "forbidden": "الوصول مخصص للمتصرف.",
+    "subtitle": "أوراش مع عروض أثمان مقارَنة وصور قبل/بعد.",
+    "newTitle": "ورش جديد",
+    "field": {
+      "title": "العنوان",
+      "titleHint": "مثال: إصلاح عزل السطح",
+      "description": "الوصف",
+      "visibility": "الظهور",
+      "supplier": "المورّد",
+      "amount": "المبلغ (درهم)",
+      "date": "تاريخ العرض",
+      "note": "ملاحظة (اختياري)",
+      "devis": "عرض الثمن (PDF، اختياري)",
+      "caption": "تعليق (اختياري)",
+      "phase": "المرحلة",
+      "photo": "صورة"
+    },
+    "visibilityShared": "ظاهر للملاك",
+    "visibilityInternal": "داخلي (المتصرف فقط)",
+    "create": "إنشاء الورش",
+    "empty": "لا يوجد أي ورش حالياً.",
+    "status": {
+      "CONSULTATION": "طلب عروض",
+      "EN_COURS": "قيد الإنجاز",
+      "TERMINE": "منتهٍ"
+    },
+    "phaseLabel": {
+      "AVANT": "قبل",
+      "APRES": "بعد"
+    },
+    "col": {
+      "project": "الورش",
+      "status": "الحالة",
+      "quotes": "العروض",
+      "amount": "المبلغ المعتمد",
+      "supplier": "المورّد",
+      "date": "تاريخ التوصل"
+    },
+    "quotesTitle": "عروض الأثمان المقارَنة",
+    "addQuote": "إضافة عرض ثمن",
+    "cheapest": "الأقل ثمناً",
+    "selected": "المعتمد",
+    "select": "اعتماد",
+    "viewDevis": "عرض الوثيقة",
+    "noQuotes": "لم يُتوصَّل بأي عرض.",
+    "photosTitle": "صور قبل / بعد",
+    "addPhoto": "إضافة صورة",
+    "noPhotosBefore": "لا توجد صورة قبل.",
+    "noPhotosAfter": "لا توجد صورة بعد.",
+    "statusTitle": "حالة الورش",
+    "save": "حفظ",
+    "back": "العودة إلى الأشغال",
+    "notFound": "الورش غير موجود.",
+    "savings": "العرض المعتمد هو الأقل ثمناً.",
+    "quotesCount": "{count} عروض",
+    "error": {
+      "forbidden": "الوصول مخصص للمتصرف.",
+      "no_active_residence": "لا توجد إقامة نشطة.",
+      "invalid": "بيانات غير صالحة.",
+      "not_found": "غير موجود.",
+      "empty": "الملف فارغ.",
+      "too_large": "الملف كبير جداً (10 ميغا كحد أقصى).",
+      "unsupported_type": "نوع الملف غير مدعوم."
     }
   }
 }

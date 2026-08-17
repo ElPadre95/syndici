@@ -19,6 +19,7 @@ import { storeFile } from '../src/server/storage/files';
 import { prismaTxRunner } from '../src/server/db/sql';
 import { distributeByTantiemes } from '../src/server/finance/campaigns';
 import { computeRegularisation } from '../src/server/finance/regularisation';
+import { solidPng } from './png';
 import { disconnectBase } from '../src/server/db/client';
 import { hashPassword } from '../src/server/auth/password';
 
@@ -1344,6 +1345,93 @@ async function main() {
           },
         },
       });
+    }
+  }
+
+  // ── Chantier de démonstration (I7) — devis comparatifs + photos avant/après.
+  {
+    const project = await prisma.worksProject.create({
+      data: {
+        residenceId: residence.id,
+        title: "Réfection de l'étanchéité de la toiture",
+        description:
+          "Infiltrations signalées au dernier étage. Mise en concurrence de trois entreprises ; travaux réalisés après vote.",
+        status: 'EN_COURS',
+        visibility: 'PARTAGE',
+      },
+    });
+    const quoteSpecs: Array<{ supplier: string; amount: number; note: string }> = [
+      { supplier: 'Étanche Pro', amount: dh(48000), note: 'Membrane bicouche, garantie 10 ans.' },
+      { supplier: 'BTP Atlas', amount: dh(52000), note: 'Résine liquide, garantie 8 ans.' },
+      { supplier: 'Toiture Plus', amount: dh(61000), note: 'Isolation renforcée incluse.' },
+    ];
+    let cheapestQuoteId: string | null = null;
+    let cheapest = Number.POSITIVE_INFINITY;
+    for (const q of quoteSpecs) {
+      const pdf = makeInvoicePdf([
+        'Devis travaux',
+        `Entreprise : ${q.supplier}`,
+        `Montant : ${(q.amount / 100).toFixed(2)} MAD`,
+        "Objet : Refection etancheite toiture",
+      ]);
+      const stored = await storeFile(
+        { residenceId: residence.id },
+        {
+          bucket: 'travaux',
+          body: pdf,
+          mimeType: 'application/pdf',
+          originalName: `devis-${q.supplier.replace(/[^a-zA-Z0-9]/g, '')}.pdf`,
+          uploadedByPersonId: gerant.id,
+        },
+      );
+      const quote = await prisma.worksQuote.create({
+        data: {
+          residenceId: residence.id,
+          projectId: project.id,
+          supplierName: q.supplier,
+          amountMinor: q.amount,
+          description: q.note,
+          receivedOn: monthStart(-1),
+          fileAssetId: stored.ok ? stored.id : null,
+        },
+      });
+      if (q.amount < cheapest) {
+        cheapest = q.amount;
+        cheapestQuoteId = quote.id;
+      }
+    }
+    // Le syndic retient le MOINS-DISANT (Étanche Pro).
+    await prisma.worksProject.update({
+      where: { id: project.id },
+      data: { selectedQuoteId: cheapestQuoteId },
+    });
+    // Photos avant (toiture dégradée — gris) / après (réfection — teinte claire).
+    const photos: Array<{ phase: 'AVANT' | 'APRES'; rgb: [number, number, number]; caption: string }> = [
+      { phase: 'AVANT', rgb: [110, 110, 116], caption: 'Toiture avant travaux' },
+      { phase: 'APRES', rgb: [96, 150, 120], caption: 'Toiture après réfection' },
+    ];
+    for (const ph of photos) {
+      const stored = await storeFile(
+        { residenceId: residence.id },
+        {
+          bucket: 'travaux',
+          body: solidPng(480, 480, ph.rgb),
+          mimeType: 'image/png',
+          originalName: `chantier-${ph.phase.toLowerCase()}.png`,
+          uploadedByPersonId: gerant.id,
+        },
+      );
+      if (stored.ok) {
+        await prisma.worksPhoto.create({
+          data: {
+            residenceId: residence.id,
+            projectId: project.id,
+            fileAssetId: stored.id,
+            phase: ph.phase,
+            caption: ph.caption,
+          },
+        });
+      }
     }
   }
 

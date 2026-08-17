@@ -25,6 +25,7 @@ import {
   UserCircle,
   Wallet,
   Scale,
+  Hammer,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -54,6 +55,7 @@ const STAFF_NAV: readonly NavItem[] = [
   { href: '/budget', key: 'budget', Icon: Wallet },
   { href: '/regularisation', key: 'regularisation', Icon: Scale },
   { href: '/incidents', key: 'incidents', Icon: TriangleAlert },
+  { href: '/travaux', key: 'works', Icon: Hammer },
   { href: '/actualites', key: 'news', Icon: Newspaper },
   { href: '/documents', key: 'documents', Icon: FileText },
   { href: '/messagerie', key: 'messages', Icon: MessageCircle },

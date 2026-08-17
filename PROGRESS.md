@@ -565,6 +565,24 @@ profil.
 
   _(I6 — notifications paramétrables + relevé mensuel auto — **retiré du périmètre** à la demande de l'utilisateur.)_
 
+- [x] **I7** — **Travaux : devis comparatifs + photos avant/après**. Nouvelle entité **chantier** (`WorksProject`)
+      qui regroupe des **devis comparatifs** (`WorksQuote` : fournisseur libre, montant, PDF du devis) et des
+      **photos avant/après** (`WorksPhoto`, enum `WorksPhase` AVANT/APRES, fichier obligatoire). Le syndic crée un
+      chantier, ajoute les devis reçus, **retient** l'un d'eux (`selectedQuoteId`, statut → EN_COURS), joint les
+      photos, et fait avancer le statut (consultation → en cours → terminé). La comparaison marque automatiquement le
+      **moins-disant** et le **devis retenu** — cœur **pur** `annotateQuotes` (testé : moins-disant unique, égalité,
+      retenu ≠ moins-disant). **Transparence** : le propriétaire voit, dans son écran de transparence, les chantiers
+      **PARTAGE** (jamais l'INTERNE) — les devis mis en concurrence, lequel a été retenu, et les photos avant/après.
+      **Étanchéité** : nouveau **mur de service des fichiers** (`canServeWorksFile`, bucket `travaux`, ajouté au
+      garde `/api/files/[id]`) — un chantier INTERNE ne sert jamais ses devis/photos à un résident (testé PGlite +
+      Postgres réel : staff voit tout, propriétaire voit PARTAGE, jamais INTERNE). Fichiers via la couche C0
+      (`storeFile`, validation type/taille), liens signés HMAC. Seed : un chantier « Réfection de l'étanchéité de la
+      toiture » (3 devis 48/52/61 k DH → moins-disant Étanche Pro retenu, PDF par devis) + 2 photos avant/après
+      (vraies images PNG générées par un mini-encodeur de seed). Vérifié connecté : liste + détail syndic (moins-disant
+      + retenu, « voir le devis », galeries avant/après servies en 200 via le mur), fr + ar (RTL intégral). Migration
+      `travaux` (enums `WorksStatus`/`WorksPhase`, `WorksProject`/`WorksQuote`/`WorksPhoto`). Gate complet vert (356
+      PGlite, 129 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·
