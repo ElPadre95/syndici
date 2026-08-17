@@ -582,11 +582,15 @@ profil.
       (calée contre les filets, sans cadre) à droite. **Contenu** : la promesse « Le syndic
       gère. Le propriétaire voit. » + l'argument MRE ; un **calculateur d'impayés** (les chiffres DU visiteur :
       lots × charge → appelé/mois et ce que représentent 20 points de collecte manquants, formule affichée, aucune
-      promesse de résultat) ; et une **VRAIE capture** de l'écran de transparence du propriétaire (compte de démo,
-      capturée via Playwright dans `public/marketing/`, dans la langue de la page — l'**arabe montre l'app en RTL
-      intégral**). Vérifié : anonyme `/fr` et `/ar` → vitrine ; `/fr/lots` anonyme → sign-in (307) ; connecté `/fr`
-      → tableau de bord. Gate complet vert (361 PGlite, 129 Postgres réel). **En attente : validation de la
-      direction avant de construire les 7 autres sections.**
+      promesse de résultat) ; et une **VRAIE capture** de l'app (le **tableau de bord** du syndic), débordant d'un
+      seul côté, calée contre les filets. **Jeu de données MARKETING dédié** (`scripts/seed-marketing.ts`, séparé du
+      seed de démo, jamais en prod) : **aucun nominatif** — résidence neutre « Yasmine », noms abrégés (« Sara T. »),
+      e-mails `@syndici.com`, fournisseurs génériques ; captures via Playwright (`scripts/capture-marketing.mjs`) dans
+      `public/marketing/`, l'**arabe montrant l'app en RTL intégral**. **En-tête** : accès aux **deux espaces**
+      (syndic / propriétaire) en menu déroulant + **sélecteur de langue globe** conçu pour 4 langues (fr, ar câblées ;
+      en, nl « bientôt »). Vérifié : anonyme `/fr` et `/ar` → vitrine ; `/fr/lots` anonyme → sign-in (307) ; connecté
+      `/fr` → tableau de bord. Gate complet vert (361 PGlite, 129 Postgres réel). **Direction validée ; sections 2 à 8
+      en cours.**
 
 - [x] **I7** — **Travaux : devis comparatifs + photos avant/après**. Nouvelle entité **chantier** (`WorksProject`)
       qui regroupe des **devis comparatifs** (`WorksQuote` : fournisseur libre, montant, PDF du devis) et des

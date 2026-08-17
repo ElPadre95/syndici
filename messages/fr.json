@@ -2163,7 +2163,14 @@
     "nav": {
       "demo": "Demander une démonstration",
       "login": "Connexion",
-      "langLabel": "العربية"
+      "langLabel": "العربية",
+      "access": "Connexion",
+      "syndic": "Espace syndic",
+      "syndicDesc": "Gérer une copropriété",
+      "owner": "Espace propriétaire",
+      "ownerDesc": "Suivre mon lot, voir la transparence",
+      "language": "Langue",
+      "soon": "Bientôt"
     },
     "hero": {
       "kicker": "Logiciel de syndic · Maroc",
@@ -2171,9 +2178,9 @@
       "title2": "Le propriétaire voit.",
       "lead": "Le logiciel de gestion de copropriété qui répond à vos copropriétaires — d'abord les MRE, ceux qui réclament le plus et paient le plus mal. Vous appelez, encaissez et justifiez ; eux voient chaque dirham, en français comme en arabe. La transparence devient votre argument.",
       "cta": "Demander une démonstration",
-      "shotAlt": "Écran de transparence du propriétaire — Résidence Al Firdaous, Casablanca.",
-      "shotTag": "Vu par le propriétaire",
-      "shotCaption": "Chaque dirham appelé, encaissé et dépensé — avec le justificatif."
+      "shotAlt": "Tableau de bord du syndic — Résidence Yasmine.",
+      "shotTag": "Le poste du syndic",
+      "shotCaption": "Trésorerie, taux de collecte, impayés et relances — en un écran."
     },
     "calc": {
       "label": "L'enjeu, en chiffres",
@@ -2187,6 +2194,6 @@
       "note": "Vos chiffres, pas les nôtres. On montre l'enjeu — pas une performance.",
       "currency": "MAD"
     },
-    "ruler": "Résidence Al Firdaous · 25 lots"
+    "ruler": "Résidence Yasmine · 25 lots"
   }
 }

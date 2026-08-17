@@ -11,7 +11,9 @@ import { Calculator } from './Calculator';
  */
 export async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations('vitrine.hero');
-  const shot = `/marketing/transparence-${locale === 'ar' ? 'ar' : 'fr'}.png`;
+  // Le tableau de bord parle plus qu'un écran de transparence en capture. La transparence est
+  // réservée à sa propre section (4). Jeu de données marketing (aucun nominatif).
+  const shot = `/marketing/dashboard-${locale === 'ar' ? 'ar' : 'fr'}.png`;
 
   return (
     <section className="relative overflow-hidden" style={{ background: 'var(--white)' }}>
@@ -74,7 +76,9 @@ export async function Hero({ locale }: { locale: string }) {
                   fill
                   priority
                   sizes="(min-width: 1024px) 60vw, 100vw"
-                  className="object-cover object-top"
+                  /* Ancré au DÉBUT (barre latérale visible) → le débordement se fait d'un seul
+                     côté, franchement, à la fin. Miroir en arabe. */
+                  className="object-cover object-left-top rtl:object-right-top"
                 />
               </div>
             </div>
