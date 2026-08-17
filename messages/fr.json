@@ -2186,6 +2186,7 @@
       "formula": "{lots} lots × {charge} = {called} appelés. 20 % non collectés = {gap}.",
       "note": "Vos chiffres, pas les nôtres. On montre l'enjeu — pas une performance.",
       "currency": "MAD"
-    }
+    },
+    "ruler": "Résidence Al Firdaous · 25 lots"
   }
 }

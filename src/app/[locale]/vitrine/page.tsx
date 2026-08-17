@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SiteHeader } from '@/components/vitrine/SiteHeader';
 import { Hero } from '@/components/vitrine/Hero';
+import { LotRuler } from '@/components/vitrine/LotRuler';
 
 /**
  * Vitrine publique (J1). Servie à la RACINE pour un visiteur anonyme (réécriture middleware).
@@ -40,12 +41,15 @@ export async function generateMetadata({
 export default async function VitrinePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations('vitrine');
 
   return (
     <>
       <SiteHeader locale={locale} />
       <main>
         <Hero locale={locale} />
+        {/* Réglette de lots — séparateur de signature entre les sections. */}
+        <LotRuler label={t('ruler')} />
       </main>
       {/* Cible de l'appel à l'action ; la section Contact complète arrivera avec les autres. */}
       <div id="contact" aria-hidden />

@@ -571,11 +571,15 @@ profil.
       racine `/<locale>` branche selon la session — le middleware, qui dispose déjà de `req.auth`, **réécrit** (URL
       préservée) une requête anonyme vers `/<locale>/vitrine` (page publique), tandis qu'un utilisateur connecté
       poursuit vers son tableau de bord d'aujourd'hui. Toute la couche `(app)` et toutes les URL existantes restent
-      inchangées ; aucune démo en libre accès. **Direction visuelle** « registre & preuve », distincte de l'app :
-      papier crème, encre bleu-nuit, **UN seul accent** (l'indigo de la marque, uniquement là où il signifie quelque
-      chose — le point du logo, le montant qui manque, le surlignage sous « voit »), fontes **Fraunces** (titres,
-      allure éditoriale) + **IBM Plex Mono** (chiffres alignés, façon reçu), texture papier, filets fins,
-      **asymétrie** (discours à gauche, capture qui déborde du bord à droite). **Contenu** : la promesse « Le syndic
+      inchangées ; aucune démo en libre accès. **Direction visuelle « L'INSTRUMENT »** (la 1re direction crème/serif
+      éditoriale a été refusée) : logiciel financier dense et précis — **blanc pur**, **encre bleu-nuit**, **filets
+      1px partout** (ils structurent la page, pas les cartes ni les ombres), **UN accent cobalt** (`#1240E0`, réservé
+      aux actions et au chiffre qui compte), bandeau de nav sombre `#0B1220`, aucun dégradé/texture/ombre, rayons
+      ≤ 4px. Fontes **Archivo** (titres 700, serrés, alignés à gauche) + **Inter** (corps) + **IBM Plex Mono**
+      (chiffres/références tabulaires) + **IBM Plex Sans Arabic**. **Élément de signature** : une **réglette de
+      références de lot** (les 25 lots réels d'Al Firdaous, A1…V6, graduations cobalt aux débuts de bloc) en
+      séparateur de section. **Asymétrie** : discours + calculateur-instrument à gauche, capture qui déborde du bord
+      (calée contre les filets, sans cadre) à droite. **Contenu** : la promesse « Le syndic
       gère. Le propriétaire voit. » + l'argument MRE ; un **calculateur d'impayés** (les chiffres DU visiteur :
       lots × charge → appelé/mois et ce que représentent 20 points de collecte manquants, formule affichée, aucune
       promesse de résultat) ; et une **VRAIE capture** de l'écran de transparence du propriétaire (compte de démo,

@@ -1,115 +1,105 @@
 /**
- * Vitrine publique (J1) — système visuel « registre & preuve », distinct de l'application.
- * Papier crème, encre bleu-nuit, UNE seule couleur d'accent (l'indigo de la marque), filets
- * fins, chiffres alignés en monospace. Propriétés logiques uniquement (RTL complet).
+ * Vitrine publique (J1) — direction « L'INSTRUMENT » : logiciel financier sérieux, dense et
+ * précis. Blanc pur, encre bleu-nuit, filets 1px partout (ils structurent, pas les cartes ni
+ * les ombres), UN accent cobalt (actions + le chiffre qui compte). Aucun dégradé, aucune
+ * texture, aucune ombre portée. Rayons ≤ 4px. Propriétés logiques uniquement (RTL complet).
  */
 
 .vitrine {
-  /* Papier & encre */
-  --paper: #f4f0e6;
-  --paper-2: #ece6d8;
-  --card: #fffdf8;
-  --ink: #16202e;
-  --ink-2: #515b68;
-  --ink-3: #8b8674;
-  --line: #ddd4c2;
-  --line-strong: #c7bda6;
+  --white: #fff;
+  --panel: #f6f8fa;
+  --dark: #0b1220;
+  --ink: #0b1220;
+  --ink-2: #47566b;
+  --ink-3: #74839a;
+  --line: #e2e7ee;
+  --line-dark: #223049; /* filet sur fond sombre */
+  --accent: #1240e0;
 
-  /* Accent unique — quand il apparaît, il signifie quelque chose. */
-  --accent: #3a51c6;
-  --accent-2: #4f6ef7;
-  --accent-soft: #e9ecfb;
+  --font-title: var(--font-archivo), 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --font-body: var(--font-inter), 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
-  --font-display: var(--font-fraunces), 'DM Serif Display', Georgia, serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
-
-  background-color: var(--paper);
+  background-color: var(--white);
   color: var(--ink);
+  font-family: var(--font-body);
   min-height: 100vh;
-  /* Grain/texture papier très discrète, sans image. */
-  background-image: radial-gradient(var(--line) 0.5px, transparent 0.5px);
-  background-size: 22px 22px;
-  background-position: -11px -11px;
+  -webkit-font-smoothing: antialiased;
 }
 
 :root[lang='ar'] .vitrine {
-  --font-display: var(--font-arabic-src), 'Noto Sans Arabic', sans-serif;
+  --font-title: var(--font-plex-arabic), var(--font-archivo), sans-serif;
+  --font-body: var(--font-plex-arabic), var(--font-inter), sans-serif;
 }
 
-.v-display {
-  font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.015em;
-  line-height: 1.04;
-}
-
-:root[lang='ar'] .v-display {
+/* Titres — Archivo 700, interlettrage serré, alignés à gauche (start), jamais centrés. */
+.v-title {
+  font-family: var(--font-title);
   font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  text-align: start;
+}
+
+:root[lang='ar'] .v-title {
   letter-spacing: 0;
-  line-height: 1.18;
+  line-height: 1.14;
 }
 
 .v-mono {
   font-family: var(--font-mono);
-  font-feature-settings: 'tnum' 1, 'ss01' 1;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
 }
 
 .v-kicker {
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
 
-/* Bouton d'action — encre pleine, angles nets (pas de pilule arrondie générique). */
+/* Action — cobalt franc, angles quasi droits (rayon 4px). */
 .v-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.95rem;
-  padding-block: 0.85rem;
-  padding-inline: 1.4rem;
-  border-radius: 3px;
-  transition: transform 0.12s ease, background 0.2s ease;
+  padding-block: 0.8rem;
+  padding-inline: 1.35rem;
+  border-radius: 4px;
+  transition: filter 0.15s ease;
 }
 
 .v-btn:hover {
-  background: var(--accent);
-  transform: translateY(-1px);
+  filter: brightness(1.12);
 }
 
-.v-btn-ghost {
+.v-btn-line {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   color: var(--ink);
   font-weight: 600;
   font-size: 0.95rem;
-  padding-block: 0.85rem;
-  padding-inline: 0.4rem;
-  border-block-end: 2px solid transparent;
-  transition: border-color 0.2s ease;
-}
-
-.v-btn-ghost:hover {
-  border-block-end-color: var(--accent);
-}
-
-/* Panneau « document » : carte papier à filet fin. */
-.v-panel {
-  background: var(--card);
-  border: 1px solid var(--line-strong);
+  padding-block: 0.8rem;
+  padding-inline: 1.1rem;
+  border: 1px solid var(--line);
   border-radius: 4px;
-  box-shadow: 0 1px 0 var(--line), 0 22px 50px -32px rgba(20, 26, 40, 0.4);
+  transition: border-color 0.15s ease;
 }
 
-/* Filet de séparation façon registre. */
-.v-rule {
-  border: 0;
-  border-block-start: 1px solid var(--line);
+.v-btn-line:hover {
+  border-color: var(--ink);
+}
+
+/* Réglette de références de lot — élément de signature (produit, pas décor). */
+.v-ruler {
+  border-block: 1px solid var(--line);
+  background: var(--white);
 }

@@ -4,74 +4,80 @@ import { ArrowRight } from 'lucide-react';
 import { Calculator } from './Calculator';
 
 /**
- * Section d'ouverture de la vitrine (J1) — la promesse, le calculateur d'enjeu, et une VRAIE
- * capture de l'écran de transparence du propriétaire (dans la langue de la page). Composition
- * asymétrique : la colonne de gauche porte le discours et le calcul ; la capture déborde du
- * bord (fin) à droite. Aucun centrage systématique, un seul accent.
+ * Section d'ouverture (J1), direction « L'INSTRUMENT ». Blanc, aligné à gauche, structuré par
+ * des FILETS (kicker souligné, filet vertical entre les colonnes) plutôt que par du vide. La
+ * capture réelle de l'écran de transparence déborde du bord (fin), calée contre les filets,
+ * sans cadre ni ombre. Le calculateur est un instrument de mesure.
  */
 export async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations('vitrine.hero');
   const shot = `/marketing/transparence-${locale === 'ar' ? 'ar' : 'fr'}.png`;
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="mx-auto max-w-[1240px] px-6 pb-16 pt-12 sm:pt-16 lg:pb-24">
-        <div className="grid items-start gap-y-12 lg:grid-cols-[1.06fr_0.94fr] lg:gap-x-10">
-          {/* Colonne discours + calcul */}
-          <div className="max-w-xl">
-            <p className="v-kicker">{t('kicker')}</p>
-            <h1 className="v-display mt-5 text-[clamp(2.6rem,6vw,4.4rem)]">
-              <span className="block" style={{ color: 'var(--ink)' }}>
-                {t('title1')}
-              </span>
-              <span
-                className="mt-1 inline-block pb-1"
-                style={{ color: 'var(--ink)', boxShadow: 'inset 0 -0.28em 0 var(--accent-soft)' }}
-              >
-                {t('title2')}
-              </span>
+    <section className="relative overflow-hidden" style={{ background: 'var(--white)' }}>
+      <div className="mx-auto max-w-[1280px] px-6">
+        {/* Kicker souligné d'un filet, pleine largeur */}
+        <div className="py-4" style={{ borderBottom: '1px solid var(--line)' }}>
+          <span className="v-kicker">{t('kicker')}</span>
+        </div>
+
+        <div className="grid lg:grid-cols-12">
+          {/* Colonne discours + instrument */}
+          <div
+            className="lg:col-span-7 lg:pe-12"
+            style={{ borderInlineEnd: '1px solid var(--line)' }}
+          >
+            <h1 className="v-title mt-9 text-[clamp(2.5rem,5.6vw,4.2rem)]" style={{ color: 'var(--ink)' }}>
+              <span className="block">{t('title1')}</span>
+              <span className="block">{t('title2')}</span>
             </h1>
-            <p className="mt-6 text-base leading-relaxed sm:text-lg" style={{ color: 'var(--ink-2)' }}>
+            <p
+              className="mt-6 max-w-xl text-base leading-relaxed sm:text-lg"
+              style={{ color: 'var(--ink-2)' }}
+            >
               {t('lead')}
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <a href="#contact" className="v-btn">
                 {t('cta')}
                 <ArrowRight className="size-4 rtl:-scale-x-100" aria-hidden />
               </a>
             </div>
 
-            <div className="mt-10">
+            <hr className="my-9" style={{ border: 0, borderTop: '1px solid var(--line)' }} />
+
+            <div className="max-w-xl pb-12">
               <Calculator />
             </div>
           </div>
 
-          {/* Capture-phare — déborde du bord (fin) sur grand écran */}
-          <figure className="relative lg:min-h-[560px]">
-            <div className="v-panel overflow-hidden lg:absolute lg:inset-y-0 lg:start-0 lg:end-[-13vw]">
-              <div className="relative aspect-[16/11] w-full lg:h-full">
+          {/* Capture-phare — déborde du bord (fin), calée contre les filets, sans cadre */}
+          <figure className="lg:relative lg:col-span-5" style={{ borderInlineStart: '1px solid var(--line)' }}>
+            <div
+              className="flex flex-col lg:absolute lg:inset-y-9 lg:end-[-14vw] lg:start-12"
+              style={{ borderTop: '1px solid var(--line)' }}
+            >
+              {/* Bandeau d'étiquette — libellé produit, sans recouvrir la capture */}
+              <figcaption
+                className="v-mono flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-4 py-2.5 text-[0.66rem]"
+                style={{ borderBottom: '1px solid var(--line)', background: 'var(--white)' }}
+              >
+                <span className="uppercase tracking-wider" style={{ color: 'var(--ink)' }}>
+                  {t('shotTag')}
+                </span>
+                <span style={{ color: 'var(--ink-3)' }}>· {t('shotCaption')}</span>
+              </figcaption>
+              <div className="relative min-h-[440px] flex-1">
                 <Image
                   src={shot}
                   alt={t('shotAlt')}
                   fill
                   priority
-                  sizes="(min-width: 1024px) 62vw, 100vw"
+                  sizes="(min-width: 1024px) 60vw, 100vw"
                   className="object-cover object-top"
                 />
               </div>
-              <span
-                className="v-mono absolute top-0 px-3 py-1.5 text-[0.68rem] uppercase tracking-wider text-white"
-                style={{ background: 'var(--accent)', insetInlineStart: 0 }}
-              >
-                {t('shotTag')}
-              </span>
             </div>
-            <figcaption
-              className="v-mono mt-4 text-xs lg:absolute lg:bottom-[-2.2rem] lg:start-1"
-              style={{ color: 'var(--ink-3)' }}
-            >
-              {t('shotCaption')}
-            </figcaption>
           </figure>
         </div>
       </div>
