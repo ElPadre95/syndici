@@ -1,0 +1,115 @@
+/**
+ * Vitrine publique (J1) — système visuel « registre & preuve », distinct de l'application.
+ * Papier crème, encre bleu-nuit, UNE seule couleur d'accent (l'indigo de la marque), filets
+ * fins, chiffres alignés en monospace. Propriétés logiques uniquement (RTL complet).
+ */
+
+.vitrine {
+  /* Papier & encre */
+  --paper: #f4f0e6;
+  --paper-2: #ece6d8;
+  --card: #fffdf8;
+  --ink: #16202e;
+  --ink-2: #515b68;
+  --ink-3: #8b8674;
+  --line: #ddd4c2;
+  --line-strong: #c7bda6;
+
+  /* Accent unique — quand il apparaît, il signifie quelque chose. */
+  --accent: #3a51c6;
+  --accent-2: #4f6ef7;
+  --accent-soft: #e9ecfb;
+
+  --font-display: var(--font-fraunces), 'DM Serif Display', Georgia, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
+
+  background-color: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  /* Grain/texture papier très discrète, sans image. */
+  background-image: radial-gradient(var(--line) 0.5px, transparent 0.5px);
+  background-size: 22px 22px;
+  background-position: -11px -11px;
+}
+
+:root[lang='ar'] .vitrine {
+  --font-display: var(--font-arabic-src), 'Noto Sans Arabic', sans-serif;
+}
+
+.v-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.04;
+}
+
+:root[lang='ar'] .v-display {
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.18;
+}
+
+.v-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum' 1, 'ss01' 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.v-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* Bouton d'action — encre pleine, angles nets (pas de pilule arrondie générique). */
+.v-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding-block: 0.85rem;
+  padding-inline: 1.4rem;
+  border-radius: 3px;
+  transition: transform 0.12s ease, background 0.2s ease;
+}
+
+.v-btn:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+
+.v-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding-block: 0.85rem;
+  padding-inline: 0.4rem;
+  border-block-end: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.v-btn-ghost:hover {
+  border-block-end-color: var(--accent);
+}
+
+/* Panneau « document » : carte papier à filet fin. */
+.v-panel {
+  background: var(--card);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  box-shadow: 0 1px 0 var(--line), 0 22px 50px -32px rgba(20, 26, 40, 0.4);
+}
+
+/* Filet de séparation façon registre. */
+.v-rule {
+  border: 0;
+  border-block-start: 1px solid var(--line);
+}

@@ -9,7 +9,15 @@ import logicalCss from './eslint-rules/logical-css.js';
 export default tseslint.config(
   {
     // `reference/` is documentation, never source: never lint it, never allow imports from it.
-    ignores: ['node_modules/**', '.next/**', 'coverage/**', 'reference/**', 'next-env.d.ts'],
+    // `reference/` = doc ; `scripts/*.mjs` = outillage Node ponctuel (captures marketing).
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'coverage/**',
+      'reference/**',
+      'next-env.d.ts',
+      'scripts/*.mjs',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

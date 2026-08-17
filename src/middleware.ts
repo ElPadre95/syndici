@@ -17,7 +17,8 @@ import { authConfigBase } from '@/auth.config';
 const intlMiddleware = createIntlMiddleware(routing);
 const { auth } = NextAuth(authConfigBase);
 
-const PUBLIC_SEGMENTS = new Set(['sign-in', 'invite']);
+// `vitrine` = la page publique servie à la RACINE pour un visiteur anonyme (voir plus bas).
+const PUBLIC_SEGMENTS = new Set(['sign-in', 'invite', 'vitrine']);
 const locales = routing.locales as readonly string[];
 
 export default auth((req) => {
@@ -26,9 +27,19 @@ export default auth((req) => {
   const hasLocale = segments.length > 0 && locales.includes(segments[0]!);
   const locale = hasLocale ? segments[0]! : routing.defaultLocale;
   const firstAfterLocale = hasLocale ? segments[1] : segments[0];
+  const isRoot = firstAfterLocale === undefined; // « /fr », « /ar » (ou « / »)
   const isPublic = firstAfterLocale !== undefined && PUBLIC_SEGMENTS.has(firstAfterLocale);
 
-  if (!isPublic && !req.auth) {
+  // RACINE PUBLIQUE : « /<locale> » branche selon la session. Visiteur anonyme → la vitrine
+  // est servie par RÉÉCRITURE (l'URL reste « /<locale> ») ; utilisateur connecté → il poursuit
+  // vers son tableau de bord (couche (app), inchangée). Toutes les autres URL restent gardées.
+  if (isRoot && hasLocale && !req.auth) {
+    const url = nextUrl.clone();
+    url.pathname = `/${locale}/vitrine`;
+    return NextResponse.rewrite(url);
+  }
+
+  if (!isRoot && !isPublic && !req.auth) {
     const signInUrl = new URL(`/${locale}/sign-in`, nextUrl.origin);
     signInUrl.searchParams.set('callbackUrl', nextUrl.pathname + nextUrl.search);
     return NextResponse.redirect(signInUrl);

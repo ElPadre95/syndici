@@ -565,6 +565,25 @@ profil.
 
   _(I6 — notifications paramétrables + relevé mensuel auto — **retiré du périmètre** à la demande de l'utilisateur.)_
 
+## Vitrine publique (J)
+
+- [ ] **J1** — **Section d'ouverture de la vitrine** (direction en attente de validation). **Architecture** : la
+      racine `/<locale>` branche selon la session — le middleware, qui dispose déjà de `req.auth`, **réécrit** (URL
+      préservée) une requête anonyme vers `/<locale>/vitrine` (page publique), tandis qu'un utilisateur connecté
+      poursuit vers son tableau de bord d'aujourd'hui. Toute la couche `(app)` et toutes les URL existantes restent
+      inchangées ; aucune démo en libre accès. **Direction visuelle** « registre & preuve », distincte de l'app :
+      papier crème, encre bleu-nuit, **UN seul accent** (l'indigo de la marque, uniquement là où il signifie quelque
+      chose — le point du logo, le montant qui manque, le surlignage sous « voit »), fontes **Fraunces** (titres,
+      allure éditoriale) + **IBM Plex Mono** (chiffres alignés, façon reçu), texture papier, filets fins,
+      **asymétrie** (discours à gauche, capture qui déborde du bord à droite). **Contenu** : la promesse « Le syndic
+      gère. Le propriétaire voit. » + l'argument MRE ; un **calculateur d'impayés** (les chiffres DU visiteur :
+      lots × charge → appelé/mois et ce que représentent 20 points de collecte manquants, formule affichée, aucune
+      promesse de résultat) ; et une **VRAIE capture** de l'écran de transparence du propriétaire (compte de démo,
+      capturée via Playwright dans `public/marketing/`, dans la langue de la page — l'**arabe montre l'app en RTL
+      intégral**). Vérifié : anonyme `/fr` et `/ar` → vitrine ; `/fr/lots` anonyme → sign-in (307) ; connecté `/fr`
+      → tableau de bord. Gate complet vert (361 PGlite, 129 Postgres réel). **En attente : validation de la
+      direction avant de construire les 7 autres sections.**
+
 - [x] **I7** — **Travaux : devis comparatifs + photos avant/après**. Nouvelle entité **chantier** (`WorksProject`)
       qui regroupe des **devis comparatifs** (`WorksQuote` : fournisseur libre, montant, PDF du devis) et des
       **photos avant/après** (`WorksPhoto`, enum `WorksPhase` AVANT/APRES, fichier obligatoire). Le syndic crée un

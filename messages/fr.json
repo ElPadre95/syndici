@@ -2158,5 +2158,34 @@
       "debit": "Débit",
       "credit": "Crédit"
     }
+  },
+  "vitrine": {
+    "nav": {
+      "demo": "Demander une démonstration",
+      "login": "Connexion",
+      "langLabel": "العربية"
+    },
+    "hero": {
+      "kicker": "Logiciel de syndic · Maroc",
+      "title1": "Le syndic gère.",
+      "title2": "Le propriétaire voit.",
+      "lead": "Le logiciel de gestion de copropriété qui répond à vos copropriétaires — d'abord les MRE, ceux qui réclament le plus et paient le plus mal. Vous appelez, encaissez et justifiez ; eux voient chaque dirham, en français comme en arabe. La transparence devient votre argument.",
+      "cta": "Demander une démonstration",
+      "shotAlt": "Écran de transparence du propriétaire — Résidence Al Firdaous, Casablanca.",
+      "shotTag": "Vu par le propriétaire",
+      "shotCaption": "Chaque dirham appelé, encaissé et dépensé — avec le justificatif."
+    },
+    "calc": {
+      "label": "L'enjeu, en chiffres",
+      "lots": "Lots dans la résidence",
+      "charge": "Charge mensuelle par lot",
+      "called": "Appelé chaque mois",
+      "perMonth": "/ mois",
+      "gap": "20 points de collecte manquants",
+      "gapSub": "ne rentrent pas, chaque mois",
+      "formula": "{lots} lots × {charge} = {called} appelés. 20 % non collectés = {gap}.",
+      "note": "Vos chiffres, pas les nôtres. On montre l'enjeu — pas une performance.",
+      "currency": "MAD"
+    }
   }
 }
