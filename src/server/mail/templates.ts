@@ -63,6 +63,52 @@ export async function documentEmail(
   return { subject: t('document.subject', { residence: d.residence }), html, text };
 }
 
+/**
+ * Notification interne d'une nouvelle demande de contact (vitrine J1). Destinée à l'équipe
+ * Syndici, pas à un résident : rédigée dans la langue d'exploitation (fr), les détails du lead
+ * repris dans le corps. La demande est DÉJÀ persistée quand cet e-mail part — il ne fait que
+ * prévenir. Les champs absents sont omis proprement.
+ */
+export async function contactRequestEmail(
+  locale: string,
+  d: {
+    name: string;
+    email: string;
+    phone: string | null;
+    city: string | null;
+    residences: number | null;
+    lots: number | null;
+    role: string;
+    message: string | null;
+  },
+): Promise<RenderedEmail> {
+  const t = await mailT(locale);
+  const line = (label: string, value: string | number | null) =>
+    value === null || value === '' ? null : `${label} : ${value}`;
+  const paragraphs = [
+    t('contact.intro'),
+    [
+      line(t('contact.fName'), d.name),
+      line(t('contact.fEmail'), d.email),
+      line(t('contact.fPhone'), d.phone),
+      line(t('contact.fCity'), d.city),
+      line(t('contact.fRole'), t(`contact.role.${d.role}`)),
+      line(t('contact.fResidences'), d.residences),
+      line(t('contact.fLots'), d.lots),
+    ]
+      .filter(Boolean)
+      .join('\n'),
+    ...(d.message ? [`${t('contact.fMessage')} :\n${d.message}`] : []),
+  ];
+  const { html, text } = renderEmail({
+    heading: t('contact.heading'),
+    paragraphs,
+    footer: t('footer'),
+    dir: dirOf(locale),
+  });
+  return { subject: t('contact.subject', { name: d.name }), html, text };
+}
+
 /** Notification d'une nouvelle actualité de la résidence. */
 export async function announcementEmail(
   locale: string,

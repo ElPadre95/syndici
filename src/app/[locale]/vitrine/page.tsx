@@ -6,6 +6,11 @@ import { LotRuler } from '@/components/vitrine/LotRuler';
 import { Problem } from '@/components/vitrine/Problem';
 import { Product } from '@/components/vitrine/Product';
 import { OwnerTransparency } from '@/components/vitrine/OwnerTransparency';
+import { Proofs } from '@/components/vitrine/Proofs';
+import { Pricing } from '@/components/vitrine/Pricing';
+import { Faq } from '@/components/vitrine/Faq';
+import { Contact } from '@/components/vitrine/Contact';
+import { SiteFooter } from '@/components/vitrine/SiteFooter';
 
 /**
  * Vitrine publique (J1). Servie à la RACINE pour un visiteur anonyme (réécriture middleware).
@@ -56,9 +61,13 @@ export default async function VitrinePage({ params }: { params: Promise<{ locale
         <Problem />
         <Product locale={locale} />
         <OwnerTransparency locale={locale} />
+        <Proofs locale={locale} />
+        <Pricing />
+        <Faq />
+        {/* Section 8 — la conversion. Porte l'ancre #contact (cible de tous les CTA). */}
+        <Contact />
       </main>
-      {/* Cible de l'appel à l'action ; la section Contact complète arrivera avec les tarifs/FAQ. */}
-      <div id="contact" aria-hidden />
+      <SiteFooter locale={locale} />
     </>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useCalc, setCalc } from './calc-store';
 
 /**
  * Calculateur d'impayés (J1) — habillé comme un INSTRUMENT DE MESURE : champs à filets,
@@ -12,8 +12,10 @@ const GROUP = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 
 export function Calculator() {
   const t = useTranslations('vitrine.calc');
-  const [lots, setLots] = useState(25);
-  const [charge, setCharge] = useState(650);
+  // État PARTAGÉ : la section Tarifs et le formulaire de contact réutilisent ces chiffres.
+  const { lots, charge } = useCalc();
+  const setLots = (n: number) => setCalc({ lots: n });
+  const setCharge = (n: number) => setCalc({ charge: n });
 
   const called = Math.max(0, Math.round(lots * charge));
   const gap = Math.round(called * 0.2);

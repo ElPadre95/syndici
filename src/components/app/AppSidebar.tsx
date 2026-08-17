@@ -27,6 +27,7 @@ import {
   Scale,
   Hammer,
   ScrollText,
+  Inbox,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -60,6 +61,7 @@ const STAFF_NAV: readonly NavItem[] = [
   { href: '/actualites', key: 'news', Icon: Newspaper },
   { href: '/documents', key: 'documents', Icon: FileText },
   { href: '/messagerie', key: 'messages', Icon: MessageCircle },
+  { href: '/demandes', key: 'demandes', Icon: Inbox },
   { href: '/reglages', key: 'settings', Icon: Settings },
 ];
 // L'accueil est neutre (pas une fonction de gestion) : commun à tous les rôles.

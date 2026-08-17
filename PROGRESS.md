@@ -567,7 +567,7 @@ profil.
 
 ## Vitrine publique (J)
 
-- [ ] **J1** — **Section d'ouverture de la vitrine** (direction en attente de validation). **Architecture** : la
+- [x] **J1** — **Vitrine publique complète** (8 sections + pied de page, fr + ar RTL intégral). **Architecture** : la
       racine `/<locale>` branche selon la session — le middleware, qui dispose déjà de `req.auth`, **réécrit** (URL
       préservée) une requête anonyme vers `/<locale>/vitrine` (page publique), tandis qu'un utilisateur connecté
       poursuit vers son tableau de bord d'aujourd'hui. Toute la couche `(app)` et toutes les URL existantes restent
@@ -593,8 +593,27 @@ profil.
       **Sections 1 à 4 posées** — ouverture (promesse + calculateur + tableau de bord) · **2. Le problème** (trois
       constats en filets) · **3. Ce que fait le produit** (4 blocs alternés avec captures réelles : paiements,
       relances, dépenses, compte) · **4. La transparence propriétaire** (écran de transparence + devis comparés &
-      photos avant/après). Réglette de lots en séparateur. **Restent : 5. preuves de sérieux · 6. tarifs · 7. FAQ ·
-      8. contact.**
+      photos avant/après). Réglette de lots en séparateur. **Sections 5 à 8 + pied de page posées** — **5. Les
+      preuves de sérieux** (faits vérifiables en filets, sans carte à icône : reçus numérotés sans trou,
+      régularisation aux tantièmes au centime près, attestation de non-dette, journal d'audit, devis mis en
+      concurrence ; captures reçu + journal) · **6. Le tarif** (contenu **modifiable** dans `src/server/contact/pricing.ts` :
+      10 MAD/lot/mois, plancher 200 MAD, sans palier ; report **relié au calculateur** via un store client partagé
+      `calc-store` — 25 lots → 250 MAD, mis en regard des impayés non collectés) · **7. FAQ** (accordéon `<details>`
+      sans JS : paiement en ligne PAS encore connecté à un prestataire, sécurité/hébergement, import Excel, export
+      au départ) · **8. Le contact** — LA conversion : nouvelle table **globale** `ContactRequest` (+ enum
+      `ContactRole`, migration `contact_request`, hors `TENANT_MODELS`), action **persiste-D'ABORD** puis notifie par
+      e-mail (couche I5, jamais bloquant), anti-abus **sans friction** (honeypot invisible + limite par IP), nombre
+      de lots **pré-rempli** depuis le calculateur ; **écran staff** `/demandes` (liste non-traitées d'abord, bascule
+      traitée/rouvrir, entrée de nav) ; **lien WhatsApp** piloté par `CONTACT_WHATSAPP` (masqué si absent) · **pied de
+      page** sombre `#0B1220` (marque, liens vers les deux espaces, sélecteur de langue, mention légale sobre).
+      **Corrections captures** : (1) **aucun chrome d'application** — la barre latérale, l'en-tête COLLANT et la bulle
+      de messagerie (tous `data-print-hide`) sont masqués avant la capture de `<main>` (l'en-tête sticky débordait
+      sinon sur la boîte de `main`) ; (2) **garde-fou** — la base doit être en état marketing (résidence + e-mails
+      `@syndici.com`) sinon échec franc, et toute capture laissant fuir `.local`/nominatif est refusée. **Migration
+      `contact_request` appliquée en prod (Neon) avant le push.** Restauré au passage un `@unique` perdu sur
+      `LateFee.chargeCallId` (la base l'avait déjà ; le schéma l'avait égaré). Gate complet vert (361 PGlite, 129
+      Postgres réel), typecheck/lint/lint:css OK. Persistance du contact vérifiée (create + count), formulaire rendu
+      (8 champs + rôle), captures fr + ar régénérées **sans chrome**.
 
 - [x] **I7** — **Travaux : devis comparatifs + photos avant/après**. Nouvelle entité **chantier** (`WorksProject`)
       qui regroupe des **devis comparatifs** (`WorksQuote` : fournisseur libre, montant, PDF du devis) et des

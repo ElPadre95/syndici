@@ -587,7 +587,7 @@ model LateFee {
   id                String    @id @default(uuid())
   residenceId       String
   lotId             String
-  chargeCallId      String? // l'appel en retard qui l'a déclenché (NULL pour un inverse)
+  chargeCallId      String?   @unique // l'appel qui l'a déclenché (NULL pour un inverse). Unique sur non-NULL (Postgres autorise plusieurs NULL) ⇒ au plus UN frais original par appel, inverses illimités.
   amountMinor       Int // centimes (négatif = écriture inverse)
   reason            String?
   reminderRuleId    String? // règle qui l'a produit (traçabilité)
@@ -1239,4 +1239,38 @@ model AuditLog {
 
   @@index([residenceId])
   @@index([entityType, entityId])
+}
+
+// ──────────────────────── Demandes de contact (vitrine J1) ─────────────────
+
+/// Rôle déclaré par le visiteur qui remplit le formulaire public.
+enum ContactRole {
+  SYNDIC_PRO
+  SYNDIC_BENEVOLE
+  PROPRIETAIRE
+}
+
+/// Demande envoyée depuis la vitrine publique — la SEULE conversion de la page.
+/// Table GLOBALE (aucun residenceId : le visiteur n'a pas encore de résidence, ce
+/// n'est pas une donnée de copropriété). Persistée AVANT tout e-mail : l'e-mail
+/// n'est qu'une notification en complément, il ne doit jamais être le seul support
+/// d'un lead. `handled` permet au syndic de marquer une demande traitée.
+model ContactRequest {
+  id         String      @id @default(uuid())
+  name       String
+  email      String
+  phone      String?
+  city       String?
+  residences Int? // nombre de résidences déclaré
+  lots       Int? // nombre de lots déclaré (pré-rempli depuis le calculateur)
+  role       ContactRole
+  message    String?
+  locale     String? // langue de la vitrine au moment de l'envoi
+  ip         String? // pour la limitation anti-abus, jamais affiché
+  userAgent  String?
+  handled    Boolean     @default(false)
+  handledAt  DateTime?
+  createdAt  DateTime    @default(now())
+
+  @@index([handled, createdAt])
 }

@@ -1230,7 +1230,8 @@
       "budget": "Budget & fonds",
       "regularisation": "Régularisation",
       "works": "Travaux",
-      "journal": "Journal"
+      "journal": "Journal",
+      "demandes": "Demandes"
     },
     "header": {
       "account": "Compte",
@@ -2074,6 +2075,24 @@
       "heading": "Nouvelle actualité de {residence}",
       "intro": "{title}",
       "cta": "Ouvrir Syndici"
+    },
+    "contact": {
+      "subject": "Nouvelle demande — {name}",
+      "heading": "Nouvelle demande de contact",
+      "intro": "Une demande vient d'arriver depuis la vitrine. Elle est déjà enregistrée dans l'espace syndic ; ce message n'est qu'une notification.",
+      "fName": "Nom",
+      "fEmail": "E-mail",
+      "fPhone": "Téléphone",
+      "fCity": "Ville",
+      "fRole": "Profil",
+      "fResidences": "Résidences",
+      "fLots": "Lots",
+      "fMessage": "Message",
+      "role": {
+        "SYNDIC_PRO": "Syndic professionnel",
+        "SYNDIC_BENEVOLE": "Syndic bénévole",
+        "PROPRIETAIRE": "Propriétaire"
+      }
     }
   },
   "travaux": {
@@ -2227,6 +2246,106 @@
       "p2x": "Le travail payé est le travail fait, documenté.",
       "capT": "Écran de transparence",
       "capW": "Devis comparatifs et photos avant/après"
+    },
+    "proofs": {
+      "kicker": "Des preuves, pas des promesses",
+      "title": "Chaque dirham se prouve.",
+      "lead": "La confiance ne se décrète pas, elle se démontre. Voici ce que le logiciel produit — des documents vérifiables, pas des arguments.",
+      "r1t": "Reçus numérotés, sans trou",
+      "r1x": "Chaque encaissement donne un reçu numéroté en séquence continue par exercice. Un numéro manquant se verrait ; rien ne se glisse entre deux.",
+      "r2t": "Régularisation aux tantièmes, au centime près",
+      "r2x": "En fin d'exercice, le trop ou le moins-perçu est réparti aux tantièmes de chaque lot, arrondi au centime, sans reste caché.",
+      "r3t": "Attestation de non-dette",
+      "r3x": "Un propriétaire à jour édite lui-même son attestation — utile pour vendre, ou pour prouver sa bonne foi en assemblée.",
+      "r4t": "Journal d'audit",
+      "r4x": "Toute écriture financière — encaissement, reçu, annulation — est tracée : qui, quoi, quand, avant et après. Rien ne s'efface en silence.",
+      "r5t": "Devis mis en concurrence",
+      "r5x": "Pour un chantier, les devis reçus sont comparés côte à côte, le moins-disant marqué, le devis retenu conservé.",
+      "capR": "Reçu numéroté",
+      "capJ": "Journal d'audit"
+    },
+    "pricing": {
+      "kicker": "Le tarif",
+      "title": "Simple, et honnête.",
+      "lead": "Un prix par lot, un plancher, rien d'autre. Pas de palier, pas de surprise. Provisoire pendant la phase d'ouverture.",
+      "perLot": "10 MAD par lot et par mois",
+      "min": "Minimum 200 MAD par mois",
+      "note": "Facturé à la résidence, pas au copropriétaire. Le tarif définitif sera confirmé avant tout engagement.",
+      "calcTitle": "Pour votre résidence",
+      "calcLine": "{lots} lots → {price} / mois",
+      "calcVs": "à mettre en regard des {gap} qui ne rentrent pas, chaque mois.",
+      "calcEmpty": "Indiquez le nombre de lots dans le simulateur, en haut de page, pour voir votre abonnement.",
+      "cta": "Demander une démonstration"
+    },
+    "faq": {
+      "kicker": "Questions fréquentes",
+      "title": "Ce qu'on nous demande.",
+      "q1": "Peut-on payer en ligne ?",
+      "a1": "Pas encore. Le paiement en ligne n'est pas connecté à un prestataire à ce jour ; les encaissements se saisissent à la main (espèces, virement, carte) et donnent un reçu numéroté. La brique de paiement en ligne viendra, sans changer votre façon de travailler.",
+      "q2": "Mes données sont-elles en sécurité ?",
+      "a2": "Chaque résidence est isolée : un syndic ne voit que ses copropriétés. Les données sont hébergées sur une infrastructure européenne, chiffrées en transit et sauvegardées. Aucun numéro de carte bancaire n'est stocké.",
+      "q3": "Puis-je importer mon fichier Excel existant ?",
+      "a3": "Oui. Lots, propriétaires et soldes de départ s'importent depuis votre tableur actuel — vous ne repartez pas de zéro.",
+      "q4": "Et si je décide de partir ?",
+      "a4": "Vous exportez tout — lots, écritures, documents — dans des formats ouverts, à tout moment. Vos données restent les vôtres ; il n'y a pas de porte fermée à clé."
+    },
+    "contact": {
+      "kicker": "Parlons-en",
+      "title": "Dites-nous où vous en êtes.",
+      "lead": "Une démonstration, une question, un devis : on vous répond. Remplissez ce qui vous concerne — le reste est facultatif.",
+      "fName": "Nom",
+      "fEmail": "E-mail",
+      "fPhone": "Téléphone",
+      "fCity": "Ville",
+      "fResidences": "Nombre de résidences",
+      "fLots": "Nombre de lots",
+      "fRole": "Vous êtes",
+      "fMessage": "Votre message",
+      "roleSYNDIC_PRO": "Syndic professionnel",
+      "roleSYNDIC_BENEVOLE": "Syndic bénévole",
+      "rolePROPRIETAIRE": "Propriétaire",
+      "rolePlaceholder": "Choisir…",
+      "optional": "facultatif",
+      "submit": "Envoyer la demande",
+      "sending": "Envoi…",
+      "okTitle": "Demande reçue.",
+      "okBody": "Merci. On revient vers vous très vite, à l'adresse indiquée.",
+      "errName": "Indiquez votre nom.",
+      "errEmail": "Indiquez une adresse e-mail valide.",
+      "errRole": "Choisissez ce qui vous décrit.",
+      "errGeneric": "Un souci est survenu. Réessayez dans un instant.",
+      "prefillNote": "Pré-rempli depuis votre simulation.",
+      "whatsapp": "Écrire sur WhatsApp",
+      "whatsappNote": "La réponse la plus rapide."
+    },
+    "footer": {
+      "tagline": "Le logiciel de syndic qui rend des comptes.",
+      "syndic": "Espace syndic",
+      "owner": "Espace propriétaire",
+      "language": "Langue",
+      "legal": "Syndici — logiciel de gestion de copropriété. Édité au Maroc. Les données affichées en démonstration sont fictives.",
+      "rights": "© {year} Syndici. Tous droits réservés."
     }
+  },
+  "demandes": {
+    "title": "Demandes de contact",
+    "subtitle": "Les demandes reçues depuis le site public. Non traitées et plus récentes d'abord.",
+    "empty": "Aucune demande pour l'instant.",
+    "forbidden": "Accès réservé au syndic.",
+    "pending": "{count} à traiter",
+    "allHandled": "Tout est traité.",
+    "role": "Profil",
+    "residences": "Résidences",
+    "lots": "Lots",
+    "city": "Ville",
+    "phone": "Téléphone",
+    "received": "Reçue",
+    "message": "Message",
+    "markHandled": "Marquer traitée",
+    "markPending": "Rouvrir",
+    "handled": "Traitée",
+    "roleSYNDIC_PRO": "Syndic professionnel",
+    "roleSYNDIC_BENEVOLE": "Syndic bénévole",
+    "rolePROPRIETAIRE": "Propriétaire"
   }
 }
