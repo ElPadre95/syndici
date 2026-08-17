@@ -26,6 +26,7 @@ import {
   Wallet,
   Scale,
   Hammer,
+  ScrollText,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -73,6 +74,7 @@ const OWNER_NAV: readonly NavItem[] = [
   { href: '/proprietaire/incidents', key: 'incidents', Icon: TriangleAlert },
   { href: '/proprietaire/documents', key: 'ownerDocs', Icon: Files },
   { href: '/proprietaire/transparence', key: 'transparency', Icon: Eye },
+  { href: '/proprietaire/journal', key: 'journal', Icon: ScrollText },
   { href: '/proprietaire/profil', key: 'profile', Icon: UserCircle },
 ];
 

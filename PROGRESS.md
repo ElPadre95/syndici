@@ -583,6 +583,20 @@ profil.
       `travaux` (enums `WorksStatus`/`WorksPhase`, `WorksProject`/`WorksQuote`/`WorksPhoto`). Gate complet vert (356
       PGlite, 129 Postgres réel).
 
+- [x] **I8** — **Export des données + journal d'audit du propriétaire**. **Journal d'audit** (`/proprietaire/journal`)
+      : l'historique chronologique des mouvements des lots du propriétaire (appels de charges, règlements avec n° de
+      reçu, frais de retard, régularisations), fusionné sur ses lots et trié du plus récent au plus ancien. Source
+      étanche : `getOwnerJournal` réutilise `getOwnerLotAccount` (contrôle de détention intégré) — le propriétaire ne
+      voit JAMAIS le lot d'un voisin. Cœur **pur** `mergeJournalEntries` (tri, débit-avant-crédit à date égale,
+      étiquetage du lot) + `journalLabel` (libellés réutilisant le namespace `account`), testés. **Export CSV** :
+      helper **pur** `toCsv` (échappement RFC 4180, BOM UTF-8, séparateur `;`, testé). Le **propriétaire** exporte
+      SON journal (`/proprietaire/journal/export`, gardé `charge.view.own`) ; le **syndic** exporte les **dépenses**
+      de la résidence sur la période (`/depenses/export`, gardé `charge.view.all`, scope résidence). Étanchéité
+      vérifiée en direct : le propriétaire reçoit son CSV (200) mais est **refusé (403)** sur l'export syndic.
+      Vérifié connecté (fr + ar RTL) : journal des deux lots de Sara (A1+A7 — régularisation, frais de retard,
+      appels, règlements), export CSV téléchargé et bien formé. **Aucune migration.** Gate complet vert (361 PGlite,
+      129 Postgres réel).
+
 ## Règles permanentes
 
 Textes via catalogues · propriétés logiques CSS uniquement · montants via le helper monétaire ·

@@ -1,5 +1,5 @@
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
-import { Building2, Plus, Receipt, Landmark } from 'lucide-react';
+import { Building2, Plus, Receipt, Landmark, Download } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
 import { ExpenseTable, type ExpenseRowView } from '@/components/finance/ExpenseTable';
@@ -33,6 +33,7 @@ export default async function DepensesPage({
   setRequestLocale(locale);
   const activeLocale = await getLocale();
   const t = await getTranslations('expenses');
+  const tExport = await getTranslations('settings');
   const sp = await searchParams;
 
   const ctx = await getSessionContext();
@@ -99,12 +100,21 @@ export default async function DepensesPage({
           </p>
         </div>
         {canManage && (
-          <Link href="/depenses/nouvelle">
-            <Button variant="primary">
-              <Plus className="size-4" aria-hidden />
-              {t('newCta')}
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <a
+              href={`/${locale}/depenses/export?from=${fromStr}&to=${toStr}`}
+              className="inline-flex items-center gap-2 rounded-md border border-sep bg-card px-3 py-2 text-sm font-bold text-label-2 hover:bg-bg"
+            >
+              <Download className="size-4" aria-hidden />
+              {tExport('export.expenses')}
+            </a>
+            <Link href="/depenses/nouvelle">
+              <Button variant="primary">
+                <Plus className="size-4" aria-hidden />
+                {t('newCta')}
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
 
