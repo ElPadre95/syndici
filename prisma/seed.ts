@@ -307,9 +307,10 @@ async function main() {
   let lateCount = 0;
   let cashCount = 0;
   const overdueForDunning: Array<{ lotId: string; payerPersonId: string }> = [];
-  // Cas MRE : un propriétaire à l'étranger qui détient DEUX lots (une résidence
-  // secondaire vide en plus de son bien principal). L'annuaire (F2) doit le montrer
-  // une seule fois, avec ses deux lots — jamais en doublon.
+  // Cas MRE : un propriétaire à l'étranger, absent, qui détient UN lot — son bien principal
+  // (A1), laissé EN RETARD (le mois en cours impayé). C'est le compte propriétaire de démo :
+  // un seul lot, mais celui qui fait vivre la démonstration (Payer, frais de retard, relevé,
+  // attestation en cas de refus). Le mécanisme multi-lots reste en place (voir A7 vacant).
   // Id STABLE du propriétaire MRE de démo (comme le syndic de démo) : sa Person garde le
   // MÊME id à chaque reseed, donc le jeton de session d'un propriétaire connecté survit au
   // rechargement des données (voir DECISIONS.md D33).
@@ -318,7 +319,6 @@ async function main() {
   let mreOwnerLotId: string | null = null; // 1er lot du MRE → fil OWNER de démo
   let delegatedLotId: string | null = null; // lot dont les charges sont déléguées au locataire
   let delegatedTenantId: string | null = null; // son locataire → fil TENANT de démo
-  let vacantLotId: string | null = null;
 
   for (const [lotIndex, spec] of specs.entries()) {
     const lot = await prisma.lot.create({
@@ -332,13 +332,13 @@ async function main() {
       },
     });
 
-    // Lot vacant en dur : aucun occupant, aucun appel de charges.
+    // Lot vacant en dur (A7) : aucun occupant, aucun appel de charges. Il reste vacant —
+    // le propriétaire de démo ne détient plus que son bien principal (A1).
     if (!spec.owner) {
-      vacantLotId = lot.id; // réservé au 2e lot du MRE (voir après la boucle).
       continue;
     }
 
-    // Le premier propriétaire à l'étranger sera le MRE multi-lots de démo → id STABLE
+    // Le premier propriétaire à l'étranger sera le MRE, propriétaire de démo → id STABLE
     // (les autres reçoivent un uuid explicite, équivalent au défaut Prisma).
     const isMreOwner: boolean = spec.owner.abroad && mreOwnerId === null;
     const ownerId: string = isMreOwner ? MRE_OWNER_ID : randomUUID();
@@ -365,7 +365,7 @@ async function main() {
         startDate: monthStart(-24),
       },
     });
-    // Premier propriétaire à l'étranger rencontré : ce sera notre MRE multi-lots.
+    // Premier propriétaire à l'étranger rencontré : ce sera notre propriétaire de démo (MRE).
     if (isMreOwner) {
       mreOwnerId = owner.id;
       mreOwnerLotId = lot.id;
@@ -421,7 +421,14 @@ async function main() {
 
       // Montant réglé selon le profil.
       let payAmount = 0;
-      if (spec.profile === 'SETTLED') payAmount = amount;
+      if (isMreOwner) {
+        // Lot UNIQUE du propriétaire de démo : mois précédents réglés (avec reçus), MOIS EN
+        // COURS impayé → reste dû + frais de retard générés plus bas. C'est le lot qui fait
+        // vivre la démo côté propriétaire : bouton Payer, frais de retard, relevé avec des
+        // mouvements, et attestation de non-dette dans son cas de REFUS. Un lot soldé, lui,
+        // ne montrerait presque rien.
+        payAmount = offset === 0 ? 0 : amount;
+      } else if (spec.profile === 'SETTLED') payAmount = amount;
       else if (spec.profile === 'PARTIAL_OVERDUE') {
         if (offset === -2)
           payAmount = amount; // ancien appel soldé (avec reçu)
@@ -466,49 +473,24 @@ async function main() {
         }
       }
     }
-    if (spec.profile === 'SETTLED') paidCount++;
+    if (isMreOwner) lateCount++; // lot de démo : en retard (mois en cours impayé)
+    else if (spec.profile === 'SETTLED') paidCount++;
     else if (spec.profile === 'PARTIAL_OVERDUE') partialCount++;
     else if (spec.profile === 'UNSETTLED_OVERDUE' || spec.profile === 'UNSETTLED_UPCOMING')
       lateCount++;
   }
 
-  // Le MRE prend possession du lot vacant en dur comme seconde propriété : il détient
-  // désormais deux lots et doit apparaître UNE seule fois dans l'annuaire (F2).
-  if (mreOwnerId && vacantLotId) {
-    // Devise secondaire (H5) : le MRE de démo (Bruxelles) raisonne en euros. Les autres
-    // propriétaires restent en dirham (désactivé par défaut).
+  // Le propriétaire de démo ne détient qu'UN SEUL lot (son bien principal A1, laissé EN
+  // RETARD ci-dessus). Le lot vacant en dur (A7) reste SANS occupant : on conserve le
+  // MÉCANISME multi-lots (rattachements, sélecteur de lot) sans le peupler — un vrai
+  // propriétaire pourra détenir plusieurs lots, mais la démo reste lisible (un seul lot →
+  // pas de sélecteur superflu). On garde seulement la devise secondaire du MRE (H5 :
+  // Bruxelles raisonne en euros ; conversion INDICATIVE à côté du dirham).
+  if (mreOwnerId) {
     await prisma.person.update({
       where: { id: mreOwnerId },
       data: { secondaryCurrency: 'EUR' },
     });
-    await prisma.lotAttachment.create({
-      data: {
-        residenceId: residence.id,
-        lotId: vacantLotId,
-        personId: mreOwnerId,
-        role: 'OWNER',
-        isChargePayer: true,
-        startDate: monthStart(-12),
-      },
-    });
-    // A7 EN RETARD : le propriétaire de démo garde A1 soldé mais laisse A7 impayé (bien
-    // secondaire d'un MRE absent). Trois appels échus non réglés → reste dû + frais de
-    // retard générés plus bas. On démontre ainsi la bascule entre lots ET les frais côté
-    // propriétaire, sans faire de Sara une mauvaise payeuse partout.
-    for (const offset of [-2, -1, 0]) {
-      const due = monthStart(offset);
-      await prisma.chargeCall.create({
-        data: {
-          residenceId: residence.id,
-          lotId: vacantLotId,
-          periodYear: due.getUTCFullYear(),
-          periodMonth: due.getUTCMonth() + 1,
-          dueDate: due,
-          amountMinor: CHARGE_APPT,
-        },
-      });
-    }
-    lateCount++;
   }
 
   // Historique de relances (E1) pour la démo : certains impayés déjà relancés une ou deux
@@ -551,8 +533,8 @@ async function main() {
       residenceId: residence.id,
       method: 'VIREMENT',
       amountMinor: { gt: 0 },
-      // Jamais sur un lot du propriétaire de DÉMO : on garde A1 soldé (le reste dû de Sara
-      // vient de A7). L'annulation-démo (B2) atterrit ainsi sur un autre lot.
+      // Jamais sur le lot du propriétaire de DÉMO (A1) : sa situation est déjà scénarisée
+      // (mois en cours impayé + frais de retard). L'annulation-démo (B2) atterrit ailleurs.
       ...(mreOwnerLotId ? { lotId: { not: mreOwnerLotId } } : {}),
     },
     orderBy: { receivedAt: 'desc' },
@@ -1288,13 +1270,22 @@ async function main() {
   }
 
   // ── Régularisation annuelle (I3) — figée sur l'exercice courant pour la démonstration :
-  // provisions appelées vs quote-part réelle des dépenses courantes, écart par lot. Le
-  // propriétaire la voit dans son compte ; le syndic peut l'annuler et la revalider.
+  // provisions appelées vs quote-part réelle des dépenses courantes, écart par lot. Le syndic
+  // peut l'annuler et la revalider ; le propriétaire la verrait dans son compte.
+  // On EXCLUT le lot du propriétaire de démo (A1) : sa régularisation serait un GROS crédit
+  // (dépenses courantes faibles vs provisions appelées) qui masquerait son arriéré et rendrait
+  // son attestation « à jour ». Or la démo veut un débiteur net (mois en cours impayé + frais
+  // de retard) → attestation dans son cas de REFUS, bouton Payer actif. La régularisation
+  // reste pleinement démontrée côté syndic et sur les 23 autres lots.
   {
     const exercice = now.getUTCFullYear();
     const [regLots, regExpenses, regProvisions] = await Promise.all([
       prisma.lot.findMany({
-        where: { residenceId: residence.id, archivedAt: null },
+        where: {
+          residenceId: residence.id,
+          archivedAt: null,
+          ...(mreOwnerLotId ? { id: { not: mreOwnerLotId } } : {}),
+        },
         select: { id: true, reference: true, quotePart: true },
       }),
       prisma.expense.aggregate({
