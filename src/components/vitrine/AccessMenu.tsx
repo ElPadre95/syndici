@@ -53,8 +53,8 @@ export function AccessMenu({ locale }: { locale: string }) {
             className="fixed inset-0 z-40"
           />
           <div
-            className="absolute z-50 mt-2 w-[280px] end-0 divide-y"
-            style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: '4px', borderColor: 'var(--line)' }}
+            className="absolute z-50 mt-2 w-[280px] overflow-hidden end-0 divide-y"
+            style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: '14px', borderColor: 'var(--line)' }}
           >
             {entry(t('syndic'), t('syndicDesc'), Building2)}
             {entry(t('owner'), t('ownerDesc'), UserCircle)}

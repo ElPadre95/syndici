@@ -12,7 +12,7 @@ export async function OwnerTransparency({ locale }: { locale: string }) {
   const loc = locale === 'ar' ? 'ar' : 'fr';
 
   return (
-    <section style={{ background: 'var(--panel)' }}>
+    <section id="transparence" style={{ background: 'var(--panel)', scrollMarginBlockStart: '4rem' }}>
       <div className="mx-auto max-w-[1200px] px-6 py-20 lg:py-28">
         <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--ink-3)' }}>
           {t('kicker')}

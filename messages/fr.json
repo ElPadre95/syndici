@@ -2180,23 +2180,26 @@
   },
   "vitrine": {
     "nav": {
-      "demo": "Demander une démonstration",
+      "demo": "Demander une démo",
       "login": "Connexion",
       "langLabel": "العربية",
-      "access": "Connexion",
+      "access": "Me connecter",
       "syndic": "Espace syndic",
       "syndicDesc": "Gérer une copropriété",
       "owner": "Espace propriétaire",
       "ownerDesc": "Suivre mon lot, voir la transparence",
       "language": "Langue",
-      "soon": "Bientôt"
+      "soon": "Bientôt",
+      "features": "Fonctionnalités",
+      "transparency": "Transparence",
+      "pricing": "Tarifs"
     },
     "hero": {
       "kicker": "Logiciel de syndic · Maroc",
       "title1": "Le syndic gère.",
       "title2": "Le propriétaire voit.",
       "lead": "Le logiciel de gestion de copropriété qui répond à vos copropriétaires — d'abord les MRE, ceux qui réclament le plus et paient le plus mal. Vous appelez, encaissez et justifiez ; eux voient chaque dirham, en français comme en arabe. La transparence devient votre argument.",
-      "cta": "Demander une démonstration",
+      "cta": "Demander une démo",
       "shotAlt": "Tableau de bord du syndic — Résidence Yasmine.",
       "shotTag": "Le poste du syndic",
       "shotCaption": "Trésorerie, taux de collecte, impayés et relances — en un écran.",
@@ -2282,7 +2285,7 @@
       "calcLine": "{lots} lots → {price} / mois",
       "calcVs": "à mettre en regard des {gap} qui ne rentrent pas, chaque mois.",
       "calcEmpty": "Indiquez le nombre de lots dans le simulateur, en haut de page, pour voir votre abonnement.",
-      "cta": "Demander une démonstration"
+      "cta": "Demander une démo"
     },
     "faq": {
       "kicker": "Questions fréquentes",

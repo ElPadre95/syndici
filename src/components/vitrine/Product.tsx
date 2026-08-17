@@ -18,7 +18,7 @@ export async function Product({ locale }: { locale: string }) {
   ];
 
   return (
-    <section style={{ background: 'var(--white)' }}>
+    <section id="fonctionnalites" style={{ background: 'var(--white)', scrollMarginBlockStart: '4rem' }}>
       <div className="mx-auto max-w-[1200px] px-6 py-20 lg:py-28">
         <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--ink-3)' }}>
           {t('kicker')}
