@@ -35,6 +35,7 @@ export async function LotAccountDocument({ account }: { account: LotAccount }) {
   return (
     <article
       data-print-root
+      data-shot="compte"
       className="flex w-full flex-col gap-6 rounded-lg border border-sep bg-white p-8"
     >
       <header className="flex flex-col gap-1 border-b border-sep pb-4">

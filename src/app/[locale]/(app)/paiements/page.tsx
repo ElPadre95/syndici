@@ -78,7 +78,10 @@ export default async function PaiementsPage({ params }: { params: Promise<{ loca
           <p className="max-w-sm text-sm text-label-3">{t('emptyBody')}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-sep bg-white">
+        <div
+          data-shot="paiements"
+          className="overflow-x-auto rounded-lg border border-sep bg-white"
+        >
           <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-sep text-xs font-bold uppercase tracking-wide text-label-4">

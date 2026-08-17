@@ -1,9 +1,9 @@
 import { getTranslations } from 'next-intl/server';
 
 /**
- * Section 2 — Le problème (J1). Trois constats, structurés par des filets verticaux (une
- * grille visible), index en monospace. Fond #F6F8FA (section alternée). Aucune icône, aucun
- * héros : de la densité aérée par les filets.
+ * Section 2 — Le problème (J, direction manuscrite). Titre de section à la main (plus petit
+ * que l'ouverture). Trois constats aérés, séparés par de l'AIR, pas par des filets ni des
+ * cartes à icône. Fond panneau léger.
  */
 export async function Problem() {
   const t = await getTranslations('vitrine.problem');
@@ -14,27 +14,28 @@ export async function Problem() {
   ];
 
   return (
-    <section style={{ background: 'var(--panel)', borderBlock: '1px solid var(--line)' }}>
-      <div className="mx-auto max-w-[1280px] px-6 py-16 lg:py-20">
-        <p className="v-kicker">{t('kicker')}</p>
-        <h2 className="v-title mt-4 max-w-3xl text-[clamp(1.9rem,3.6vw,2.9rem)]" style={{ color: 'var(--ink)' }}>
+    <section style={{ background: 'var(--panel)' }}>
+      <div className="mx-auto max-w-[1200px] px-6 py-20 lg:py-28">
+        <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--ink-3)' }}>
+          {t('kicker')}
+        </p>
+        <h2 className="v-hand mt-3 max-w-3xl text-[clamp(2rem,4vw,3.1rem)]" style={{ color: 'var(--ink)' }}>
           {t('title')}
         </h2>
 
-        <div className="mt-12 grid gap-x-0 gap-y-10 md:grid-cols-3">
-          {items.map((it, i) => (
-            <div
-              key={it.n}
-              className={`md:pe-8 ${i > 0 ? 'md:ps-8' : ''}`}
-              style={i > 0 ? { borderInlineStart: '1px solid var(--line)' } : undefined}
-            >
-              <span className="v-mono text-sm" style={{ color: 'var(--accent)' }}>
+        <div className="mt-14 grid gap-x-12 gap-y-12 sm:grid-cols-3">
+          {items.map((it) => (
+            <div key={it.n}>
+              <span
+                className="v-hand text-4xl"
+                style={{ color: 'var(--accent)' }}
+              >
                 {it.n}
               </span>
-              <h3 className="v-title mt-3 text-xl" style={{ color: 'var(--ink)', letterSpacing: '-0.02em' }}>
+              <h3 className="mt-3 text-xl font-bold" style={{ color: 'var(--ink)' }}>
                 {it.head}
               </h3>
-              <p className="mt-3 text-[0.95rem] leading-relaxed" style={{ color: 'var(--ink-2)' }}>
+              <p className="mt-3 text-base leading-relaxed" style={{ color: 'var(--ink-2)' }}>
                 {it.body}
               </p>
             </div>

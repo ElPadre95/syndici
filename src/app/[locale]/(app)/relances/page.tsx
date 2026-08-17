@@ -99,7 +99,10 @@ export default async function RelancesPage({ params }: { params: Promise<{ local
         </div>
       ) : (
         <>
-          <div className="border-orange/30 flex items-center gap-3 rounded-lg border bg-orange-soft px-4 py-3">
+          <div
+            data-shot="relances"
+            className="border-orange/30 flex items-center gap-3 rounded-lg border bg-orange-soft px-4 py-3"
+          >
             <BellRing className="size-5 shrink-0 text-orange" aria-hidden />
             <p className="text-sm font-bold text-orange">
               {t('banner', { count: rows.length })}

@@ -34,6 +34,7 @@ export async function ReceiptDocument({ receipt }: { receipt: ReceiptView }) {
   return (
     <article
       data-print-root
+      data-shot="recu"
       className={cn(
         'mx-auto flex w-full max-w-xl flex-col gap-6 rounded-lg border border-sep bg-white p-8',
         receipt.voidedAt && 'opacity-95',

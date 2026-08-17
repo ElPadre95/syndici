@@ -2199,7 +2199,13 @@
       "cta": "Demander une démonstration",
       "shotAlt": "Tableau de bord du syndic — Résidence Yasmine.",
       "shotTag": "Le poste du syndic",
-      "shotCaption": "Trésorerie, taux de collecte, impayés et relances — en un écran."
+      "shotCaption": "Trésorerie, taux de collecte, impayés et relances — en un écran.",
+      "leadIn": "Vous appelez, encaissez, justifiez.",
+      "annLive": "en direct",
+      "annLaw": "Conforme à la loi 18-00",
+      "annBilingual": "En arabe aussi",
+      "title2lead": "Le propriétaire",
+      "title2mark": "voit"
     },
     "calc": {
       "label": "L'enjeu, en chiffres",
@@ -2262,7 +2268,8 @@
       "r5t": "Devis mis en concurrence",
       "r5x": "Pour un chantier, les devis reçus sont comparés côte à côte, le moins-disant marqué, le devis retenu conservé.",
       "capR": "Reçu numéroté",
-      "capJ": "Journal d'audit"
+      "capJ": "Journal d'audit",
+      "annNoGap": "Sans trou"
     },
     "pricing": {
       "kicker": "Le tarif",

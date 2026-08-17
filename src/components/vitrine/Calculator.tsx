@@ -48,7 +48,10 @@ export function Calculator() {
   );
 
   return (
-    <div style={{ border: '1px solid var(--line)', borderRadius: '4px' }}>
+    <div
+      className="v-float overflow-hidden"
+      style={{ background: 'var(--white)', border: '1px solid var(--line)' }}
+    >
       <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--line)' }}>
         <span className="v-kicker">{t('label')}</span>
       </div>

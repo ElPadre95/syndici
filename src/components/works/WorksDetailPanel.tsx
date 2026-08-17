@@ -202,7 +202,7 @@ export function WorksDetailPanel({
       {/* Photos avant / après */}
       <section className="flex flex-col gap-3">
         <h2 className="text-section font-bold text-label">{t('photosTitle')}</h2>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div data-shot="travaux" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className="flex flex-col gap-2">
             <h3 className="text-body font-bold text-label-2">{t('phaseLabel.AVANT')}</h3>
             {gallery(detail.photosBefore, 'noPhotosBefore')}

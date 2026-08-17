@@ -30,25 +30,26 @@ const HIDE_DEV = 'nextjs-portal,[data-nextjs-toast],#__next-dev-tools-indicator{
 // navigation évoluera : les captures ne doivent montrer QUE la zone de contenu.
 const HIDE_CHROME = '[data-print-hide]{display:none!important}';
 
+// Captures de la vitrine : chaque fichier est un CADRE SERRÉ sur UNE zone lisible (crop d'un
+// élément `data-shot`), jamais un écran entier rétréci. `crop` = sélecteur de l'élément.
 const SHOTS = [
-  { file: 'dashboard', email: 'syndic@syndici.com', path: '' },
+  // Vignette sociale (Open Graph) : l'écran de transparence complet (zone de contenu seule).
   { file: 'transparence', email: 'owner@syndici.com', path: '/proprietaire/transparence' },
-  { file: 'paiements', email: 'syndic@syndici.com', path: '/paiements' },
-  { file: 'relances', email: 'syndic@syndici.com', path: '/relances' },
-  { file: 'depenses', email: 'syndic@syndici.com', path: '/depenses' },
-  { file: 'regularisation', email: 'syndic@syndici.com', path: '/regularisation' },
-  { file: 'journal', email: 'owner@syndici.com', path: '/proprietaire/journal' },
+  // Détails recadrés utilisés par les sections de la vitrine.
+  { file: 'hero-treasury', email: 'syndic@syndici.com', path: '', crop: '[data-shot="treasury"]' },
+  { file: 'crop-paiements', email: 'syndic@syndici.com', path: '/paiements', crop: '[data-shot="paiements"]', maxH: 360 },
+  { file: 'crop-relances', email: 'syndic@syndici.com', path: '/relances', crop: '[data-shot="relances"]' },
+  { file: 'crop-depenses', email: 'syndic@syndici.com', path: '/depenses', crop: '[data-shot="depenses"]', maxH: 340 },
+  { file: 'crop-devis', email: 'owner@syndici.com', path: '/proprietaire/transparence', crop: '[data-shot="devis"]' },
+  { file: 'crop-journal', email: 'owner@syndici.com', path: '/proprietaire/journal', crop: '[data-shot="journal"]', maxH: 360 },
   ...(process.env.OWNER_LOT_ID
-    ? [
-        { file: 'compte', email: 'owner@syndici.com', path: `/proprietaire/lots/${process.env.OWNER_LOT_ID}/compte` },
-        { file: 'attestation', email: 'owner@syndici.com', path: `/proprietaire/lots/${process.env.OWNER_LOT_ID}/attestation` },
-      ]
+    ? [{ file: 'crop-compte', email: 'owner@syndici.com', path: `/proprietaire/lots/${process.env.OWNER_LOT_ID}/compte`, crop: '[data-shot="compte"]' }]
     : []),
   ...(process.env.RECEIPT_ID
-    ? [{ file: 'recu', email: 'owner@syndici.com', path: `/proprietaire/recus/${process.env.RECEIPT_ID}` }]
+    ? [{ file: 'crop-recu', email: 'owner@syndici.com', path: `/proprietaire/recus/${process.env.RECEIPT_ID}`, crop: '[data-shot="recu"]' }]
     : []),
   ...(process.env.WORKS_ID
-    ? [{ file: 'travaux', email: 'syndic@syndici.com', path: `/travaux/${process.env.WORKS_ID}` }]
+    ? [{ file: 'crop-travaux', email: 'syndic@syndici.com', path: `/travaux/${process.env.WORKS_ID}`, crop: '[data-shot="travaux"]' }]
     : []),
 ];
 
@@ -79,16 +80,28 @@ async function login(page, locale, email) {
   await page.waitForTimeout(1500);
 }
 
-async function appShot(page, file) {
+async function appShot(page, file, crop, maxH) {
   await page.addStyleTag({ content: HIDE_DEV + HIDE_CHROME });
   await page.waitForTimeout(700);
-  const main = page.locator('main').first();
+  // `crop` : cadre serré sur UN élément lisible (préféré partout) ; sinon la zone de contenu.
+  const target = crop ? page.locator(crop).first() : page.locator('main').first();
+  await target.scrollIntoViewIfNeeded().catch(() => {});
   // Garde-fou post-rendu : aucune donnée nominative ne doit fuir.
-  const text = await main.innerText();
+  const text = await target.innerText();
   if (FORBIDDEN.test(text)) {
     throw new Error(`REFUS ${file} : donnée nominative détectée (${(text.match(FORBIDDEN) || [])[0]}).`);
   }
-  await main.screenshot({ path: join(OUT, file) }); // ZONE DE CONTENU seule
+  // `maxH` : pour un élément TROP HAUT (longue table), on ne garde que le HAUT (en-tête +
+  // premières lignes) — un détail lisible vaut mieux qu'une liste entière rétrécie.
+  const box = maxH ? await target.boundingBox() : null;
+  if (box && box.height > maxH) {
+    await page.screenshot({
+      path: join(OUT, file),
+      clip: { x: box.x, y: box.y, width: box.width, height: maxH },
+    });
+  } else {
+    await target.screenshot({ path: join(OUT, file) });
+  }
   console.log('✔', join(OUT, file));
 }
 
@@ -129,7 +142,7 @@ async function run() {
         await login(page, locale, s.email);
         await page.goto(`${BASE}/${locale}${s.path}`, { waitUntil: 'networkidle' });
         await page.waitForTimeout(1200);
-        await appShot(page, `${s.file}-${locale}.png`);
+        await appShot(page, `${s.file}-${locale}.png`, s.crop, s.maxH);
         await ctx.close();
       }
     }

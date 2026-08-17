@@ -23,7 +23,7 @@ export async function SiteFooter({ locale }: { locale: string }) {
             <div className="text-xl" style={{ color: '#fff' }}>
               <Wordmark />
             </div>
-            <p className="mt-4 text-sm leading-relaxed" style={{ color: '#c3ccd9' }}>
+            <p className="v-hand mt-4 text-2xl leading-tight" style={{ color: '#fff' }}>
               {t('tagline')}
             </p>
           </div>

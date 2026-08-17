@@ -272,7 +272,7 @@ export default async function OwnerTransparencyPage({
                   {w.description && <p className="text-note text-label-3">{w.description}</p>}
 
                   {w.quotes.length > 0 && (
-                    <div className="flex flex-col gap-1">
+                    <div data-shot="devis" className="flex flex-col gap-1">
                       <p className="text-eyebrow font-bold uppercase text-label-4">
                         {tWorks('quotesTitle')}
                       </p>

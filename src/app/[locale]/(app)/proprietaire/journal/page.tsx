@@ -60,7 +60,7 @@ export default async function OwnerJournalPage({
       {entries.length === 0 ? (
         <p className="rounded-md bg-bg px-3 py-6 text-center text-note text-label-4">{t('empty')}</p>
       ) : (
-        <Card className="overflow-x-auto p-0">
+        <Card data-shot="journal" className="overflow-x-auto p-0">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-sep text-note uppercase text-label-4">

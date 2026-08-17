@@ -19,6 +19,14 @@
   --font-title: var(--font-archivo), 'IBM Plex Sans Arabic', system-ui, sans-serif;
   --font-body: var(--font-inter), 'IBM Plex Sans Arabic', system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  /* Titres MANUSCRITS : Caveat (fr) ; l'arabe bascule sur Aref Ruqaa plus bas. */
+  --font-hand: var(--font-caveat), 'Comic Sans MS', cursive;
+
+  /* Palette d'ANNOTATION — réservée aux SEULS griffonnages manuscrits (flèches, cercles,
+     soulignements, mentions). Jamais sur du texte courant, jamais en fond de bloc. */
+  --ann-blue: #4f8dff;
+  --ann-amber: #e0952a;
+  --ann-green: #2fa98a;
 
   background-color: var(--white);
   color: var(--ink);
@@ -30,6 +38,64 @@
 :root[lang='ar'] .vitrine {
   --font-title: var(--font-plex-arabic), var(--font-archivo), sans-serif;
   --font-body: var(--font-plex-arabic), var(--font-inter), sans-serif;
+  /* L'arabe a SON geste manuscrit : la calligraphie ruq'ah (Aref Ruqaa). */
+  --font-hand: var(--font-aref), var(--font-plex-arabic), serif;
+}
+
+/* ─────────────────────── Direction « MANUSCRIT » (section d'ouverture) ─────────────────────
+   Généreux, aéré, humain : titres à la main très grands, annotations dessinées, beaucoup d'air,
+   captures flottantes à l'ombre douce. Le cobalt reste réservé aux actions. */
+
+/* Titre manuscrit — très grand, aligné au début, jamais centré. Interlignage adapté par langue. */
+.v-hand {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  line-height: 0.98;
+  text-align: start;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+
+:root[lang='ar'] .v-hand {
+  font-weight: 700;
+  /* ruq'ah : lignes resserrées (l'ancien 1.4 était trop écarté) MAIS assez d'air pour que la
+     boucle entoure le mot sans croiser les diacritiques hautes de la ligne au-dessus. */
+  line-height: 1.28;
+}
+
+/* Amorce en gras avant le paragraphe (façon Odoo) : « Tous les éléments essentiels… ». */
+.v-leadin {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Capture flottante : grande, ombre DOUCE, coins arrondis, aucun cadre dur. */
+.v-float {
+  border-radius: 14px;
+  box-shadow:
+    0 2px 6px rgba(11, 18, 32, 0.06),
+    0 24px 48px -18px rgba(11, 18, 32, 0.22),
+    0 40px 80px -30px rgba(18, 64, 224, 0.14);
+}
+
+/* Mention manuscrite qui pointe un élément. La couleur vient d'une variable d'annotation. */
+.v-annote {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--ann-color, var(--ann-blue));
+}
+
+:root[lang='ar'] .v-annote {
+  line-height: 1.4;
+}
+
+/* Trait de dessin (flèches, cercles, soulignements) : bouts ronds, léger fondu, jamais net. */
+.v-ink {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 /* Titres — Archivo 700, interlettrage serré, alignés à gauche (start), jamais centrés. */

@@ -115,8 +115,12 @@ export async function StaffDashboard({
         </div>
       )}
 
-      {/* 2. L'ARGENT — bloc large et dominant */}
-      <section className="relative overflow-hidden rounded-lg bg-grad-indigo p-6 text-white shadow-md">
+      {/* 2. L'ARGENT — bloc large et dominant. `data-shot` : point d'ancrage des captures
+          marketing (cadre serré sur un élément LISIBLE, jamais l'écran entier rétréci). */}
+      <section
+        data-shot="treasury"
+        className="relative overflow-hidden rounded-lg bg-grad-indigo p-6 text-white shadow-md"
+      >
         <span
           aria-hidden
           className="pointer-events-none absolute -top-16 end-[-40px] size-52 rounded-full bg-white/10"

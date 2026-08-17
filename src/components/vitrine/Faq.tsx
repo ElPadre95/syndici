@@ -2,9 +2,9 @@ import { getTranslations } from 'next-intl/server';
 import { Plus } from 'lucide-react';
 
 /**
- * Section 7 — Les questions fréquentes (J1). Réponses honnêtes, sans esquive : le paiement en
- * ligne n'est PAS encore connecté, on le dit. Accordéon natif `<details>` (fonctionne sans JS),
- * séparé par des filets, aucune carte. Fond blanc.
+ * Section 7 — Les questions fréquentes (J, direction manuscrite). Réponses honnêtes (le paiement
+ * en ligne n'est PAS encore connecté, on le dit). Accordéon natif `<details>` (fonctionne sans
+ * JS), aéré, cartes souples plutôt que filets. Fond blanc.
  */
 export async function Faq() {
   const t = await getTranslations('vitrine.faq');
@@ -17,17 +17,23 @@ export async function Faq() {
 
   return (
     <section style={{ background: 'var(--white)' }}>
-      <div className="mx-auto max-w-[1280px] px-6 py-16 lg:py-20">
-        <p className="v-kicker">{t('kicker')}</p>
-        <h2 className="v-title mt-4 max-w-3xl text-[clamp(1.9rem,3.6vw,2.9rem)]" style={{ color: 'var(--ink)' }}>
+      <div className="mx-auto max-w-[1200px] px-6 py-20 lg:py-28">
+        <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--ink-3)' }}>
+          {t('kicker')}
+        </p>
+        <h2 className="v-hand mt-3 max-w-3xl text-[clamp(2rem,4vw,3.1rem)]" style={{ color: 'var(--ink)' }}>
           {t('title')}
         </h2>
 
-        <div className="mt-10 max-w-3xl" style={{ borderTop: '1px solid var(--line)' }}>
+        <div className="mt-12 flex max-w-3xl flex-col gap-4">
           {items.map((it) => (
-            <details key={it.q} className="group" style={{ borderBottom: '1px solid var(--line)' }}>
-              <summary className="flex cursor-pointer items-center justify-between gap-4 py-5 marker:content-['']">
-                <span className="v-title text-lg sm:text-xl" style={{ color: 'var(--ink)', letterSpacing: '-0.02em' }}>
+            <details
+              key={it.q}
+              className="group px-6 py-5"
+              style={{ background: 'var(--panel)', borderRadius: '14px' }}
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+                <span className="text-lg font-bold sm:text-xl" style={{ color: 'var(--ink)' }}>
                   {it.q}
                 </span>
                 <Plus
@@ -36,7 +42,7 @@ export async function Faq() {
                   aria-hidden
                 />
               </summary>
-              <p className="max-w-2xl pb-6 text-[0.95rem] leading-relaxed" style={{ color: 'var(--ink-2)' }}>
+              <p className="mt-4 max-w-2xl text-base leading-relaxed" style={{ color: 'var(--ink-2)' }}>
                 {it.a}
               </p>
             </details>

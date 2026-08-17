@@ -56,7 +56,10 @@ export function ExpenseTable({ rows, canManage }: { rows: ExpenseRowView[]; canM
           {error}
         </div>
       )}
-      <div className="overflow-x-auto rounded-lg border border-sep bg-white">
+      <div
+        data-shot="depenses"
+        className="overflow-x-auto rounded-lg border border-sep bg-white"
+      >
         <table className="w-full min-w-[720px] text-sm">
           <thead>
             <tr className="border-b border-sep text-xs font-bold uppercase tracking-wide text-label-4">

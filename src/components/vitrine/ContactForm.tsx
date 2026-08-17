@@ -57,9 +57,14 @@ export function ContactForm() {
           ? t('errRole')
           : null;
 
-  const inputCls = 'v-mono w-full bg-transparent px-3.5 py-2.5 text-sm outline-none';
-  const inputStyle = { color: 'var(--ink)', border: '1px solid var(--line)', borderRadius: '4px' } as const;
-  const labelCls = 'mb-1.5 flex items-baseline gap-2 text-xs font-semibold';
+  const inputCls = 'w-full px-4 py-2.5 text-[0.95rem] outline-none transition-colors focus:bg-white';
+  const inputStyle = {
+    color: 'var(--ink)',
+    border: '1px solid var(--line)',
+    borderRadius: '12px',
+    background: 'var(--panel)',
+  } as const;
+  const labelCls = 'mb-1.5 flex items-baseline gap-2 text-sm font-semibold';
 
   const field = (
     name: string,

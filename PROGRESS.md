@@ -615,6 +615,22 @@ profil.
       Postgres réel), typecheck/lint/lint:css OK. Persistance du contact vérifiée (create + count), formulaire rendu
       (8 champs + rôle), captures fr + ar régénérées **sans chrome**.
 
+- [x] **J1b** — **Refonte visuelle « MANUSCRIT »** (référence page produit Odoo) — le contenu et
+      la structure des 8 sections + pied de page NE CHANGENT PAS, seule la peau change (la
+      direction « instrument » dense est abandonnée). **Titres à la main** : Caveat 700 (fr),
+      **Aref Ruqaa** (ruq'ah) pour l'arabe — chaque langue a son geste ; titres de section plus
+      petits que l'ouverture (une seule domine). **Annotations DESSINÉES en SVG** (boucle au
+      feutre, flèche courbe, souligné) — tracés irréguliers double-passe, jamais icônes ni
+      emojis ; **4 sur toute la page** (3 dans l'ouverture, « Sans trou » vers le reçu dans les
+      preuves). **Captures RECADRÉES** : mécanisme de crop (`data-shot` sur l'élément + `crop`/
+      `maxH` dans le script) → chaque capture montre UNE zone lisible (bloc trésorerie, lignes de
+      paiements, bandeau de relances, tableau des 3 devis, reçu, journal…), flottantes à l'ombre
+      douce, alternées gauche/droite, sans chrome. **Séparateurs souples** (courbes/bandes de
+      fond alternées) à la place des filets et de la réglette de lots (supprimée). Cobalt réservé
+      aux actions ; petite palette d'annotation (bleu clair, ambre, vert d'eau) réservée aux
+      seuls griffonnages ; bandeau + pied de page en #0B1220. Bascule arabe RTL vérifiée sur
+      toute la longueur. Gate complet vert (361 PGlite, 129 Postgres réel).
+
 - [x] **I7** — **Travaux : devis comparatifs + photos avant/après**. Nouvelle entité **chantier** (`WorksProject`)
       qui regroupe des **devis comparatifs** (`WorksQuote` : fournisseur libre, montant, PDF du devis) et des
       **photos avant/après** (`WorksPhoto`, enum `WorksPhase` AVANT/APRES, fichier obligatoire). Le syndic crée un
