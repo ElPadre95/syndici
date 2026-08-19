@@ -1,11 +1,10 @@
 'use client';
 
-import { signOut } from 'next-auth/react';
-import { useTranslations } from 'next-intl';
-import { LogOut, UserCircle2 } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import { UserCircle2 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
-import { LocaleSwitcher } from '@/components/LocaleSwitcher';
+import { LangMenu } from '@/components/LangMenu';
 import { ResidenceSwitcher, type SwitcherResidence } from '@/components/app/ResidenceSwitcher';
 
 interface AppHeaderProps {
@@ -21,6 +20,7 @@ interface AppHeaderProps {
  */
 export function AppHeader({ userLabel, residences, activeId }: AppHeaderProps) {
   const t = useTranslations('app.header');
+  const locale = useLocale();
 
   return (
     <header
@@ -40,13 +40,13 @@ export function AppHeader({ userLabel, residences, activeId }: AppHeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <LocaleSwitcher />
-        {userLabel ? (
-          <Button variant="ghost" onClick={() => signOut({ callbackUrl: '/' })}>
-            <LogOut className="size-4" aria-hidden />
-            {t('signOut')}
-          </Button>
-        ) : (
+        <LangMenu
+          locale={locale}
+          tone="onLight"
+          languageLabel={t('language')}
+          soonLabel={t('soon')}
+        />
+        {!userLabel && (
           <Link href="/sign-in">
             <Button variant="primary">{t('signIn')}</Button>
           </Link>

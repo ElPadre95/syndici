@@ -1,160 +1,169 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import {
-  LayoutDashboard,
-  Building2,
-  DoorOpen,
-  Users,
-  Send,
-  CalendarClock,
-  CreditCard,
-  Receipt,
-  FileText,
-  FileSignature,
-  BellRing,
-  Newspaper,
-  Settings,
-  Menu,
-  X,
-  Eye,
-  MessageCircle,
-  TriangleAlert,
-  FileBarChart2,
-  Files,
-  UserCircle,
-  Wallet,
-  Scale,
-  Hammer,
-  ScrollText,
-  Inbox,
-  type LucideIcon,
-} from 'lucide-react';
+import { signOut } from 'next-auth/react';
+import { Menu, X, LogOut, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 import { cn } from '@/lib/cn';
-
-interface NavItem {
-  href: string;
-  key: string;
-  Icon: LucideIcon;
-}
-
-// Chaque entrée mène à un écran RÉEL (jamais de lien mort — cf. A4).
-// Les entrées SYNDIC ne sont montrées qu'au staff : un résident ne doit voir
-// aucune fonction de gestion (A7 §1).
-const STAFF_NAV: readonly NavItem[] = [
-  { href: '/residences', key: 'residences', Icon: Building2 },
-  { href: '/lots', key: 'lots', Icon: DoorOpen },
-  { href: '/residents', key: 'residents', Icon: Users },
-  { href: '/invitations', key: 'invitations', Icon: Send },
-  { href: '/charges', key: 'charges', Icon: CalendarClock },
-  { href: '/paiements', key: 'payments', Icon: CreditCard },
-  { href: '/relances', key: 'reminders', Icon: BellRing },
-  { href: '/depenses', key: 'expenses', Icon: Receipt },
-  { href: '/contrats', key: 'contracts', Icon: FileSignature },
-  { href: '/bilan', key: 'annual', Icon: FileBarChart2 },
-  { href: '/budget', key: 'budget', Icon: Wallet },
-  { href: '/regularisation', key: 'regularisation', Icon: Scale },
-  { href: '/incidents', key: 'incidents', Icon: TriangleAlert },
-  { href: '/travaux', key: 'works', Icon: Hammer },
-  { href: '/actualites', key: 'news', Icon: Newspaper },
-  { href: '/documents', key: 'documents', Icon: FileText },
-  { href: '/messagerie', key: 'messages', Icon: MessageCircle },
-  { href: '/demandes', key: 'demandes', Icon: Inbox },
-  { href: '/reglages', key: 'settings', Icon: Settings },
-];
-// L'accueil est neutre (pas une fonction de gestion) : commun à tous les rôles.
-const HOME_NAV: NavItem = { href: '/', key: 'dashboard', Icon: LayoutDashboard };
-
-// Navigation PROPRIÉTAIRE (tranche G) — peu d'entrées, pensée mobile. Elle grandit par
-// incrément (G2 : mes charges ; G3 : transparence ; G4 : messagerie). « Jamais de lien
-// mort » : on n'ajoute une entrée que quand son écran existe.
-const OWNER_NAV: readonly NavItem[] = [
-  { href: '/proprietaire/charges', key: 'myCharges', Icon: CreditCard },
-  { href: '/proprietaire/releve', key: 'monthly', Icon: FileBarChart2 },
-  { href: '/proprietaire/incidents', key: 'incidents', Icon: TriangleAlert },
-  { href: '/proprietaire/documents', key: 'ownerDocs', Icon: Files },
-  { href: '/proprietaire/transparence', key: 'transparency', Icon: Eye },
-  { href: '/proprietaire/journal', key: 'journal', Icon: ScrollText },
-  { href: '/proprietaire/profil', key: 'profile', Icon: UserCircle },
-];
+import { STAFF_GROUPS, OWNER_ITEMS, isActivePath, activeStaffGroup } from './nav-model';
 
 /** Variante de navigation selon le rôle effectif : staff, propriétaire, ou locataire (minimal). */
 export type NavVariant = 'staff' | 'owner' | 'tenant';
 
-/** Détermine l'entrée active : correspondance exacte pour l'accueil, préfixe sinon. */
-function isActive(pathname: string, href: string): boolean {
-  if (href === '/') return pathname === '/';
-  return pathname === href || pathname.startsWith(`${href}/`);
+interface Entry {
+  href: string;
+  label: string;
+  Icon: LucideIcon;
+  active: boolean;
+  badge: number;
 }
 
-function Brand({ appName }: { appName: string }) {
+function Brand() {
   return (
-    <div className="flex items-center gap-2">
-      <span className="flex size-7 items-center justify-center rounded-md bg-grad-indigo text-sm font-extrabold text-white">
-        S
-      </span>
-      <span className="font-serif text-2xl tracking-tight text-label">{appName}</span>
-    </div>
+    <span className="flex size-7 items-center justify-center rounded-md bg-grad-indigo text-sm font-extrabold text-white">
+      S
+    </span>
   );
 }
 
 /**
- * Navigation (R1). Barre latérale fixe sur grand écran ; sur mobile elle se replie en
- * une barre compacte (marque + menu) qui ouvre un tiroir — le contenu reste utilisable
- * en petite largeur. Positionnement logique partout (le tiroir s'ouvre du côté du texte).
+ * Navigation (R1). Sur grand écran, un RAIL réduit (icônes) qui s'élargit au survol en
+ * recouvrant le contenu (voir `app-nav.css`) ; jamais de menu déroulant — chaque entrée ouvre
+ * directement sa page. « Se déconnecter » est TOUT EN BAS du rail, séparée, atteignable même
+ * repliée. Sur mobile, une barre compacte ouvre un tiroir. Positionnement logique (miroir RTL).
  */
-export function AppSidebar({ variant }: { variant: NavVariant }) {
-  const t = useTranslations('app.nav');
+export function AppSidebar({ variant, unread = 0 }: { variant: NavVariant; unread?: number }) {
+  const tGroups = useTranslations('app.groups');
+  const tNav = useTranslations('app.nav');
   const tCommon = useTranslations('common');
   const tHeader = useTranslations('app.header');
   const tBtn = useTranslations('buttons');
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const items =
-    variant === 'staff'
-      ? [HOME_NAV, ...STAFF_NAV]
-      : variant === 'owner'
-        ? [HOME_NAV, ...OWNER_NAV]
-        : [HOME_NAV];
 
-  const navLinks = (onNavigate?: () => void): ReactNode => (
-    <nav className="flex flex-col gap-1">
-      {items.map(({ href, key, Icon }) => {
-        const active = isActive(pathname, href);
-        return (
-          <Link
-            key={key}
-            href={href}
-            onClick={onNavigate}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              'flex items-center gap-3 rounded-md border-s-2 py-2 pe-3 ps-3 text-body font-semibold transition-colors',
-              active
-                ? 'border-indigo bg-indigo-soft text-indigo'
-                : 'border-transparent text-label-3 hover:bg-bg hover:text-label',
-            )}
-          >
-            <Icon className="size-4 shrink-0" aria-hidden />
-            <span>{t(key)}</span>
-          </Link>
-        );
-      })}
-    </nav>
+  const staffGroup = activeStaffGroup(pathname);
+  const entries: Entry[] =
+    variant === 'staff'
+      ? STAFF_GROUPS.map((g) => ({
+          href: g.href,
+          label: tGroups(g.key),
+          Icon: g.Icon,
+          active: staffGroup?.key === g.key,
+          badge: g.badge === 'messages' ? unread : 0,
+        }))
+      : variant === 'owner'
+        ? OWNER_ITEMS.map((i) => ({
+            href: i.href,
+            label: tNav(i.key),
+            Icon: i.Icon,
+            active: isActivePath(pathname, i.href),
+            badge: 0,
+          }))
+        : OWNER_ITEMS.slice(0, 1).map((i) => ({
+            href: i.href,
+            label: tNav(i.key),
+            Icon: i.Icon,
+            active: isActivePath(pathname, i.href),
+            badge: 0,
+          }));
+
+  const badgeEl = (n: number, compact: boolean) =>
+    n > 0 ? (
+      <span
+        className={cn(
+          'flex min-w-[1.15rem] items-center justify-center rounded-full bg-red px-1 text-[0.65rem] font-bold leading-4 text-white',
+          compact ? 'absolute -top-1.5 end-2.5' : '',
+        )}
+        aria-hidden
+      >
+        {n > 9 ? '9+' : n}
+      </span>
+    ) : null;
+
+  // Entrée du RAIL (grand écran) : zone d'icône centrée (visible repliée) + libellé (au survol).
+  const railEntry = ({ href, label, Icon, active, badge }: Entry) => (
+    <Link
+      key={href + label}
+      href={href}
+      title={label}
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'relative flex h-11 items-center text-body font-semibold transition-colors',
+        active ? 'text-indigo' : 'text-label-3 hover:text-label',
+      )}
+    >
+      {active && <span className="absolute start-0 inset-y-1.5 w-0.5 rounded-e bg-indigo" aria-hidden />}
+      <span className="relative flex w-16 shrink-0 items-center justify-center">
+        <Icon className="size-5" aria-hidden />
+        {badgeEl(badge, true)}
+      </span>
+      <span className="whitespace-nowrap pe-4">{label}</span>
+    </Link>
   );
+
+  // Entrée du TIROIR (mobile) : icône + libellé toujours visibles.
+  const drawerEntry = ({ href, label, Icon, active, badge }: Entry) => (
+    <Link
+      key={href + label}
+      href={href}
+      onClick={() => setOpen(false)}
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'flex items-center gap-3 rounded-md border-s-2 py-2 pe-3 ps-3 text-body font-semibold transition-colors',
+        active
+          ? 'border-indigo bg-indigo-soft text-indigo'
+          : 'border-transparent text-label-3 hover:bg-bg hover:text-label',
+      )}
+    >
+      <Icon className="size-4 shrink-0" aria-hidden />
+      <span className="flex-1">{label}</span>
+      {badgeEl(badge, false)}
+    </Link>
+  );
+
+  const signOutBtn = (compact: boolean): ReactNode =>
+    compact ? (
+      <button
+        type="button"
+        onClick={() => signOut({ callbackUrl: '/' })}
+        title={tHeader('signOut')}
+        className="flex h-11 w-full items-center text-body font-semibold text-label-3 transition-colors hover:text-label"
+      >
+        <span className="flex w-16 shrink-0 items-center justify-center">
+          <LogOut className="size-5 rtl:-scale-x-100" aria-hidden />
+        </span>
+        <span className="whitespace-nowrap pe-4">{tHeader('signOut')}</span>
+      </button>
+    ) : (
+      <button
+        type="button"
+        onClick={() => signOut({ callbackUrl: '/' })}
+        className="flex w-full items-center gap-3 rounded-md py-2 pe-3 ps-3 text-body font-semibold text-label-3 transition-colors hover:bg-bg hover:text-label"
+      >
+        <LogOut className="size-4 shrink-0 rtl:-scale-x-100" aria-hidden />
+        <span>{tHeader('signOut')}</span>
+      </button>
+    );
 
   return (
     <>
-      {/* Barre latérale — grand écran */}
+      {/* RAIL — grand écran : réduit en permanence, élargi au survol (app-nav.css) */}
       <aside
         data-print-hide
-        className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col gap-1 border-e border-sep bg-card pb-6 pe-3 ps-4 pt-6 lg:flex"
+        className="app-rail fixed start-0 top-0 z-30 hidden h-screen flex-col overflow-hidden border-e border-sep bg-card lg:flex"
       >
-        <div className="mb-7 ps-2">
-          <Brand appName={tCommon('appName')} />
+        <div className="flex h-14 shrink-0 items-center">
+          <span className="flex w-16 shrink-0 items-center justify-center">
+            <Brand />
+          </span>
+          <span className="whitespace-nowrap font-serif text-2xl tracking-tight text-label">
+            {tCommon('appName')}
+          </span>
         </div>
-        {navLinks()}
+        <nav className="flex flex-1 flex-col gap-0.5 py-2">{entries.map(railEntry)}</nav>
+        {/* Déconnexion — tout en bas, séparée, atteignable même repliée */}
+        <div className="shrink-0 border-t border-sep py-2">{signOutBtn(true)}</div>
       </aside>
 
       {/* Barre compacte — mobile / tablette */}
@@ -162,7 +171,10 @@ export function AppSidebar({ variant }: { variant: NavVariant }) {
         data-print-hide
         className="sticky top-0 z-30 flex items-center justify-between border-b border-sep bg-card px-4 py-3 lg:hidden"
       >
-        <Brand appName={tCommon('appName')} />
+        <div className="flex items-center gap-2">
+          <Brand />
+          <span className="font-serif text-2xl tracking-tight text-label">{tCommon('appName')}</span>
+        </div>
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -185,7 +197,10 @@ export function AppSidebar({ variant }: { variant: NavVariant }) {
           />
           <div className="absolute inset-y-0 start-0 flex w-72 max-w-[82%] animate-popup-in flex-col overflow-y-auto border-e border-sep bg-card p-4 shadow-md">
             <div className="mb-5 flex items-center justify-between">
-              <Brand appName={tCommon('appName')} />
+              <div className="flex items-center gap-2">
+                <Brand />
+                <span className="font-serif text-2xl tracking-tight text-label">{tCommon('appName')}</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -195,7 +210,8 @@ export function AppSidebar({ variant }: { variant: NavVariant }) {
                 <X className="size-5" aria-hidden />
               </button>
             </div>
-            {navLinks(() => setOpen(false))}
+            <nav className="flex flex-1 flex-col gap-1">{entries.map(drawerEntry)}</nav>
+            <div className="mt-2 border-t border-sep pt-2">{signOutBtn(false)}</div>
           </div>
         </div>
       )}

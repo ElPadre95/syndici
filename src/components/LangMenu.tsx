@@ -2,12 +2,16 @@
 
 import { useState } from 'react';
 import { Globe, Check } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/navigation';
 
 /**
- * Sélecteur de langue (J1) — icône globe + menu déroulant, conçu pour QUATRE langues (fr, ar,
- * en, nl). Seules fr et ar sont câblées (routes existantes) ; en/nl sont affichées « bientôt ».
- * Le menu pointe vers la RACINE de la locale (la vitrine y est servie).
+ * Sélecteur de langue PARTAGÉ — icône globe + menu déroulant, conçu pour QUATRE langues
+ * (fr, ar, en, nl). Seules fr et ar sont câblées ; en/nl sont affichées « bientôt ».
+ * Un seul composant sert la vitrine (fond sombre) ET l'application (en-tête clair) via `tone`.
+ *
+ * Le changement de langue PRÉSERVE la page courante : chaque langue câblée est un lien
+ * next-intl `<Link href={pathname} locale={code}>`, donc on reste sur la même route
+ * (fonctionne aussi bien dans l'app que sur la vitrine, où le pathname vaut « / »).
  */
 const LANGS = [
   { code: 'fr', name: 'Français', on: true },
@@ -16,19 +20,28 @@ const LANGS = [
   { code: 'nl', name: 'Nederlands', on: false },
 ];
 
-export function LangMenu({ locale }: { locale: string }) {
-  const t = useTranslations('vitrine.nav');
+interface LangMenuProps {
+  locale: string;
+  /** `onDark` : barre/pied de vitrine sombres ; `onLight` : en-tête clair de l'app. */
+  tone: 'onDark' | 'onLight';
+  languageLabel: string;
+  soonLabel: string;
+}
+
+export function LangMenu({ locale, tone, languageLabel, soonLabel }: LangMenuProps) {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const triggerColor = tone === 'onDark' ? '#c3ccd9' : 'var(--label-2)';
 
   return (
     <div className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label={t('language')}
+        aria-label={languageLabel}
         aria-expanded={open}
         className="flex items-center gap-1.5"
-        style={{ color: '#c3ccd9' }}
+        style={{ color: triggerColor }}
       >
         <Globe className="size-4" aria-hidden />
         <span className="v-mono text-[0.72rem] uppercase">{locale}</span>
@@ -48,15 +61,17 @@ export function LangMenu({ locale }: { locale: string }) {
           >
             {LANGS.map((l) =>
               l.on ? (
-                <a
+                <Link
                   key={l.code}
-                  href={`/${l.code}`}
+                  href={pathname}
+                  locale={l.code}
+                  onClick={() => setOpen(false)}
                   className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-[color:var(--panel)]"
                   style={{ color: 'var(--ink)' }}
                 >
                   <span>{l.name}</span>
                   {l.code === locale && <Check className="size-4" style={{ color: 'var(--accent)' }} aria-hidden />}
-                </a>
+                </Link>
               ) : (
                 <span
                   key={l.code}
@@ -64,7 +79,7 @@ export function LangMenu({ locale }: { locale: string }) {
                   style={{ color: 'var(--ink-3)' }}
                 >
                   <span>{l.name}</span>
-                  <span className="v-mono text-[0.6rem] uppercase tracking-wider">{t('soon')}</span>
+                  <span className="v-mono text-[0.6rem] uppercase tracking-wider">{soonLabel}</span>
                 </span>
               ),
             )}

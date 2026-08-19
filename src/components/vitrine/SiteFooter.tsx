@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Wordmark } from './Wordmark';
-import { LangMenu } from './LangMenu';
+import { LangMenu } from '@/components/LangMenu';
 
 /**
  * Pied de page (J1) — fond sombre #0B1220, sobre. Marque + accroche, liens vers les DEUX
@@ -9,6 +9,7 @@ import { LangMenu } from './LangMenu';
  */
 export async function SiteFooter({ locale }: { locale: string }) {
   const t = await getTranslations('vitrine.footer');
+  const tNav = await getTranslations('vitrine.nav');
   const year = new Date().getFullYear();
   const links = [
     { href: `/${locale}/sign-in`, label: t('syndic') },
@@ -40,7 +41,7 @@ export async function SiteFooter({ locale }: { locale: string }) {
               <p className="v-kicker mb-3" style={{ color: '#74839a' }}>
                 {t('language')}
               </p>
-              <LangMenu locale={locale} />
+              <LangMenu locale={locale} tone="onDark" languageLabel={tNav('language')} soonLabel={tNav('soon')} />
             </div>
           </div>
         </div>

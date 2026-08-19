@@ -1,0 +1,34 @@
+/**
+ * Barre latérale du syndic (R1) — comportement du prototype d'origine : rail RÉDUIT en
+ * permanence (icônes seules, largeur fixe), ÉLARGI AU SURVOL pour révéler les libellés, en
+ * RECOUVRANT le contenu (il n'est jamais repoussé, rien ne bouge sous le curseur). Aucun
+ * bouton de repli : un seul comportement.
+ */
+.app-rail {
+  width: 4rem; /* 64px, repliée */
+}
+
+/* Élargissement AU SURVOL uniquement sur pointeur fin (souris) — sur tactile, le tiroir reste. */
+@media (hover: hover) and (pointer: fine) {
+  .app-rail {
+    transition: width 0.22s ease;
+  }
+
+  .app-rail:hover {
+    width: 16rem; /* 256px, déployée par-dessus le contenu */
+    transition-delay: 0.15s; /* léger délai : un simple passage de souris ne la déclenche pas */
+    /* Ombre portée DU CÔTÉ DU CONTENU pour que la superposition se lise (LTR : vers la droite). */
+    box-shadow: 10px 0 34px -12px rgba(11, 18, 32, 0.24);
+  }
+  /* En arabe la barre s'élargit vers la gauche → l'ombre change de côté. */
+  [dir='rtl'] .app-rail:hover {
+    box-shadow: -10px 0 34px -12px rgba(11, 18, 32, 0.24);
+  }
+}
+
+/* Respect de la préférence « mouvement réduit ». */
+@media (prefers-reduced-motion: reduce) {
+  .app-rail {
+    transition: none;
+  }
+}

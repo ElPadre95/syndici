@@ -1,13 +1,15 @@
 import { getLocale, getTranslations, setRequestLocale } from 'next-intl/server';
+import { notFound } from 'next/navigation';
 import { Inbox, CheckCircle2 } from 'lucide-react';
 import { getSessionContext } from '@/server/session';
 import { listContactRequests } from '@/server/contact/data';
+import { isOperator } from '@/server/contact/operator';
 import { HandleButton } from '@/components/contact/HandleButton';
 
 /**
- * Écran staff — les demandes de contact reçues depuis la vitrine (J1). Consultation des leads
- * persistés (non traités et récents d'abord). Réservé au STAFF (mandat actif) : ce sont des
- * prospects, pas une donnée de copropriété. Chaque demande se marque traitée / se rouvre.
+ * Boîte de réception des DEMANDES de la vitrine (nos prospects) — écran INTERNE Syndici, pas
+ * un écran de syndic. Retiré de la navigation client ET réservé aux opérateurs (voir
+ * `isOperator`) : un non-opérateur reçoit un 404 (l'écran n'existe pas pour lui).
  */
 export default async function DemandesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -16,13 +18,7 @@ export default async function DemandesPage({ params }: { params: Promise<{ local
   const t = await getTranslations('demandes');
 
   const ctx = await getSessionContext();
-  if (!ctx?.isStaff) {
-    return (
-      <p className="mx-auto max-w-3xl rounded-md bg-orange-soft px-3 py-2 text-sm text-orange">
-        {t('forbidden')}
-      </p>
-    );
-  }
+  if (!ctx?.isStaff || !(await isOperator())) notFound();
 
   const requests = await listContactRequests();
   const pending = requests.filter((r) => !r.handled).length;

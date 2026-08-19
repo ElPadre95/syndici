@@ -1231,7 +1231,8 @@
       "regularisation": "Régularisation",
       "works": "Travaux",
       "journal": "Journal",
-      "demandes": "Demandes"
+      "demandes": "Demandes",
+      "members": "Membres"
     },
     "header": {
       "account": "Compte",
@@ -1239,7 +1240,9 @@
       "signOut": "Se déconnecter",
       "guest": "Non connecté",
       "menu": "Menu",
-      "residencesCount": "{count, plural, =0 {Aucune résidence} one {# résidence} other {# résidences}}"
+      "residencesCount": "{count, plural, =0 {Aucune résidence} one {# résidence} other {# résidences}}",
+      "language": "Langue",
+      "soon": "Bientôt"
     },
     "dashboard": {
       "sectionLabel": "Espace syndic",
@@ -1294,6 +1297,14 @@
     "comingSoon": {
       "title": "Section à venir",
       "body": "Cet écran sera construit dans un prochain incrément."
+    },
+    "groups": {
+      "dashboard": "Tableau de bord",
+      "copropriete": "Copropriété",
+      "encaissements": "Encaissements",
+      "depenses": "Dépenses",
+      "vie": "Vie de la résidence",
+      "reglages": "Réglages"
     }
   },
   "residences": {

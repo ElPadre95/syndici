@@ -631,6 +631,26 @@ profil.
       seuls griffonnages ; bandeau + pied de page en #0B1220. Bascule arabe RTL vérifiée sur
       toute la longueur. Gate complet vert (361 PGlite, 129 Postgres réel).
 
+- [x] **R1b** — **Navigation syndic regroupée (19 → 6) + rail au survol**. Les dix-neuf entrées
+      plates deviennent SIX groupes (`nav-model.ts`, source unique) : Tableau de bord ·
+      Copropriété (Lots/Résidents/Invitations) · Encaissements (Appels/Paiements/Relances/
+      Régularisation/Bilan) · Dépenses (Dépenses/Contrats/Travaux/Budget) · Vie de la résidence
+      (Incidents/Actualités/Documents/Messagerie) · Réglages (Réglages/Membres/Résidences).
+      Chaque entrée ouvre DIRECTEMENT sa page la plus utilisée (pas de menu déroulant) ; à
+      l'intérieur, des **onglets** (`GroupTabs`, déduits du chemin dans le layout) passent d'un
+      écran à l'autre. **Aucune URL ne change** (regroupement de présentation). **Rail au
+      SURVOL** (`app-nav.css`) : réduit en permanence (icônes), élargi au survol EN RECOUVRANT le
+      contenu (jamais repoussé), ombre côté contenu, délai avant élargissement, `@media (hover:
+      hover) and (pointer: fine)` seulement (tactile = tiroir), `prefers-reduced-motion` respecté,
+      RTL (élargit vers la gauche, ombre inversée). Badge de non-lus **au niveau du groupe** (Vie
+      de la résidence), visible replié. « Se déconnecter » quitte l'en-tête et descend TOUT EN BAS
+      du rail. En-tête : le sélecteur de langue devient un **globe** (composant `LangMenu` partagé
+      avec la vitrine, préserve le chemin), e-mail conservé. **Membres** extrait de Réglages vers
+      `/membres` (`member.manage`). **Demandes** sorti de la nav client et réservé aux opérateurs
+      (`OPERATOR_EMAILS`, 404 sinon). Contenu borné en largeur sur très grand écran. Captures
+      marketing (crops `data-print-hide`) ne montrent toujours pas la nav. Vérifié fr + ar
+      (replié/survolé) + mobile. Gate complet vert (361 PGlite, 129 Postgres réel).
+
 - [x] **I7** — **Travaux : devis comparatifs + photos avant/après**. Nouvelle entité **chantier** (`WorksProject`)
       qui regroupe des **devis comparatifs** (`WorksQuote` : fournisseur libre, montant, PDF du devis) et des
       **photos avant/après** (`WorksPhoto`, enum `WorksPhase` AVANT/APRES, fichier obligatoire). Le syndic crée un

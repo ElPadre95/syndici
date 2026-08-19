@@ -1,9 +1,11 @@
 import { redirect } from 'next/navigation';
 import { AppSidebar } from '@/components/app/AppSidebar';
 import { AppHeader } from '@/components/app/AppHeader';
+import { GroupTabs } from '@/components/app/GroupTabs';
 import { MessagingBubble } from '@/components/app/MessagingBubble';
 import { getAuthState } from '@/server/session';
 import { unreadCount } from '@/server/messaging/data';
+import '@/styles/app-nav.css';
 
 /**
  * Coquille de l'application connectée (A1/A2). Layout serveur : il est l'AUTORITÉ sur la
@@ -42,15 +44,23 @@ export default async function AppLayout({
       ? await unreadCount({ personId: ctx.personId, residenceId: ctx.activeId, role: ctx.role })
       : 0;
   return (
-    <div className="min-h-screen bg-bg lg:flex">
-      <AppSidebar variant={variant} />
-      <div className="flex min-h-screen flex-1 flex-col">
+    <div className="min-h-screen bg-bg">
+      {/* Rail fixe (grand écran) : il RECOUVRE le contenu au survol ; le contenu est simplement
+          décalé de la largeur repliée (lg:ps-16), jamais repoussé par l'élargissement. */}
+      <AppSidebar variant={variant} unread={unread} />
+      <div className="flex min-h-screen flex-col lg:ps-16">
         <AppHeader
           userLabel={ctx.userLabel}
           residences={ctx.residences.map((r) => ({ id: r.id, name: r.name }))}
           activeId={ctx.activeId}
         />
-        <main className="flex-1 px-6 py-6">{children}</main>
+        {/* Largeur maximale sur très grand écran : les tableaux ne s'étirent pas à l'infini. */}
+        <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-[1500px]">
+            <GroupTabs />
+            {children}
+          </div>
+        </main>
       </div>
       <MessagingBubble variant={variant} unread={unread} />
     </div>

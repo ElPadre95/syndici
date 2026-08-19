@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { Wordmark } from './Wordmark';
-import { LangMenu } from './LangMenu';
+import { LangMenu } from '@/components/LangMenu';
 import { AccessMenu } from './AccessMenu';
 import { MobileNav } from './MobileNav';
 
@@ -45,7 +45,7 @@ export async function SiteHeader({ locale }: { locale: string }) {
           <div className="hidden lg:block">
             <AccessMenu locale={locale} />
           </div>
-          <LangMenu locale={locale} />
+          <LangMenu locale={locale} tone="onDark" languageLabel={t('language')} soonLabel={t('soon')} />
           <div className="lg:hidden">
             <MobileNav locale={locale} sections={sections} />
           </div>
